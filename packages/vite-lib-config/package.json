@@ -1,0 +1,26 @@
+{
+  "name": "@kurone-kito/vite-lib-config",
+  "version": "0.20.0",
+  "description": "The vite configuration package for the workspaces",
+  "keywords": ["cli", "config", "vite"],
+  "homepage": "https://github.com/kurone-kito/builder-config#readme",
+  "bugs": "https://github.com/kurone-kito/builder-config/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kurone-kito/builder-config.git",
+    "directory": "packages/vite-lib-config"
+  },
+  "license": "MIT",
+  "author": "kurone-kito <krone@kit.black> (https://kit.black/)",
+  "type": "module",
+  "files": [],
+  "devDependencies": {
+    "@kurone-kito/typescript-config": "workspace:^"
+  },
+  "engines": {
+    "node": "^20.11 || ^22 || >=24"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

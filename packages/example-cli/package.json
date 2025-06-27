@@ -1,0 +1,32 @@
+{
+  "name": "@kurone-kito/example-cli",
+  "version": "0.20.0",
+  "private": true,
+  "description": "The example CLI project",
+  "keywords": ["cli", "example"],
+  "homepage": "https://github.com/kurone-kito/builder-config#readme",
+  "bugs": "https://github.com/kurone-kito/builder-config/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kurone-kito/builder-config.git",
+    "directory": "packages/example-cli"
+  },
+  "license": "MIT",
+  "author": "kurone-kito <krone@kit.black> (https://kit.black/)",
+  "type": "module",
+  "files": [],
+  "dependencies": {
+    "@kurone-kito/example-lib": "workspace:^"
+  },
+  "devDependencies": {
+    "@kurone-kito/sea-builder": "workspace:^",
+    "@kurone-kito/typescript-config": "workspace:^",
+    "@kurone-kito/vite-lib-config": "workspace:^"
+  },
+  "engines": {
+    "node": "^20.11 || ^22 || >=24"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

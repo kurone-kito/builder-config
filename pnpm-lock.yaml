@@ -29,6 +29,9 @@ importers:
       '@kurone-kito/cspell-config':
         specifier: ^0.20.0-alpha.3
         version: 0.20.0-alpha.3(cspell@9.1.2)
+      '@kurone-kito/example-cli':
+        specifier: workspace:^
+        version: link:packages/example-cli
       '@kurone-kito/lint-staged-config':
         specifier: ^0.20.0-alpha.3
         version: 0.20.0-alpha.3(cspell@9.1.2)(lint-staged@16.1.2)
@@ -53,6 +56,48 @@ importers:
       typescript:
         specifier: ~5.8.3
         version: 5.8.3
+
+  packages/example-cli:
+    dependencies:
+      '@kurone-kito/example-lib':
+        specifier: workspace:^
+        version: link:../example-lib
+    devDependencies:
+      '@kurone-kito/sea-builder':
+        specifier: workspace:^
+        version: link:../sea-builder
+      '@kurone-kito/typescript-config':
+        specifier: workspace:^
+        version: link:../typescript-config
+      '@kurone-kito/vite-lib-config':
+        specifier: workspace:^
+        version: link:../vite-lib-config
+
+  packages/example-lib:
+    devDependencies:
+      '@kurone-kito/typescript-config':
+        specifier: workspace:^
+        version: link:../typescript-config
+      '@kurone-kito/vite-lib-config':
+        specifier: workspace:^
+        version: link:../vite-lib-config
+
+  packages/sea-builder:
+    devDependencies:
+      '@kurone-kito/typescript-config':
+        specifier: workspace:^
+        version: link:../typescript-config
+      '@kurone-kito/vite-lib-config':
+        specifier: workspace:^
+        version: link:../vite-lib-config
+
+  packages/typescript-config: {}
+
+  packages/vite-lib-config:
+    devDependencies:
+      '@kurone-kito/typescript-config':
+        specifier: workspace:^
+        version: link:../typescript-config
 
 packages:
 

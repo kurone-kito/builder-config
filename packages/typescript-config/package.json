@@ -1,0 +1,23 @@
+{
+  "name": "@kurone-kito/typescript-config",
+  "version": "0.20.0",
+  "description": "My TypeScript configuration for general projects",
+  "keywords": ["config", "tsconfig", "typescript", "typescriptconfig"],
+  "homepage": "https://github.com/kurone-kito/builder-config#readme",
+  "bugs": "https://github.com/kurone-kito/builder-config/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kurone-kito/builder-config.git",
+    "directory": "packages/typescript-config"
+  },
+  "license": "MIT",
+  "author": "kurone-kito <krone@kit.black> (https://kit.black/)",
+  "type": "module",
+  "files": [],
+  "engines": {
+    "node": "^20.11 || ^22 || >=24"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "@kurone-kito/sea-builder",
+  "version": "0.20.0",
+  "description": "The Single Executable App (SEA) builder for the Node.js",
+  "keywords": ["sea", "builder", "boilerplate", "template"],
+  "homepage": "https://github.com/kurone-kito/builder-config#readme",
+  "bugs": "https://github.com/kurone-kito/builder-config/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kurone-kito/builder-config.git",
+    "directory": "packages/sea-builder"
+  },
+  "license": "MIT",
+  "author": "kurone-kito <krone@kit.black> (https://kit.black/)",
+  "type": "module",
+  "files": [],
+  "devDependencies": {
+    "@kurone-kito/typescript-config": "workspace:^",
+    "@kurone-kito/vite-lib-config": "workspace:^"
+  },
+  "engines": {
+    "node": "^20.11 || ^22 || >=24"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
