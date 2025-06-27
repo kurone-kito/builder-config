@@ -1,0 +1,14 @@
+name: Publish the packages
+run-name: Publish by @${{ github.actor }}
+on:
+  release:
+    types:
+      - published
+permissions:
+  contents: read
+  packages: write
+jobs:
+  build:
+    uses: ./.github/workflows/common-release.yml
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

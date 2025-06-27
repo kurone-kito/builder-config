@@ -1,12 +1,15 @@
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
-name: The CI workflow on push
+name: The CI workflow on push as a feature branch
 on:
   push:
+    branches:
+      - '*'
+      - '!main'
 permissions:
   contents: read
-run-name: Pushed by @${{ github.actor }}
+run-name: Pushed the feature branch by @${{ github.actor }}
 jobs:
   build:
     defaults:
