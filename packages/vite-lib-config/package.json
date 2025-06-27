@@ -14,8 +14,13 @@
   "author": "kurone-kito <krone@kit.black> (https://kit.black/)",
   "type": "module",
   "files": [],
+  "scripts": {
+    "clean": "rimraf -g \"*.tgz\" node_modules/.cache",
+    "prepack": "pnpm run clean"
+  },
   "devDependencies": {
-    "@kurone-kito/typescript-config": "workspace:^"
+    "@kurone-kito/typescript-config": "workspace:^",
+    "rimraf": "^6.0.1"
   },
   "engines": {
     "node": "^20.11 || ^22 || >=24"

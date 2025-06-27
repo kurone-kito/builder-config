@@ -15,13 +15,18 @@
   "author": "kurone-kito <krone@kit.black> (https://kit.black/)",
   "type": "module",
   "files": [],
+  "scripts": {
+    "clean": "rimraf -g \"*.tgz\" node_modules/.cache",
+    "prepack": "pnpm run clean"
+  },
   "dependencies": {
     "@kurone-kito/example-lib": "workspace:^"
   },
   "devDependencies": {
     "@kurone-kito/sea-builder": "workspace:^",
     "@kurone-kito/typescript-config": "workspace:^",
-    "@kurone-kito/vite-lib-config": "workspace:^"
+    "@kurone-kito/vite-lib-config": "workspace:^",
+    "rimraf": "^6.0.1"
   },
   "engines": {
     "node": "^20.11 || ^22 || >=24"

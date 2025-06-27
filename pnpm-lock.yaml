@@ -72,6 +72,9 @@ importers:
       '@kurone-kito/vite-lib-config':
         specifier: workspace:^
         version: link:../vite-lib-config
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.0.1
 
   packages/example-lib:
     devDependencies:
@@ -81,6 +84,9 @@ importers:
       '@kurone-kito/vite-lib-config':
         specifier: workspace:^
         version: link:../vite-lib-config
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.0.1
 
   packages/sea-builder:
     devDependencies:
@@ -90,14 +96,24 @@ importers:
       '@kurone-kito/vite-lib-config':
         specifier: workspace:^
         version: link:../vite-lib-config
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.0.1
 
-  packages/typescript-config: {}
+  packages/typescript-config:
+    devDependencies:
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.0.1
 
   packages/vite-lib-config:
     devDependencies:
       '@kurone-kito/typescript-config':
         specifier: workspace:^
         version: link:../typescript-config
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.0.1
 
 packages:
 
