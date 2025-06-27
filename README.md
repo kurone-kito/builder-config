@@ -20,6 +20,7 @@ pnpm install
 
 ```sh
 pnpm run build
+pnpm run dev # Build and watch for changes
 ```
 
 ### Linting
@@ -34,9 +35,6 @@ pnpm run lint:fix # Lint and auto-fix
 ```sh
 pnpm run test
 ```
-
-Currently, the command works as an alias for the `pnpm run lint` command.
-Set up your own testing framework and replace this script as needed.
 
 ### Cleaning
 

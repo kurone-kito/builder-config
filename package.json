@@ -11,8 +11,15 @@
   "author": "kurone-kito <krone@kit.black> (https://kit.black/)",
   "type": "module",
   "files": [],
+  "workspaces": {
+    "packages": ["./packages/*"]
+  },
   "scripts": {
-    "clean": "rimraf -g \"*.tgz\" \"*.tsbuildinfo\" node_modules/.cache",
+    "build": "pnpm --aggregate-output --if-present --workspace-concurrency=0 -r run build",
+    "clean": "pnpm run --no-bail \"/^clean:.+/\"",
+    "clean:root": "rimraf -g \"*.tgz\" \"*.tsbuildinfo\" node_modules/.cache",
+    "clean:sub": "pnpm --aggregate-output --if-present --parallel --workspace-concurrency=0 -r run clean",
+    "dev": "pnpm --parallel --workspace-concurrency=Infinity -r run dev",
     "lint": "pnpm run \"/lint:.+:check/\"",
     "lint:biome:check": "biome check",
     "lint:biome:fix": "biome check --write",
@@ -21,8 +28,12 @@
     "lint:markdown:check": "markdownlint-cli2 \"**/*.md\"",
     "lint:markdown:fix": "markdownlint-cli2 --fix \"**/*.md\"",
     "postlint:fix": "pnpm run lint:cspell:check",
+    "predev": "pnpm run build",
     "prepare": "husky",
-    "test": "pnpm run lint"
+    "pretest": "pnpm run build",
+    "publish": "pnpm -r publish --no-git-checks",
+    "publish:next": "pnpm -r publish --tag next --no-git-checks",
+    "test": "pnpm --aggregate-output --if-present --workspace-concurrency=0 -r run test"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
@@ -34,7 +45,6 @@
     "@kurone-kito/cspell-config": "^0.20.0-alpha.3",
     "@kurone-kito/lint-staged-config": "^0.20.0-alpha.3",
     "@kurone-kito/markdownlint-config": "^0.20.0-alpha.3",
-    "@kurone-kito/typescript-config": "^0.20.0-alpha.7",
     "cspell": "^9.1.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",

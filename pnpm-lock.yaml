@@ -35,9 +35,6 @@ importers:
       '@kurone-kito/markdownlint-config':
         specifier: ^0.20.0-alpha.3
         version: 0.20.0-alpha.3
-      '@kurone-kito/typescript-config':
-        specifier: ^0.20.0-alpha.7
-        version: 0.20.0-alpha.7(typescript@5.8.3)
       cspell:
         specifier: ^9.1.2
         version: 9.1.2
@@ -462,15 +459,6 @@ packages:
   '@kurone-kito/markdownlint-config@0.20.0-alpha.3':
     resolution: {integrity: sha512-oIf/Qn5XI14RDEdGCcHYg5ZynDjgb6qWcXJ+puLVzN4w4gThydPBoAbJHVFCqVjVUDp8WYnyBq2ai11inLIaqA==}
     engines: {node: ^20.11 || ^22 || >=24}
-
-  '@kurone-kito/typescript-config@0.20.0-alpha.7':
-    resolution: {integrity: sha512-gcQBoR0XdRsU1n4KOU7dp7+PIz8c8x/ItFZNubPdjbUcQeL3/2IreYwjmpYSZVKXXdm8DwVq79Vkq7cMDtFwng==}
-    engines: {node: ^20.11 || ^22 || >=24}
-    peerDependencies:
-      typescript: '>=5.7.x'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -1788,10 +1776,6 @@ snapshots:
       lint-staged: 16.1.2
 
   '@kurone-kito/markdownlint-config@0.20.0-alpha.3': {}
-
-  '@kurone-kito/typescript-config@0.20.0-alpha.7(typescript@5.8.3)':
-    optionalDependencies:
-      typescript: 5.8.3
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
