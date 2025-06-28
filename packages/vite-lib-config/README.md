@@ -9,6 +9,13 @@ Vite configuration for CLI and library projects
   - Jod LTS (`^22.x.x`)
   - Latest (`>=24.x.x`)
 
+## Usage
+
+```ts
+import config from '@kurone-kito/vite-lib-config';
+console.log(config); // => {}
+```
+
 ## LICENSE
 
 MIT

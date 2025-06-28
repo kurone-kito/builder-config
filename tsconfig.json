@@ -1,1 +1,10 @@
-{ "files": [], "references": [{ "path": "./packages/typescript-config" }] }
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/example-cli" },
+    { "path": "./packages/example-lib" },
+    { "path": "./packages/sea-builder" },
+    { "path": "./packages/typescript-config" },
+    { "path": "./packages/vite-lib-config" }
+  ]
+}
