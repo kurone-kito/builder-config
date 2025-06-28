@@ -16,6 +16,7 @@
   },
   "scripts": {
     "build": "pnpm --aggregate-output --if-present --workspace-concurrency=0 -r run build",
+    "build:min": "pnpm --aggregate-output --if-present --workspace-concurrency=0 --filter \"@kurone-kito/example-*^...\" run build",
     "clean": "pnpm run --no-bail \"/^clean:.+/\"",
     "clean:root": "rimraf -g \"*.tgz\" \"*.tsbuildinfo\" node_modules/.cache",
     "clean:sub": "pnpm --aggregate-output --if-present --parallel --workspace-concurrency=0 -r run clean",
@@ -28,9 +29,9 @@
     "lint:markdown:check": "markdownlint-cli2 \"**/*.md\"",
     "lint:markdown:fix": "markdownlint-cli2 --fix \"**/*.md\"",
     "postlint:fix": "pnpm run lint:cspell:check",
-    "predev": "pnpm run build",
+    "predev": "pnpm run build:min",
     "prepare": "husky",
-    "pretest": "pnpm run build",
+    "pretest": "pnpm run build:min",
     "publish": "pnpm -r publish --no-git-checks",
     "publish:next": "pnpm -r publish --tag next --no-git-checks",
     "test": "pnpm --aggregate-output --if-present --workspace-concurrency=0 -r run test"
