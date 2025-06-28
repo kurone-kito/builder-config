@@ -262,6 +262,10 @@ $RECYCLE.BIN/
 # pnpm
 pnpm-lock.yaml.*
 
+# Vite / Vitest
+v8-compile-cache-*
+*.config.timestamp_*
+
 ### Text ###
 # LICENSE
 packages/*/LICENSE
