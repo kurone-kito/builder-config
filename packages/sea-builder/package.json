@@ -13,11 +13,13 @@
   "license": "MIT",
   "author": "kurone-kito <krone@kit.black> (https://kit.black/)",
   "type": "module",
+  "bin": "dist/index.mjs",
   "files": ["dist"],
   "scripts": {
     "build": "tsc",
     "clean": "rimraf -g \"*.tgz\" \"*.tsbuildinfo\" dist LICENSE node_modules/.cache",
     "dev": "tsc --watch",
+    "devPreinstall": "pnpm dlx mkdirp dist && pnpm dlx shx head -n 1 src/index.mts > dist/index.mjs",
     "prebuild": "cpy --flat ../../LICENSE .",
     "prepack": "pnpm run clean && pnpm run build",
     "test": "tsc --noEmit"

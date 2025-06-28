@@ -9,6 +9,12 @@ SEA (Single Executable Application) Builder for the Node.js apps
   - Jod LTS (`^22.x.x`)
   - Latest (`>=24.x.x`)
 
+## Usage
+
+```sh
+npx -y @kurone-kito/sea-builder
+```
+
 ## LICENSE
 
 MIT
