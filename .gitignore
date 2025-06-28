@@ -261,3 +261,7 @@ $RECYCLE.BIN/
 ### Node ###
 # pnpm
 pnpm-lock.yaml.*
+
+### Text ###
+# LICENSE
+packages/*/LICENSE
