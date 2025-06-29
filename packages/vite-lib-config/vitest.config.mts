@@ -1,4 +1,3 @@
-import { mergeConfig } from 'vitest/config';
-import { viteConfig } from './src/vite.mjs';
+import { vitestConfig } from './src/vitest.mjs';
 
-export default mergeConfig(viteConfig(), { test: { environment: 'node' } });
+export default vitestConfig();

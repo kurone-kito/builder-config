@@ -46,6 +46,14 @@ Creates a Vite configuration for building a library or CLI.
   with the base config.
 - **`options`**: `ViteConfigOptions` - Options for creating the config.
 
+### `vitestConfig(overrides?, options?)`
+
+Creates a Vitest configuration for running tests.
+
+- **`overrides`**: `ViteUserConfig` - Additional Vitest configuration to
+  merge with the base config.
+- **`options`**: `ViteConfigOptions` - Options for creating the config.
+
 ### `ViteConfigOptions`
 
 An object with the following properties:
