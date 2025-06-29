@@ -266,6 +266,9 @@ pnpm-lock.yaml.*
 v8-compile-cache-*
 *.config.timestamp_*
 
+# xsea
+sea
+
 ### Text ###
 # LICENSE
 packages/*/LICENSE
