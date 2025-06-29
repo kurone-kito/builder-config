@@ -86,3 +86,18 @@ jobs:
         if: ${{ github.event_name == 'release' }}
         name: attach the packages to the release assets
         run: gh release upload "$TAG_NAME" ./*.tgz --clobber
+      - if: ${{ github.event_name == 'release' }}
+        name: build the SEA binaries
+        run: pnpm run build:sea
+      - if: ${{ github.event_name == 'release' }}
+        name: Compress the SEA binaries
+        run: |
+          cd packages/cli/sea
+          for bin in *; do
+            zip -9 "${bin}.zip" "$bin"
+          done
+      - if: ${{ github.event_name == 'release' }}
+        name: Uploading assets to the release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: packages/cli/sea/*.zip

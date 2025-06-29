@@ -16,6 +16,7 @@
   },
   "scripts": {
     "build": "pnpm --aggregate-output --if-present --workspace-concurrency=0 -r run build",
+    "build:sea": "pnpm --filter \"@kurone-kito/example-cli\" run build:sea",
     "clean": "pnpm run --no-bail \"/^clean:.+/\"",
     "clean:root": "rimraf -g \"*.tgz\" \"*.tsbuildinfo\" coverage node_modules/.cache",
     "clean:sub": "pnpm --aggregate-output --if-present --parallel --workspace-concurrency=0 -r run clean",
@@ -28,6 +29,7 @@
     "lint:fix": "pnpm run \"/lint:.+:fix/\"",
     "lint:markdown:check": "markdownlint-cli2 \"**/*.md\"",
     "lint:markdown:fix": "markdownlint-cli2 --fix \"**/*.md\"",
+    "prebuild:sea": "pnpm --aggregate-output --if-present --workspace-concurrency=0 --filter \"!@kurone-kito/example-cli\" run build",
     "postlint:fix": "pnpm run lint:cspell:check",
     "pnpm:devPreinstall": "pnpm --if-present --workspace-concurrency=0 -r run devPreinstall",
     "predev": "pnpm run build",

@@ -18,10 +18,12 @@
   "files": ["dist"],
   "scripts": {
     "build": "vite build",
-    "clean": "rimraf -g \"*.tgz\" \"*.tsbuildinfo\" coverage dist LICENSE node_modules/.cache",
+    "build:sea": "sea-builder --node=20 --targets=darwin-arm64,darwin-x64,linux-arm64,linux-x64,win-arm64,win-x64 example-cli",
+    "clean": "rimraf -g \"*.tgz\" \"*.tsbuildinfo\" coverage dist LICENSE node_modules/.cache sea",
     "dev": "vite build --watch",
     "devPreinstall": "pnpm dlx mkdirp dist && pnpm dlx shx head -n 1 src/index.mts > dist/index.mjs",
     "prebuild": "cpy --flat ../../LICENSE .",
+    "prebuild:sea": "pnpm run build",
     "prepack": "pnpm run clean && pnpm run build",
     "test": "vitest run --coverage"
   },
@@ -37,7 +39,8 @@
     "rimraf": "^6.0.1",
     "typescript": "~5.8.3",
     "vite": "^7.0.0",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "xsea": "^0.1.0"
   },
   "engines": {
     "node": "^20.11 || ^22 || >=24"

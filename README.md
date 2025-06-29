@@ -41,6 +41,7 @@ pnpm install
 ```sh
 pnpm run build
 pnpm run dev # Build and watch for changes
+pnpm run build:sea # Build the Single Executable Application(s)
 ```
 
 ### Linting
