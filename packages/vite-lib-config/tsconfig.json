@@ -1,5 +1,11 @@
 {
-  "compilerOptions": { "lib": ["ES2023"], "outDir": "dist", "rootDir": "src" },
-  "exclude": ["**/*.spec.mts", "coverage", "dist", "node_modules"],
-  "extends": "@kurone-kito/typescript-config"
+  "compilerOptions": {
+    "lib": ["DOM", "ES2023"],
+    "outDir": "dist",
+    "rootDir": "src",
+    "types": ["node"]
+  },
+  "exclude": ["coverage", "dist", "node_modules"],
+  "extends": "@kurone-kito/typescript-config",
+  "include": ["src/**/*.mts"]
 }
