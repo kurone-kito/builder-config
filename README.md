@@ -1,92 +1,73 @@
-# 📄 PNPM project template
+# 🛠️ Builder config
 
-## Features
+My configuration for the Vite, TypeScript, and other tools in this monorepo.
 
-- PNPM
-- TypeScript
-- Biome
-- Commitlint with Husky
-- Visual Studio Code / Vim ready
-- CI configurations
-  - CodeRabbit
-  - Dependabot
-  - GitHub Actions
+## Structure of the monorepo
 
-## how to use this template
+- [`packages/sea-builder`](packages/sea-builder/README.md):
+  SEA (Single Executable Application) Builder for Node.js apps.
+  It builds a single executable file from the source code.
+  This is useful for CLI applications and other Node.js projects.
+- [`packages/typescript-config`](packages/typescript-config/README.md):
+  My TypeScript configuration for general projects.
+- [`packages/vite-lib-config`](packages/vite-lib-config/README.md):
+  Vite configuration for CLI and library projects.
 
-You can create a new project by using `degit` or the “Use this template”
-button on GitHub.
+And the example library:
 
-```sh
-npx degit kurone-kito/pnpm-project-template my-project
-cd my-project
-pnpm install
-```
-
-After generating the project, update `package.json` fields such as `name`
-and `author` so that they reflect your project information.
-
-### Example settings
-
-#### Monorepo
-
-Add package directories to `pnpm-workspace.yaml`:
-
-```yaml
-packages:
-  - packages/*
-```
-
-#### Non-monorepo
-
-Remove `pnpm-workspace.yaml` if you do not need workspace support.
+- [`packages/example-cli`](packages/example-cli/README.md):
+  Example CLI application using the SEA Builder.
+- [`packages/example-lib`](packages/example-lib/README.md):
+  Example library for Node.js apps.
 
 ## System Requirements
 
 - Node.js: Any of the following versions
   - Iron LTS (`^20.11.x`)
-  - Jod LTS `^22.x.x` or
-  - Latest `>=24.x.x`
+  - Jod LTS (`^22.x.x`)
+  - Latest (`>=24.x.x`)
 
-Note that this template includes `.node-version`, `.nvmrc`, and
-`.tool-versions` files with specific Node.js versions. These files
-currently list `20.19.2`, so update them and this section as needed when
-you start a new project.
+## Development
 
-## Install the dependencies
+### Install the dependencies
 
 ```sh
 corepack enable
 pnpm install
 ```
 
-## Linting
+### Building
+
+```sh
+pnpm run build
+pnpm run dev # Build and watch for changes
+pnpm run build:sea # Build the Single Executable Application(s)
+```
+
+### Linting
 
 ```sh
 pnpm run lint
 pnpm run lint:fix # Lint and auto-fix
 ```
 
-## Testing
+### Testing
 
 ```sh
 pnpm run test
 ```
 
-Currently, the command works as an alias for the `pnpm run lint` command.
-Set up your own testing framework and replace this script as needed.
-
-## Cleaning
+### Cleaning
 
 ```sh
 pnpm run clean
 ```
 
-## Rules for Development
+## Contributing
 
 Welcome to contribute to this repository! For more details,
 please refer to [CONTRIBUTING.md](.github/CONTRIBUTING.md).
 
 ## LICENSE
 
-MIT
+[MIT](./LICENSE)
