@@ -33,8 +33,8 @@ importers:
         specifier: workspace:^
         version: link:packages/example-cli
       '@kurone-kito/lint-staged-config':
-        specifier: ^0.20.0-alpha.3
-        version: 0.20.0-alpha.3(cspell@9.1.2)(lint-staged@16.1.2)
+        specifier: ^0.20.0
+        version: 0.20.0(cspell@9.1.2)(lint-staged@16.1.2)
       '@kurone-kito/markdownlint-config':
         specifier: ^0.20.0-alpha.3
         version: 0.20.0-alpha.3
@@ -819,8 +819,8 @@ packages:
       cspell:
         optional: true
 
-  '@kurone-kito/lint-staged-config@0.20.0-alpha.3':
-    resolution: {integrity: sha512-UjHJC+8xOrwrx1QmYZCBzCcKbu0PGiwzFqF7Yda+To3z/+3rNoGRDaeE3v/O/SqetBPFzAJdJeAhQDnUA+ZRAw==}
+  '@kurone-kito/lint-staged-config@0.20.0':
+    resolution: {integrity: sha512-qpvUP6cAGy/KPE7a+l+53rss2V91THmgZJKIpRelQQUt5K+L1OAAE9Hy+wD0GJ64NcscdTcUHzpFR6NjAG8W+Q==}
     engines: {node: ^20.11 || ^22 || >=24}
     peerDependencies:
       cspell: '>=5.7.x'
@@ -3234,7 +3234,7 @@ snapshots:
     optionalDependencies:
       cspell: 9.1.2
 
-  '@kurone-kito/lint-staged-config@0.20.0-alpha.3(cspell@9.1.2)(lint-staged@16.1.2)':
+  '@kurone-kito/lint-staged-config@0.20.0(cspell@9.1.2)(lint-staged@16.1.2)':
     optionalDependencies:
       cspell: 9.1.2
       lint-staged: 16.1.2
