@@ -3,7 +3,7 @@ run-name: Publish by as the alpha version @${{ github.actor }}
 on:
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
   packages: write
 jobs:
   build:
