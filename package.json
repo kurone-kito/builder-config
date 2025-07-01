@@ -48,7 +48,7 @@
     "@cspell/cspell-types": "^9.1.2",
     "@kurone-kito/biome-config": "^0.20.0-alpha.3",
     "@kurone-kito/commitlint-config": "^0.20.0-alpha.3",
-    "@kurone-kito/cspell-config": "^0.20.0-alpha.3",
+    "@kurone-kito/cspell-config": "^0.20.0",
     "@kurone-kito/example-cli": "workspace:^",
     "@kurone-kito/lint-staged-config": "^0.20.0-alpha.3",
     "@kurone-kito/markdownlint-config": "^0.20.0-alpha.3",

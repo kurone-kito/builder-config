@@ -27,8 +27,8 @@ importers:
         specifier: ^0.20.0-alpha.3
         version: 0.20.0-alpha.3(@commitlint/config-conventional@19.8.1)
       '@kurone-kito/cspell-config':
-        specifier: ^0.20.0-alpha.3
-        version: 0.20.0-alpha.3(cspell@9.1.2)
+        specifier: ^0.20.0
+        version: 0.20.0(cspell@9.1.2)
       '@kurone-kito/example-cli':
         specifier: workspace:^
         version: link:packages/example-cli
@@ -810,8 +810,8 @@ packages:
       '@commitlint/config-conventional':
         optional: true
 
-  '@kurone-kito/cspell-config@0.20.0-alpha.3':
-    resolution: {integrity: sha512-gNqdPJTUmk8Tg4tw85ADjOuF0NoHshOjAQqZdl/8dmW+eH2tD2zZP4/kd22a7BT3h1kg/oIAg2I4Wm8fksjc3A==}
+  '@kurone-kito/cspell-config@0.20.0':
+    resolution: {integrity: sha512-vkCZwBxAfxrRozS9CP6X64Em0bcZXKGRmYeKUPP0qop5OISSjSojqUmmHe/NKs1FGkIhpTdT5wXZbMqHizS6pA==}
     engines: {node: ^20.11 || ^22 || >=24}
     peerDependencies:
       cspell: '*'
@@ -3230,7 +3230,7 @@ snapshots:
     optionalDependencies:
       '@commitlint/config-conventional': 19.8.1
 
-  '@kurone-kito/cspell-config@0.20.0-alpha.3(cspell@9.1.2)':
+  '@kurone-kito/cspell-config@0.20.0(cspell@9.1.2)':
     optionalDependencies:
       cspell: 9.1.2
 
