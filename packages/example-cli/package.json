@@ -1,6 +1,6 @@
 {
   "name": "@kurone-kito/example-cli",
-  "version": "0.20.0",
+  "version": "0.20.1-alpha.1",
   "private": true,
   "description": "The example CLI project",
   "keywords": ["cli", "example"],
