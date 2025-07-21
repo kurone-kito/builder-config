@@ -2,7 +2,11 @@
   "name": "@kurone-kito/vite-lib-config",
   "version": "0.20.0",
   "description": "The vite configuration package for the workspaces",
-  "keywords": ["cli", "config", "vite"],
+  "keywords": [
+    "cli",
+    "config",
+    "vite"
+  ],
   "homepage": "https://github.com/kurone-kito/builder-config#readme",
   "bugs": "https://github.com/kurone-kito/builder-config/issues",
   "repository": {
@@ -15,7 +19,9 @@
   "type": "module",
   "exports": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "vite build",
     "clean": "rimraf -g \"*.tgz\" \"*.tsbuildinfo\" coverage dist LICENSE node_modules/.cache",

@@ -3,7 +3,10 @@
   "version": "0.20.0",
   "private": true,
   "description": "The example CLI project",
-  "keywords": ["cli", "example"],
+  "keywords": [
+    "cli",
+    "example"
+  ],
   "homepage": "https://github.com/kurone-kito/builder-config#readme",
   "bugs": "https://github.com/kurone-kito/builder-config/issues",
   "repository": {
@@ -15,7 +18,9 @@
   "author": "kurone-kito <krone@kit.black> (https://kit.black/)",
   "type": "module",
   "bin": "dist/index.mjs",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "vite build",
     "build:sea": "sea-builder --node=20 --targets=darwin-arm64,darwin-x64,linux-arm64,linux-x64,win-arm64,win-x64 example-cli",

@@ -1,5 +1,5 @@
-import allNodeVersions from 'all-node-versions';
 import type { SemverVersion } from 'all-node-versions';
+import allNodeVersions from 'all-node-versions';
 import { rcompare, satisfies } from 'semver';
 import { toSemver } from './toSemver.mjs';
 

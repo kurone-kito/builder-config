@@ -3,7 +3,11 @@
   "version": "0.20.0",
   "private": true,
   "description": "The boilerplate project of the Node.js",
-  "keywords": ["boilerplate", "pnpm", "template"],
+  "keywords": [
+    "boilerplate",
+    "pnpm",
+    "template"
+  ],
   "homepage": "https://github.com/kurone-kito/builder-config#readme",
   "bugs": "https://github.com/kurone-kito/builder-config/issues",
   "repository": "github:kurone-kito/builder-config",
@@ -12,7 +16,9 @@
   "type": "module",
   "files": [],
   "workspaces": {
-    "packages": ["./packages/*"]
+    "packages": [
+      "./packages/*"
+    ]
   },
   "scripts": {
     "build": "pnpm --aggregate-output --if-present --workspace-concurrency=0 -r run build",

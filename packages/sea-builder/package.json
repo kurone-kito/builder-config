@@ -2,7 +2,12 @@
   "name": "@kurone-kito/sea-builder",
   "version": "0.20.0",
   "description": "The Single Executable App (SEA) builder for the Node.js",
-  "keywords": ["sea", "builder", "boilerplate", "template"],
+  "keywords": [
+    "sea",
+    "builder",
+    "boilerplate",
+    "template"
+  ],
   "homepage": "https://github.com/kurone-kito/builder-config#readme",
   "bugs": "https://github.com/kurone-kito/builder-config/issues",
   "repository": {
@@ -17,7 +22,9 @@
     "sea-builder": "./dist/builder.mjs",
     "sea-cache": "./dist/cache.mjs"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "vite build",
     "clean": "rimraf -g \"*.tgz\" \"*.tsbuildinfo\" coverage dist LICENSE node_modules/.cache",
