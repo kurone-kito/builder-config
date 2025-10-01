@@ -46,7 +46,7 @@
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@cspell/cspell-types": "^9.1.2",
-    "@kurone-kito/biome-config": "^0.20.0-alpha.3",
+    "@kurone-kito/biome-config": "^0.20.0",
     "@kurone-kito/commitlint-config": "^0.20.0-alpha.3",
     "@kurone-kito/cspell-config": "^0.20.0-alpha.3",
     "@kurone-kito/example-cli": "workspace:^",
