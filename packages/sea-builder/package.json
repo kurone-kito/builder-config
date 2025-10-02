@@ -1,6 +1,6 @@
 {
   "name": "@kurone-kito/sea-builder",
-  "version": "0.20.0",
+  "version": "0.21.0",
   "description": "The Single Executable App (SEA) builder for the Node.js",
   "keywords": [
     "sea",
