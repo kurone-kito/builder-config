@@ -33,7 +33,8 @@
     "test": "vitest run --coverage"
   },
   "dependencies": {
-    "@kurone-kito/example-lib": "workspace:^"
+    "@kurone-kito/example-lib": "workspace:^",
+    "@kurone-kito/web-toybox-node": "0.1.0-alpha.2"
   },
   "devDependencies": {
     "@kurone-kito/sea-builder": "workspace:^",

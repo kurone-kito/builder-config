@@ -74,6 +74,9 @@ importers:
       '@kurone-kito/example-lib':
         specifier: workspace:^
         version: link:../example-lib
+      '@kurone-kito/web-toybox-node':
+        specifier: 0.1.0-alpha.2
+        version: 0.1.0-alpha.2
     devDependencies:
       '@kurone-kito/sea-builder':
         specifier: workspace:^
@@ -854,6 +857,14 @@ packages:
 
   '@kurone-kito/markdownlint-config@0.21.0':
     resolution: {integrity: sha512-mTbVM6wWk1XK6m2WJQAeOtynqSZHBTHieDH5VPqtLce2JFCcV8/x/7HlcJC8iO3Zn63Kyhricq9f8YrU6ic0cQ==}
+    engines: {node: ^20.11 || ^22 || >=24}
+
+  '@kurone-kito/web-toybox-node@0.1.0-alpha.2':
+    resolution: {integrity: sha512-hQeY/HHFFCFmBr4yTVPZIL8gvNc+vNG7BsHNpsw7qt1cokLUylKXHkpAbs1pmULmmmQLpRogEAb2wazu3qoGIQ==}
+    engines: {node: ^20.11 || ^22 || >=24}
+
+  '@kurone-kito/web-toybox@0.1.0-alpha.2':
+    resolution: {integrity: sha512-7Dyoket3jqTu4d75l2dhkkmKk8AJ3Jp3NH4licSNANikKqxBs8j4EoaHOD+FpY99YawPSWc9KD8b5OgFsn5aeQ==}
     engines: {node: ^20.11 || ^22 || >=24}
 
   '@microsoft/api-extractor-model@7.30.9':
@@ -3255,6 +3266,14 @@ snapshots:
       lint-staged: 16.2.3
 
   '@kurone-kito/markdownlint-config@0.21.0': {}
+
+  '@kurone-kito/web-toybox-node@0.1.0-alpha.2':
+    dependencies:
+      '@kurone-kito/web-toybox': 0.1.0-alpha.2
+
+  '@kurone-kito/web-toybox@0.1.0-alpha.2':
+    dependencies:
+      type-fest: 5.0.1
 
   '@microsoft/api-extractor-model@7.30.9(@types/node@24.6.2)':
     dependencies:
