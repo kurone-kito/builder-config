@@ -28,6 +28,7 @@
     "sourceMap": true,
     "strict": true,
     "stripInternal": true,
+    "erasableSyntaxOnly": true,
     "target": "ES2023",
     "verbatimModuleSyntax": true
   },

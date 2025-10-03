@@ -1,8 +1,13 @@
 {
   "name": "@kurone-kito/typescript-config",
-  "version": "0.20.0",
+  "version": "0.21.0",
   "description": "My TypeScript configuration for general projects",
-  "keywords": ["config", "tsconfig", "typescript", "typescriptconfig"],
+  "keywords": [
+    "config",
+    "tsconfig",
+    "typescript",
+    "typescriptconfig"
+  ],
   "homepage": "https://github.com/kurone-kito/builder-config#readme",
   "bugs": "https://github.com/kurone-kito/builder-config/issues",
   "repository": {
@@ -14,16 +19,18 @@
   "author": "kurone-kito <krone@kit.black> (https://kit.black/)",
   "type": "module",
   "exports": "./tsconfig.json",
-  "files": ["tsconfig.json"],
+  "files": [
+    "tsconfig.json"
+  ],
   "scripts": {
     "build": "cpy --flat ../../LICENSE .",
     "clean": "rimraf -g \"*.tgz\" LICENSE node_modules/.cache",
     "prepack": "pnpm run clean && pnpm run build"
   },
   "devDependencies": {
-    "cpy-cli": "^5.0.0",
+    "cpy-cli": "^6.0.0",
     "rimraf": "^6.0.1",
-    "typescript": "~5.8.3"
+    "typescript": "~5.9.3"
   },
   "peerDependencies": {
     "typescript": ">=5.7.x"
