@@ -173,4 +173,4 @@ jobs:
       - name: Uploading assets to the release
         uses: softprops/action-gh-release@v2
         with:
-          files: 'packages/cli/sea/*.zip'
+          files: 'packages/example-cli/sea/*.zip'
