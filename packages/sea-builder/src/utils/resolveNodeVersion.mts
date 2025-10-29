@@ -12,7 +12,7 @@ import { toSemver } from './toSemver.mjs';
 export const resolveNodeVersion = async (
   spec?: string | undefined,
 ): Promise<`v${SemverVersion}`> => {
-  const { majors, versions } = await allNodeVersions({ fetch: false });
+  const { majors, versions } = await allNodeVersions({ fetch: true });
   const range = toSemver(spec, majors);
   const resolved = versions
     .map(({ node }) => node)
