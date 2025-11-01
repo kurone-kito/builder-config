@@ -40,7 +40,7 @@
     "all-node-versions": "^13.0.1",
     "execa": "^9.6.0",
     "listr2": "^9.0.4",
-    "semver": "^7.7.2"
+    "semver": "^7.7.3"
   },
   "devDependencies": {
     "@kurone-kito/typescript-config": "workspace:^",
