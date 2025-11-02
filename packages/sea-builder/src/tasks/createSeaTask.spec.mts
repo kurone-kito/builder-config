@@ -19,7 +19,7 @@ describe('createSeaTask', () => {
       [
         'exec',
         'xsea',
-        'dist/index.mjs',
+        'dist/index.cjs',
         '-o',
         'sea/foo',
         '-t',

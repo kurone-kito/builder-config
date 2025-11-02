@@ -11,6 +11,6 @@ export const CACHE_DIR = join('node_modules', '.cache', 'xsea');
 export const XSEA_PREFIX_ARGS = [
   'exec',
   'xsea',
-  'dist/index.mjs',
+  'dist/index.cjs',
   '-o',
 ] as const;
