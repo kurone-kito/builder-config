@@ -5,7 +5,7 @@ import { expect, it } from 'vitest';
 it('CLI outputs Hello, world!', () => {
   const stdout = execFileSync(
     'node',
-    [resolve(import.meta.dirname, '../dist/index.mjs')],
+    [resolve(import.meta.dirname, '../dist/index.cjs')],
     { encoding: 'utf8' },
   );
   expect(stdout.trim()).toBe('Hello, world!');
