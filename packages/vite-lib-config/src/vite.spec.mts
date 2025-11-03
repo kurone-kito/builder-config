@@ -136,6 +136,62 @@ describe('viteConfig', () => {
     it('returns an empty configuration', () =>
       expect(viteConfig({}, { cwd, entries: ['index.mts'] })).toEqual({}));
   });
+
+  describe('When sea flag is enabled', () => {
+    beforeAll(async () => {
+      cwd = await setup({ 'index.mts': 'console.log();' });
+      entry = join(cwd, srcDir, 'index.mts');
+    });
+
+    afterAll(async () => {
+      await rm(cwd, { recursive: true, force: true });
+      cwd = '';
+    });
+
+    it('should use CommonJS format', () =>
+      expect(viteConfig({}, { cwd, sea: true })).toHaveProperty(
+        'build.rollupOptions.output.format',
+        'cjs',
+      ));
+
+    it('should use index.cjs as entry file name', () =>
+      expect(viteConfig({}, { cwd, sea: true })).toHaveProperty(
+        'build.rollupOptions.output.entryFileNames',
+        'index.cjs',
+      ));
+
+    it('should enable inlineDynamicImports', () =>
+      expect(viteConfig({}, { cwd, sea: true })).toHaveProperty(
+        'build.rollupOptions.output.inlineDynamicImports',
+        true,
+      ));
+
+    it('should externalize built-in modules', () => {
+      const config = viteConfig({}, { cwd, sea: true });
+      expect(config).toHaveProperty('build.rollupOptions.external');
+      const external = config.build?.rollupOptions?.external as string[];
+      expect(external).toContain('fs');
+      expect(external).toContain('node:fs');
+    });
+
+    it('should have nodeResolve plugin', () => {
+      const config = viteConfig({}, { cwd, sea: true });
+      expect(config).toHaveProperty('build.rollupOptions.plugins');
+      const plugins = config.build?.rollupOptions?.plugins as unknown[];
+      expect(plugins).toHaveLength(1);
+    });
+
+    it('should set ssr.noExternal to true', () =>
+      expect(viteConfig({}, { cwd, sea: true })).toHaveProperty(
+        'ssr.noExternal',
+        true,
+      ));
+
+    it('overrides settings with mergeConfig', () =>
+      expect(
+        viteConfig({ build: { outDir: 'out' } }, { cwd, sea: true }),
+      ).toHaveProperty('build.outDir', 'out'));
+  });
 });
 
 describe('srcDir', () => {

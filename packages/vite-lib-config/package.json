@@ -36,6 +36,7 @@
     "test:vitest": "vitest run --coverage"
   },
   "dependencies": {
+    "@rollup/plugin-node-resolve": "^16.0.3",
     "lodash-es": "^4.17.21",
     "shebang-regex": "^4.0.0",
     "type-fest": "^5.0.1",

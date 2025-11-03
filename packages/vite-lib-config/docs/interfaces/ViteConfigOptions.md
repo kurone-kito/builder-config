@@ -42,6 +42,22 @@ Entry files relative to [srcDir](#srcdir).
 
 ***
 
+### sea?
+
+> `readonly` `optional` **sea**: `boolean`
+
+Enable that builds for SEA (Single Executable Application).
+
+If enabled, the build will bundle all dependencies into a single file.
+
+#### Default
+
+```ts
+false
+```
+
+***
+
 ### srcDir?
 
 > `readonly` `optional` **srcDir**: `string`

@@ -1,5 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
+import { builtinModules } from 'node:module';
 import { resolve } from 'node:path';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 import castArray from 'lodash-es/castArray.js';
 import shebangRegex from 'shebang-regex';
 import type { Arrayable } from 'type-fest';
@@ -23,6 +25,14 @@ export interface ViteConfigOptions {
    * @default ['index.mts']
    */
   readonly entries?: Readonly<Arrayable<string>> | undefined;
+
+  /**
+   * Enable that builds for SEA (Single Executable Application).
+   *
+   * If enabled, the build will bundle all dependencies into a single file.
+   * @default false
+   */
+  readonly sea?: boolean | undefined;
 
   /**
    * Directory where the source files are located.
@@ -49,6 +59,23 @@ const staticConfig = {
     ssr: true,
     target: 'node20.18',
   },
+} as const satisfies UserConfig;
+
+/** Static configuration for SEA builds. */
+const staticSeaConfig = {
+  build: {
+    rollupOptions: {
+      external: [...builtinModules, ...builtinModules.map((m) => `node:${m}`)],
+      output: {
+        entryFileNames: 'index.cjs',
+        format: 'cjs',
+        inlineDynamicImports: true,
+        manualChunks: undefined,
+      },
+      plugins: [nodeResolve({ preferBuiltins: true })],
+    },
+  },
+  ssr: { noExternal: true },
 } as const satisfies UserConfig;
 
 /**
@@ -95,8 +122,13 @@ export const viteConfig = (
   const {
     cwd = process.cwd(),
     entries = 'index.mts',
+    sea,
     srcDir = 'src',
   } = options;
   const files = castArray(entries).map((e) => resolve(cwd, srcDir, e));
-  return mergeConfig(innerCreateConfig(files), overrides);
+  const seaConfig = sea ? staticSeaConfig : {};
+  return mergeConfig(
+    innerCreateConfig(files),
+    mergeConfig(seaConfig, overrides),
+  );
 };
