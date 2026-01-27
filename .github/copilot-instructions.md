@@ -215,12 +215,14 @@ feat: add auth system and refactor database layer and update docs
 
 ## Packages
 
-| path                  | package name                           | description                                        |
-| --------------------- | -------------------------------------- | -------------------------------------------------- |
-| `/`                   | `@kurone-kito/pnpm-workspace-template` | Manage the monorepo workspace and linting.         |
-| `/packages/cli`       | `@kurone-kito/pwt-cli`                 | A boilerplate for CLI applications.                |
-| `/packages/lib`       | `@kurone-kito/pwt-lib`                 | A boilerplate for libraries.                       |
-| `/packages/web-solid` | `@kurone-kito/pwt-web-solid`           | A boilerplate for web applications using Solid.js. |
+| path                          | package name                     | description                                      |
+| ----------------------------- | -------------------------------- | ------------------------------------------------ |
+| `/`                           | `@kurone-kito/builder-config`    | Manage the monorepo workspace and linting.       |
+| `/packages/example-cli`       | `@kurone-kito/example-cli`       | An example CLI app using the SEA Builder.        |
+| `/packages/example-lib`       | `@kurone-kito/example-lib`       | An example library for Node.js apps.             |
+| `/packages/sea-builder`       | `@kurone-kito/sea-builder`       | SEA Builder for Node.js apps.                    |
+| `/packages/typescript-config` | `@kurone-kito/typescript-config` | TypeScript configuration for general projects.   |
+| `/packages/vite-lib-config`   | `@kurone-kito/vite-lib-config`   | Vite configuration for CLI and library projects. |
 
 ### Cross-package dependencies
 
