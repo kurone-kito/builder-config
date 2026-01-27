@@ -1,5 +1,5 @@
 name: Publish the packages as the alpha version
-run-name: Publish by as the alpha version @${{ github.actor }}
+run-name: Publish as the alpha version by @${{ github.actor }}
 on:
   workflow_dispatch:
 permissions:

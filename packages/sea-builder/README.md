@@ -11,7 +11,7 @@ SEA (Single Executable Application) Builder for the Node.js apps
 ## System Requirements
 
 - Node.js: Any of the following versions
-  - Iron LTS (`^20.11.x`)
+  - Iron LTS (`^20.18.x`)
   - Jod LTS (`^22.x.x`)
   - Latest (`>=24.x.x`)
 
@@ -51,7 +51,7 @@ as `linux-x64` or `win32-x64`. `sea-builder` automatically invokes
 `sea-builder` also accepts a `--node` option to choose the Node.js version.
 Omitting this option uses the latest patch of the oldest supported LTS line.
 Passing `--node=20` is equivalent to specifying `^20`, while
-`--node=20.11` behaves like `~20.11`.
+`--node=20.18` behaves like `~20.18`.
 
 ### Cache directory
 

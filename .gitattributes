@@ -1,5 +1,20 @@
+# Normalize line endings
+* text=auto eol=lf
+
+# Binary files
+*.gif binary
+*.ico binary
+*.jpeg binary
+*.jpg binary
+*.png binary
+*.webp binary
+
+# Exclude from distribution archives
 .coderabbit.yaml export-ignore
 .git* export-ignore
-.github/** export-ignore
 .husky/** export-ignore
 .imgbotconfig export-ignore
+
+# Lockfiles should be included in the repository,
+# but not treated as source code
+pnpm-lock.yaml linguist-vendored
