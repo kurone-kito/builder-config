@@ -1,5 +1,11 @@
 # ⚡️ `@kurone-kito/vite-lib-config`
 
+![NPM Version](https://img.shields.io/npm/v/%40kurone-kito%2Fvite-lib-config)
+![Node Current](https://img.shields.io/node/v/%40kurone-kito%2Fvite-lib-config)
+![NPM Last Update](https://img.shields.io/npm/last-update/%40kurone-kito%2Fvite-lib-config)
+![NPM Downloads](https://img.shields.io/npm/dy/%40kurone-kito%2Fvite-lib-config)
+![npms.io](https://img.shields.io/npms-io/final-score/%40kurone-kito/vite-lib-config)
+
 Vite configuration for CLI and library projects
 
 ## System Requirements

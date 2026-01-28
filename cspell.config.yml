@@ -7,5 +7,6 @@ import:
   - '@kurone-kito/cspell-config'
 version: '0.2'
 words:
+  - npms
   - rcompare
   - xsea

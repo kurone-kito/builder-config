@@ -1,16 +1,21 @@
 # 🛠️ Builder config
 
+![GitHub package.json version](https://img.shields.io/github/package-json/v/kurone-kito/builder-config)
+
 My configuration for the Vite, TypeScript, and other tools in this monorepo.
 
 ## Structure of the monorepo
 
-- [`packages/sea-builder`](packages/sea-builder/README.md):
+- ![NPM Downloads](https://img.shields.io/npm/dy/%40kurone-kito%2Fsea-builder)
+  [`packages/sea-builder`](packages/sea-builder/README.md):
   SEA (Single Executable Application) Builder for Node.js apps.
   It builds a single executable file from the source code.
   This is useful for CLI applications and other Node.js projects.
-- [`packages/typescript-config`](packages/typescript-config/README.md):
+- ![NPM Downloads](https://img.shields.io/npm/dy/%40kurone-kito%2Ftypescript-config)
+  [`packages/typescript-config`](packages/typescript-config/README.md):
   My TypeScript configuration for general projects.
-- [`packages/vite-lib-config`](packages/vite-lib-config/README.md):
+- ![NPM Downloads](https://img.shields.io/npm/dy/%40kurone-kito%2Fvite-lib-config)
+  [`packages/vite-lib-config`](packages/vite-lib-config/README.md):
   Vite configuration for CLI and library projects.
 
 And the example library:

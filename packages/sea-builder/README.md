@@ -1,5 +1,11 @@
 # 🟦 `@kurone-kito/sea-builder`
 
+![NPM Version](https://img.shields.io/npm/v/%40kurone-kito%2Fsea-builder)
+![Node Current](https://img.shields.io/node/v/%40kurone-kito%2Fsea-builder)
+![NPM Last Update](https://img.shields.io/npm/last-update/%40kurone-kito%2Fsea-builder)
+![NPM Downloads](https://img.shields.io/npm/dy/%40kurone-kito%2Fsea-builder)
+![npms.io](https://img.shields.io/npms-io/final-score/%40kurone-kito/sea-builder)
+
 SEA (Single Executable Application) Builder for the Node.js apps
 
 ## System Requirements

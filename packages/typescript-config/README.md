@@ -1,5 +1,11 @@
 # 🟦 `@kurone-kito/typescript-config`
 
+![NPM Version](https://img.shields.io/npm/v/%40kurone-kito%2Ftypescript-config)
+![Node Current](https://img.shields.io/node/v/%40kurone-kito%2Ftypescript-config)
+![NPM Last Update](https://img.shields.io/npm/last-update/%40kurone-kito%2Ftypescript-config)
+![NPM Downloads](https://img.shields.io/npm/dy/%40kurone-kito%2Ftypescript-config)
+![npms.io](https://img.shields.io/npms-io/final-score/%40kurone-kito/typescript-config)
+
 My TypeScript configuration for general Node.js projects.
 
 ## System Requirements
