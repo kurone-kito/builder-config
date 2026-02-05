@@ -39,7 +39,7 @@
     "lint:markdown:fix": "markdownlint-cli2 --fix \"**/*.md\"",
     "prebuild:sea": "pnpm --aggregate-output --if-present --workspace-concurrency=0 --filter \"!@kurone-kito/example-cli\" run build",
     "postlint:fix": "pnpm run lint:cspell:check",
-    "pnpm:devPreinstall": "pnpm --if-present --workspace-concurrency=0 -r run devPreinstall",
+    "pnpm:devPreinstall": "pnpm --if-present --workspace-concurrency=0 -r run pnpm:devPreinstall",
     "predev": "pnpm run build",
     "prepare": "husky",
     "pretest": "pnpm run build",

@@ -26,7 +26,7 @@
     "build:sea": "sea-builder --node=20 --targets=darwin-arm64,darwin-x64,linux-arm64,linux-x64,win-arm64,win-x64 example-cli",
     "clean": "rimraf -g \"*.tgz\" \"*.tsbuildinfo\" coverage dist LICENSE node_modules/.cache sea",
     "dev": "vite build --watch",
-    "devPreinstall": "pnpm dlx mkdirp dist && pnpm dlx shx head -n 1 src/index.mts > dist/index.mjs",
+    "pnpm:devPreinstall": "pnpm dlx mkdirp dist && pnpm dlx shx head -n 1 src/index.mts > dist/index.mjs",
     "prebuild": "cpy --flat ../../LICENSE .",
     "prebuild:sea": "pnpm run build",
     "prepack": "pnpm run clean && pnpm run build",
