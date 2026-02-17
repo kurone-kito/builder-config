@@ -39,6 +39,15 @@ export interface ViteConfigOptions {
    * @default 'src'
    */
   readonly srcDir?: string | undefined;
+
+  /**
+   * Target environments for the build, specified as an array of strings.
+   * Each string can represent a specific environment or a version, such as
+   * 'node20.20' or 'es2023'. These targets will be used to determine the
+   * appropriate JavaScript features and syntax to include in the output.
+   * @default ['node20.20', 'es2023']
+   */
+  readonly target?: Arrayable<string> | undefined;
 }
 
 /** The name of the output file. */
@@ -52,7 +61,6 @@ const staticConfig = {
     },
     sourcemap: true,
     ssr: true,
-    target: 'node20.19',
   },
 } as const satisfies UserConfig;
 
@@ -80,9 +88,13 @@ const staticSeaConfig = {
  * If the file starts with a shebang(`#!...`), the build uses library mode;
  * otherwise it performs an SSR build.
  * @param entries Entry point files for the Vite configuration.
+ * @param target Target environments for the build.
  * @return A Vite {@link UserConfig} object with the configuration
  */
-const innerCreateConfig = (entries: readonly string[]): UserConfig => {
+const innerCreateConfig = (
+  entries: readonly string[],
+  target: Arrayable<string>,
+): UserConfig => {
   const entry = entries.filter((f) => existsSync(f));
   if (!entry.length) {
     return {};
@@ -92,6 +104,7 @@ const innerCreateConfig = (entries: readonly string[]): UserConfig => {
     build: {
       rollupOptions: { input: entry },
       ...(bin ? {} : { lib: { entry, formats: ['es'] } }),
+      target,
     },
     plugins: bin ? [] : [dts({ exclude: ['**/*.spec.mts'] })],
   });
@@ -119,11 +132,11 @@ export const viteConfig = (
     entries = 'index.mts',
     sea,
     srcDir = 'src',
+    target = ['node20.20', 'es2023'],
   } = options;
   const files = castArray(entries).map((e) => resolve(cwd, srcDir, e));
-  const seaConfig = sea ? staticSeaConfig : {};
   return mergeConfig(
-    innerCreateConfig(files),
-    mergeConfig(seaConfig, overrides),
+    innerCreateConfig(files, target),
+    mergeConfig(sea ? staticSeaConfig : {}, overrides),
   );
 };

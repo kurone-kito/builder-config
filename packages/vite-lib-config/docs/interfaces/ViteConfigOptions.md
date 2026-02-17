@@ -69,3 +69,20 @@ Directory where the source files are located.
 ```ts
 'src'
 ```
+
+***
+
+### target?
+
+> `readonly` `optional` **target**: `Arrayable`\<`string`\>
+
+Target environments for the build, specified as an array of strings.
+Each string can represent a specific environment or a version, such as
+'node20.20' or 'es2023'. These targets will be used to determine the
+appropriate JavaScript features and syntax to include in the output.
+
+#### Default
+
+```ts
+['node20.20', 'es2023']
+```
