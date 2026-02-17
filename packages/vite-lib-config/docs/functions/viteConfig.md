@@ -6,7 +6,7 @@
 
 # Function: viteConfig()
 
-> **viteConfig**(`overrides`, `options`): `UserConfig`
+> **viteConfig**(`overrides?`, `options?`): `UserConfig`
 
 Create a Vite configuration for the current project.
 
@@ -17,14 +17,14 @@ these defaults via mergeConfig.
 
 ## Parameters
 
-### overrides
+### overrides?
 
 `UserConfig` = `{}`
 
 Additional configuration options to merge with the base
 config.
 
-### options
+### options?
 
 [`ViteConfigOptions`](../interfaces/ViteConfigOptions.md) = `{}`
 
