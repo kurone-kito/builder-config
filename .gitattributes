@@ -15,6 +15,9 @@
 .husky/** export-ignore
 .imgbotconfig export-ignore
 
+# Documentation files
+packages/**/docs/** linguist-documentation linguist-generated
+
 # Lockfiles should be included in the repository,
 # but not treated as source code
 pnpm-lock.yaml linguist-vendored
