@@ -3,6 +3,7 @@
     "lib": ["DOM", "ES2023"],
     "noEmit": true,
     "rootDir": "src",
+    "skipLibCheck": true,
     "types": ["node"]
   },
   "exclude": ["coverage", "dist", "node_modules"],

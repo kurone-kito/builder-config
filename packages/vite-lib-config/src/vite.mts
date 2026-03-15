@@ -47,30 +47,25 @@ const out = '[name].mjs';
 /** Static configuration for Vite builds. */
 const staticConfig = {
   build: {
-    rollupOptions: {
-      output: {
-        chunkFileNames: out,
-        entryFileNames: out,
-        format: 'es',
-        importAttributesKey: 'with',
-      },
+    rolldownOptions: {
+      output: { chunkFileNames: out, entryFileNames: out, format: 'es' },
     },
     sourcemap: true,
     ssr: true,
-    target: 'node20.18',
+    target: 'node20.19',
   },
 } as const satisfies UserConfig;
 
 /** Static configuration for SEA builds. */
 const staticSeaConfig = {
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       external: [...builtinModules, ...builtinModules.map((m) => `node:${m}`)],
       output: {
+        codeSplitting: false,
         entryFileNames: 'index.cjs',
         format: 'cjs',
         inlineDynamicImports: true,
-        manualChunks: undefined,
       },
       plugins: [nodeResolve({ preferBuiltins: true })],
     },

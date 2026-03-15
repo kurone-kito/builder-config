@@ -25,4 +25,8 @@ const staticConfig = {
 export const vitestConfig = (
   overrides: ViteUserConfig = {},
   options: ViteConfigOptions = {},
-): ViteUserConfig => mergeConfig(staticConfig, viteConfig(overrides, options));
+): ViteUserConfig =>
+  mergeConfig(
+    mergeConfig(staticConfig, viteConfig(undefined, options)),
+    overrides,
+  );

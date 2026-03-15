@@ -40,7 +40,6 @@
     "lodash-es": "^4.17.21",
     "shebang-regex": "^4.0.0",
     "type-fest": "^5.0.1",
-    "vite": "^7.3.1",
     "vite-plugin-dts": "^4.5.4"
   },
   "devDependencies": {
@@ -53,10 +52,14 @@
     "typedoc": "^0.28.13",
     "typedoc-plugin-markdown": "^4.9.0",
     "typescript": "~6.0.2",
+    "vite": "^8.0.3",
     "vitest": "^4.1.2"
   },
+  "peerDependencies": {
+    "vite": ">=8.0.0"
+  },
   "engines": {
-    "node": "^20.18 || ^22 || >=24"
+    "node": "^20.19 || ^22 || >=24"
   },
   "publishConfig": {
     "access": "public"
