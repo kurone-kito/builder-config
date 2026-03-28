@@ -1,36 +1,55 @@
 # Guidelines for AI Agents
 
-This project is a pnpm monorepo workspace template containing three
-sample packages: a CLI application, a library, and a web application.
-When contributing to this repository using AI agents, adhere to the
-following guidelines to ensure high-quality contributions that align
-with the project's standards and practices:
+This project provides shared build tooling and configuration
+packages for the author's Node.js projects. It publishes reusable
+TypeScript, Vite, and SEA-builder configurations so that downstream
+repositories can adopt a consistent build pipeline without
+duplicating setup. It is derived from
+[kurone-kito/pnpm-project-template](https://github.com/kurone-kito/pnpm-project-template)
+(cumulative-updates branch).
 
 ## Tooling priority and compatibility
 
-This repository is intentionally optimized for GitHub Copilot CLI and
-VS Code Copilot Chat because they are the primary tools used for
-day-to-day work and benchmarking.
+This repository is optimized for **GitHub Copilot CLI** and
+**VS Code Copilot Chat** as the primary AI tools.
+**Codex CLI** is used as a secondary tool.
 
-`AGENTS.md` and `CLAUDE.md` exist as lightweight compatibility entry
-points for Codex and Claude Code. Keep this file as the canonical,
-fully detailed guide unless benchmark results justify a more neutral
-layout.
+| File | Purpose |
+| ---- | ------- |
+| `.github/copilot-instructions.md` | Canonical, fully detailed guide (this file) |
+| `AGENTS.md` | Lightweight entry point for Codex |
+| `CLAUDE.md` | Lightweight entry point for Claude Code |
+| `GEMINI.md` | Lightweight entry point for Gemini CLI |
+| `.github/instructions/*.instructions.md` | Per-package scoped instructions for VS Code Copilot |
 
-Per-package conventions are provided in `.github/instructions/` as
-scoped instruction files. These are automatically loaded by VS Code
-Copilot when working in the corresponding package directory.
+## Commands
+
+Run these at the workspace root. Prefer workspace-scoped commands
+when targeting a single package:
+`pnpm -F '<package-name>' run <script>`
+
+```sh
+corepack enable && pnpm install   # Install dependencies
+pnpm run build                    # Build all packages (dependency order)
+pnpm run dev                      # Watch mode for all packages
+pnpm run lint:fix                 # Lint and auto-fix
+pnpm run lint                     # Lint (verify only)
+pnpm run test                     # Run all tests (builds first)
+pnpm run test:vitest              # Unit tests with coverage
+pnpm run test:ts                  # TypeScript type checking
+pnpm run build:sea                # Build SEA binaries (CLI)
+pnpm run clean                    # Remove build artifacts
+```
 
 ## Conversation
 
-- The conversational language should match the user's language.
+- Match the conversational language to the user's language.
   For example, if the user speaks in Japanese, respond in Japanese.
-- However, comments and documentation should be written in English
-  unless there is a clear context otherwise.
+- Write comments and documentation in **English** unless there is a
+  clear context otherwise.
 - **Always** run `pnpm run lint:fix` after making any changes — no
   matter how small (including documentation typo fixes). Then verify
-  with `pnpm run lint` before committing. This ensures consistent
-  style even when the change itself seems trivial.
+  with `pnpm run lint` before committing.
 - If uncertainties, concerns, or other implementation issues arise
   while running in Agent mode, promptly switch to Plan mode and ask
   the user questions. In such cases, provide one or more recommended
@@ -38,8 +57,7 @@ Copilot when working in the corresponding package directory.
 - Outside GitHub Copilot, interpret the `Agent mode` and `Plan mode`
   wording by intent: continue autonomously for low-risk work, but
   pause and ask a concise question when uncertainty or hidden risk
-  makes the next step unsafe. When that pause is needed, provide one
-  or more recommended response options.
+  makes the next step unsafe.
 
 ## Boundaries
 
@@ -51,6 +69,8 @@ Copilot when working in the corresponding package directory.
 - Use LF line endings, 2-space indentation, and a final newline
 - Keep commits atomic — one logical change per commit
 - Write comments and documentation in English
+- Run `pnpm run build` before testing (`pretest` does this
+  automatically, but be aware of the dependency)
 
 ### Ask first
 
@@ -59,6 +79,8 @@ Copilot when working in the corresponding package directory.
 - Modifying CI/CD workflows (`.github/workflows/`)
 - Altering shared configuration packages (`@kurone-kito/*-config`)
 - Making changes that affect all workspace packages
+- Changing public API surface of published packages
+  (`sea-builder`, `typescript-config`, `vite-lib-config`)
 
 ### Never do
 
@@ -69,13 +91,133 @@ Copilot when working in the corresponding package directory.
 - Accept AI-generated code without reviewing it for correctness
   and security
 - Introduce breaking changes without a `BREAKING CHANGE` footer
+- Remove or weaken TypeScript strict-mode options in
+  `typescript-config`
+
+## Architecture
+
+```txt
+builder-config (workspace root)
+├── packages/
+│   ├── typescript-config  ← Shared tsconfig (published)
+│   ├── vite-lib-config    ← Vite/Vitest config factory (published)
+│   ├── sea-builder        ← Cross-platform SEA builder CLI (published)
+│   ├── example-lib        ← Demo library (private)
+│   └── example-cli        ← Demo CLI using SEA builder (private)
+├── biome.jsonc            ← extends @kurone-kito/biome-config
+├── vitest.config.mts      ← workspace-level Vitest config
+└── tsconfig.json          ← project references to all packages
+```
+
+### Package overview
+
+| Package | Published | Role |
+| ------- | --------- | ---- |
+| `@kurone-kito/typescript-config` | ✅ | Strict TypeScript settings (ES2023, nodenext, composite) |
+| `@kurone-kito/vite-lib-config` | ✅ | `viteConfig()` and `vitestConfig()` factory functions for library and CLI builds |
+| `@kurone-kito/sea-builder` | ✅ | CLI tool that builds Node.js apps into Single Executable Applications across 6 platforms |
+| `@kurone-kito/example-lib` | ❌ | Minimal library to validate the config packages |
+| `@kurone-kito/example-cli` | ❌ | Minimal CLI to validate the SEA builder pipeline |
+
+### Dependency flow
+
+```txt
+typescript-config ──► vite-lib-config ──► example-lib
+                                     └──► example-cli ◄── sea-builder
+                                     └──► sea-builder
+```
+
+All packages reference `typescript-config` and `vite-lib-config`
+via `workspace:^`. The `example-cli` depends on `example-lib` for
+its runtime output and on `sea-builder` for SEA binary generation.
+
+### External shared configurations
+
+This workspace consumes sibling config packages published
+separately. Do **not** modify their behavior from within this repo:
+
+- `@kurone-kito/biome-config` — Biome linter/formatter rules
+- `@kurone-kito/commitlint-config` — Conventional Commits enforcement
+- `@kurone-kito/cspell-config` — Spell-check dictionaries
+
+## Tech stack
+
+- **Runtime**: Node.js ^20.18 || ^22 || >=24
+- **Package manager**: pnpm (corepack-managed)
+- **Language**: TypeScript ~6.0 (strict mode, `verbatimModuleSyntax`,
+  `erasableSyntaxOnly`)
+- **Bundler**: Vite 8 (library mode for ES modules, CJS for SEA)
+- **Test runner**: Vitest 4 with `@vitest/coverage-v8`
+- **Linter/formatter**: Biome 2
+- **Spell checker**: cspell
+- **Markdown linter**: markdownlint-cli2
+- **Commit linter**: commitlint (Conventional Commits)
+- **Git hooks**: Husky
+
+## Coding standards
+
+- **Indentation**: 2 spaces (enforced by `.editorconfig`)
+- **Line endings**: LF only (enforced by `.editorconfig` and
+  `.gitattributes`)
+- **Trailing whitespace**: trimmed (except in Markdown)
+- **Final newline**: always present
+- **File naming**: lowercase with hyphens
+  (e.g., `feature-request.yml`) unless constrained by a platform
+  convention (e.g., `CONTRIBUTING.md`)
+- **Module style**: ES modules (`.mts` extension) with
+  `verbatimModuleSyntax` — always use `import type` for type-only
+  imports
+
+### Code patterns
+
+```typescript
+// ✅ Good — type-only import, explicit return type, descriptive name
+import type { UserConfig } from 'vite';
+
+export const createLibConfig = (entry: string): UserConfig => ({
+  build: { lib: { entry, formats: ['es'] } },
+});
+```
+
+```typescript
+// ❌ Bad — missing type-only import, implicit return, vague name
+import { UserConfig } from 'vite';
+
+export const config = (e) => ({
+  build: { lib: { entry: e, formats: ['es'] } },
+});
+```
+
+### Anti-patterns to avoid
+
+- Do **not** use `require()` or `.js`/`.ts` extensions — this is
+  an ESM-only project using `.mts`
+- Do **not** add `any` type annotations — the strict TypeScript
+  config enforces `noImplicitAny`
+- Do **not** use barrel re-exports without `export type` for
+  type-only symbols (`verbatimModuleSyntax` will error)
+- Do **not** skip `readonly` modifiers where possible — prefer
+  immutable data
+
+## Testing strategy
+
+- **Framework**: Vitest 4 with v8 coverage provider
+- **Test location**: co-located with source as `*.spec.mts` files
+  (e.g., `src/index.spec.mts`)
+- **Test naming**: use descriptive names that explain expected
+  behavior (e.g., `it('returns the default message')`)
+- **Coverage**: v8 provider; exclusions configured in
+  `vitest.config.mts` (dotfiles, config files, `coverage/`, `dist/`)
+- **Build-before-test**: `pnpm run test` triggers `pretest` which
+  runs `pnpm run build` automatically
+- **Type checking**: `pnpm run test:ts` runs `tsc` via each
+  package's own `test:ts` script
 
 ## Commit rules
 
 This project follows
 [Conventional Commits](https://www.conventionalcommits.org/).
-A `.gitmessage` template is available at the repository root for
-guidance when writing commit messages.
+A `.gitmessage` template is available at the repository root.
 
 ### Format
 
@@ -89,283 +231,107 @@ guidance when writing commit messages.
 
 ### Subject line
 
-- Use the format: `<type>[optional scope]: <description>`
 - Write from the **user's perspective** — briefly state what this
-  commit solves or improves for the end user or developer
+  commit solves or improves
 - Write in **lowercase**, imperative mood (e.g., "add", not "added")
-- Keep the subject line under **72 characters**
-- Do **not** end with a period
+- Keep under **72 characters**; do **not** end with a period
 
 ### Types
 
-Common types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`,
-`chore`, `ci`, `build`, `perf`
+`feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `ci`,
+`build`, `perf`
 
 ### Scopes
 
-- Optional, in parentheses: `feat(ci):`, `fix(lint):`,
-  `docs(readme):`
-- Keep scopes **lowercase**, short, and consistent
-- Use the directory or component name that best describes the area
+Use the package directory name or component:
+`feat(sea-builder):`, `fix(vite-lib-config):`, `docs(readme):`,
+`chore(root):`, `ci(workflows):`
 
-### Body (line 3+)
+### Body
 
-The body should address three aspects:
-
-- **Why** — the purpose or motivation behind the change
-- **Context** — what was needed, the situation or constraint
-- **What changed** — the concrete action taken
-
-Prefer the **why → context → change** order when practical.
-Write these as **natural prose** — weave the aspects into
-coherent sentences rather than using labeled sections. Labeled
-sections (`Why:` / `Context:` / `Change:`) are acceptable only
-when explicit paragraph separation improves clarity.
-
-Omit any aspect whose information **cannot be reliably inferred**.
-If the subject line is self-explanatory, the body may be omitted
-entirely. **Breaking changes must always include a body.**
-
-Wrap body lines at **72 characters**.
+Address **why → context → what changed** as natural prose.
+Omit the body when the subject line is self-explanatory.
+**Breaking changes must always include a body.**
+Wrap at **72 characters**.
 
 ### Breaking changes
 
 - Append `!` after the type/scope:
   `feat!: remove deprecated endpoint`
-- Add a `BREAKING CHANGE:` trailer in the footer with a detailed
-  explanation of what breaks and migration steps
-
-### Footers / trailers
-
-- `Closes #<issue>` / `Refs #<issue>` — link to issues
-- `Co-authored-by: Name <email>` — credit co-authors
-- `BREAKING CHANGE: <description>` — detail the breaking change
+- Add a `BREAKING CHANGE:` trailer with migration steps
 
 ### Atomic commits
 
-Keep each commit as **small and focused** as possible:
-
-- **One logical change per commit** — if the subject line needs
-  "and", consider splitting
+- **One logical change per commit**
 - **Separate refactoring** from behavior changes
-- **Separate formatting/style** changes from logic changes
+- **Separate formatting** from logic changes
 - **Separate dependency updates** from code changes
-- When in doubt, prefer smaller commits that are easy to review,
-  revert, and bisect
 
 ### Examples
-
-#### Good — single-line (trivial change)
 
 ```txt
 fix: correct typo in feature request template
 ```
 
-#### Good — prose body
-
 ```txt
-feat(ci): add concurrency settings to lint workflow
+feat(vite-lib-config): add target option to specify build targets
 
-Parallel lint runs on the same branch waste resources and
-cause race conditions in status checks. GitHub Actions
-supports concurrency groups that automatically cancel
-redundant runs, so add a concurrency group keyed on branch
-name with cancel-in-progress enabled.
+Downstream projects need to override the default ES2023 + Node 20
+build target for newer runtime environments. The viteConfig
+factory now accepts an optional target array that is forwarded to
+the Vite build configuration.
 
 Refs #42
 ```
 
-#### Good — breaking change
-
 ```txt
 feat!: require node 20 as minimum version
 
-Node 18 reaches end-of-life and lacks native fetch support
-used by the new HTTP client. All production environments
-have already been upgraded to node 20+, so update the
-engines field and CI matrix to require node >= 20.
+Node 18 reaches end-of-life and lacks native fetch support.
+Update the engines field and CI matrix to require node >= 20.
 
-BREAKING CHANGE: drop support for node 16 and 18. Users
-must upgrade to node 20 or later.
+BREAKING CHANGE: drop support for node 16 and 18. Users must
+upgrade to node 20 or later.
 Closes #108
 ```
 
-#### Bad — vague, developer-centric
+## Self-review checklist
 
-```txt
-fix: update code
-```
+Before considering a task complete, verify:
 
-#### Bad — too large / non-atomic
-
-```txt
-feat: add auth system and refactor database layer and update docs
-```
-
-## Coding Standards
-
-- **Indentation**: 2 spaces (enforced by `.editorconfig`)
-- **Line endings**: LF only (enforced by `.editorconfig` and
-  `.gitattributes`)
-- **Trailing whitespace**: trimmed (except in Markdown)
-- **Final newline**: always present
-- **File naming**: lowercase with hyphens
-  (e.g., `feature-request.yml`) unless constrained by a platform
-  convention (e.g., `CONTRIBUTING.md`)
-
-## Packages
-
-| path                          | package name                     | description                                      |
-| ----------------------------- | -------------------------------- | ------------------------------------------------ |
-| `/`                           | `@kurone-kito/builder-config`    | Manage the monorepo workspace and linting.       |
-| `/packages/example-cli`       | `@kurone-kito/example-cli`       | An example CLI app using the SEA Builder.        |
-| `/packages/example-lib`       | `@kurone-kito/example-lib`       | An example library for Node.js apps.             |
-| `/packages/sea-builder`       | `@kurone-kito/sea-builder`       | SEA Builder for Node.js apps.                    |
-| `/packages/typescript-config` | `@kurone-kito/typescript-config` | TypeScript configuration for general projects.   |
-| `/packages/vite-lib-config`   | `@kurone-kito/vite-lib-config`   | Vite configuration for CLI and library projects. |
-
-### Cross-package dependencies
-
-- `@kurone-kito/pwt-lib` is the foundational library consumed by
-  both CLI and Web packages via `workspace:^` references.
-- Changes to `pwt-lib` exports may require updates in consuming
-  packages.
-- Run `pnpm run build` at the root to build all packages in
-  dependency order.
-
-### Scoped instructions
-
-Per-package conventions are provided in
-`.github/instructions/*.instructions.md`. These files are
-automatically loaded by VS Code Copilot when working in the
-corresponding package directory.
-
-## Development
-
-### Install the dependencies
-
-```sh
-corepack enable
-pnpm install
-```
-
-### Building
-
-```sh
-pnpm run build
-
-# Watch mode for all packages
-pnpm run dev
-
-# Build a specific package
-pnpm -F '@kurone-kito/pwt-lib' run build
-
-# Build Single Executable Applications (CLI)
-pnpm run build:sea
-```
-
-### Linting
-
-```sh
-pnpm run lint
-pnpm run lint:fix # Lint and auto-fix
-```
-
-### Testing
-
-Run `pnpm run build` before executing the test commands.
-
-```sh
-pnpm run test        # Run unit tests
-pnpm run test:e2e    # Run end-to-end tests (web-solid)
-pnpm run test:ts     # TypeScript type checking
-```
-
-### Cleaning
-
-```sh
-pnpm run clean
-```
-
-## Guardrails
-
-- **Do not** modify community documents (CODE_OF_CONDUCT,
-  CONTRIBUTING) without explicit approval
+1. `pnpm run lint:fix` passes with no remaining errors
+2. `pnpm run lint` confirms a clean state
+3. `pnpm run build` succeeds for all affected packages
+4. `pnpm run test:vitest` passes with no regressions
+5. `pnpm run test:ts` shows no type errors
+6. Public API changes are documented and backward-compatible
+   (or marked as breaking)
+7. Commit messages follow Conventional Commits format
 
 ## Security
 
 These rules follow the
 [OpenSSF Security-Focused Guide for AI Code Assistant Instructions](https://best.openssf.org/Security-Focused-Guide-for-AI-Code-Assistant-Instructions.html):
 
-- **No secrets in code** — store credentials in environment variables
-  or a secrets manager; never hard-code them
+- **No secrets in code** — store credentials in environment
+  variables or a secrets manager; never hard-code them
 - **Treat AI output as untrusted** — review all generated code for
   correctness, security vulnerabilities, and adherence to project
   standards before committing
 - **Validate inputs** — ensure all external data is validated and
   sanitized before use
-- **Verify dependencies** — confirm that any recommended packages are
-  reputable, actively maintained, and free of known vulnerabilities
-- **Recursive review** — when generating security-sensitive code, ask
-  the AI to review its own output and suggest improvements before
-  accepting
+- **Verify dependencies** — confirm that any recommended packages
+  are reputable, actively maintained, and free of known
+  vulnerabilities
+- **Recursive review** — when generating security-sensitive code,
+  ask the AI to review its own output and suggest improvements
+  before accepting
 
-## Onboarding
+## Guardrails
 
-This project is a pnpm monorepo workspace template, a derivative of
-[kurone-kito/pnpm-project-template](https://github.com/kurone-kito/pnpm-project-template).
-It demonstrates how to structure a multi-package workspace with
-shared tooling and conventions.
-
-For non-monorepo projects, use
-[pnpm-project-template](https://github.com/kurone-kito/pnpm-project-template)
-instead.
-
-### Derived-repository detection
-
-When an AI agent starts a session, it should determine whether this
-repository is the **base template** or a **derived project**:
-
-1. **Check the repository name** — inspect the git remote URL
-   (e.g., `git remote get-url origin`), the working-directory name,
-   or any GitHub API context available to the agent. If the
-   repository name is exactly `pnpm-workspace-template`, treat it as
-   the base template. Any other name indicates a derived project.
-2. **Check for generic content** — look for the sentinel phrase
-   `pnpm monorepo workspace template` in this file or in the
-   repository's AI instruction files. Its presence means the
-   guidelines have **not yet been customized**.
-
-If both conditions are met — the repository is derived **and** the
-guidelines are still generic — the agent should **proactively
-propose an onboarding workflow** before proceeding with the user's
-request. The proposal should be conversational, brief, and
-non-blocking (the user may decline and continue normally).
-
-### Onboarding proposal
-
-When proposing onboarding, suggest customizing the following areas
-in a single plan:
-
-1. **Project description** — update `README.md` and the opening
-   lines of AI instruction files to reflect the project's purpose
-2. **Package configuration** — update package names, scopes, and
-   descriptions in every `package.json`
-3. **Framework / toolchain** — identify the primary framework;
-   add relevant build tooling and type definitions
-4. **Dependency management** — configure workspace structure and
-   lock-file conventions as needed
-5. **Testing strategy** — define the test runner, coverage targets,
-   and test-file conventions
-6. **CI/CD workflows** — adjust `.github/workflows/` to match the
-   project's build, test, and deploy pipeline
-7. **AI guideline specialization** — rewrite this file,
-   `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, and scoped instructions
-   in `.github/instructions/` to include project-specific rules,
-   coding patterns, and architecture notes
-8. **License review** — confirm or replace the MIT license if the
-   project requires a different one
-
-Present these items as a checklist proposal (e.g., in Plan mode for
-Copilot, or as a numbered list for other agents). Let the user
-select which items to tackle and in what order.
+- Do **not** modify community documents (`CODE_OF_CONDUCT*`,
+  `CONTRIBUTING*`) without explicit approval
+- Do **not** weaken strict TypeScript options in
+  `packages/typescript-config/tsconfig.json`
+- Do **not** change Biome rules here — they are managed in the
+  external `@kurone-kito/biome-config` package
