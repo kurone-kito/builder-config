@@ -34,10 +34,10 @@
     "test": "vitest run --coverage"
   },
   "dependencies": {
-    "lodash-es": "^4.17.21",
+    "lodash-es": "^4.18.1",
     "shebang-regex": "^4.0.0",
     "type-fest": "^5.0.1",
-    "vite": "^7.1.9",
+    "vite": "^7.1.11",
     "vite-plugin-dts": "^4.5.4"
   },
   "devDependencies": {
