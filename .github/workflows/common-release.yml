@@ -135,7 +135,7 @@ jobs:
       - name: pack the packages
         run: pnpm --filter "!*builder-config" -r pack
       - name: Uploading assets to the release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: '*.tgz'
   build-and-deploy-sea-to-release:
@@ -171,6 +171,6 @@ jobs:
             zip -9 "${bin}.zip" "$bin"
           done
       - name: Uploading assets to the release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: 'packages/example-cli/sea/*.zip'
