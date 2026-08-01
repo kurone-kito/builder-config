@@ -1,3 +1,7 @@
+allowBuilds:
+  esbuild: true
+configDependencies:
+  '@pnpm/plugin-types-fixer': 0.1.0+sha512-bLww63gRHi7siYTqFJb5qNdcXadU0jv20Et6z5AryMZ7FlLolbEJOrXLpg8+amQZNHHNW1dfFUBGVw/9ezQbFg==
 enableGlobalVirtualStore: true
 engineStrict: true
 gitChecks: false
@@ -5,6 +9,13 @@ ignoreWorkspaceRootCheck: true
 linkWorkspacePackages: true
 onlyBuiltDependencies:
   - esbuild
+overrides:
+  '@babel/parser': 7.29.7
+  '@babel/types': 7.29.7
+packageExtensions:
+  undici-types:
+    dependencies:
+      '@types/node': '*'
 packages:
   - packages/*
 pmOnFail: warn
