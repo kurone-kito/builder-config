@@ -36,6 +36,12 @@ jobs:
           HUSKY: 0
         name: Install the dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
+      - if: ${{ inputs.next == true }}
+        name: Check the whether the current version is prerelease
+        run: pnpm run is:prerelease
+      - if: ${{ inputs.next != true }}
+        name: Check the whether the current version is not prerelease
+        run: pnpm run is:release
       - name: Build the project explicitly. The workaround is provisional because the publish command does not perform topological sorting.
         run: pnpm run build
       - env:
@@ -49,10 +55,10 @@ jobs:
           EOF
       - if: ${{ inputs.next != true }}
         name: Publish the packages
-        run: pnpm run publish --no-git-check
+        run: pnpm run publish
       - if: ${{ inputs.next == true }}
         name: Publish the packages as the alpha version
-        run: pnpm run publish:next --no-git-check
+        run: pnpm run publish:next
   build-and-deploy-to-github:
     name: Build and deploy to GitHub Packages
     permissions:
@@ -94,12 +100,12 @@ jobs:
           @kurone-kito:registry=https://npm.pkg.github.com/
           //npm.pkg.github.com/:_authToken=$GITHUB_TOKEN
           EOF
-      - if: ${{ !inputs.next }}
+      - if: ${{ inputs.next != true }}
         name: Publish the packages
-        run: pnpm run publish --no-git-check
-      - if: ${{ inputs.next }}
+        run: pnpm run publish
+      - if: ${{ inputs.next == true }}
         name: Publish the packages as the alpha version
-        run: pnpm run publish:next --no-git-check
+        run: pnpm run publish:next
   build-and-deploy-packages-to-release:
     if: ${{ github.event_name == 'release' }}
     name: Build and deploy the packages to the release
