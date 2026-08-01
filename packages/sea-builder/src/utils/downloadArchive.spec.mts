@@ -78,6 +78,23 @@ describe('downloadArchive', () => {
     expect(readdirSync(dir)).toEqual([ARCHIVE_NAME]);
   });
 
+  it('looks up the checksum by the URL filename, not the dest filename', async () => {
+    const renamedDest = join(dir, 'renamed-locally.tar.gz');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: string | URL) =>
+        input.toString().endsWith('SHASUMS256.txt')
+          ? shasumsResponse(`${ARCHIVE_HASH}  ${ARCHIVE_NAME}\n`)
+          : archiveResponse(bodyStream(ARCHIVE_CONTENT)),
+      ),
+    );
+
+    await downloadArchive(ARCHIVE_URL, renamedDest);
+
+    expect(existsSync(renamedDest)).toBe(true);
+    expect(readFileSync(renamedDest, 'utf8')).toBe(ARCHIVE_CONTENT);
+  });
+
   it('throws and leaves no file for a non-2xx archive response', async () => {
     vi.stubGlobal(
       'fetch',
