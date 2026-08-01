@@ -149,5 +149,17 @@ own dogfood baseline. See
 rationale, scope, and known flag/path-matching gotchas (including the
 `gh api` DELETE-verb trap, which stays out of the allow list here too).
 
+One deliberate divergence from upstream's dogfood file: this
+repository's baseline drops the `Bash(node scripts/*)` /
+`Bash(node bin/*)` allow entries. Those exist upstream because
+idd-skill's own repository *is* the `vendored-node` source tree; under
+this repository's `package-manager` profile the `idd-*` helpers run
+through `pnpm exec`/`package.json` scripts instead, this repository has
+no `bin/` directory at all, and its own `scripts/` holds only small
+release utilities (`isPrerelease.mjs`, `createEntryStub.mjs`) — keeping
+the wildcard would widen the attack surface (any newly added or
+modified script under `scripts/` would run without a permission
+prompt) with no corresponding IDD-helper benefit here.
+
 Personal additions belong in `.claude/settings.local.json`, which
 layers on top of the committed baseline.
