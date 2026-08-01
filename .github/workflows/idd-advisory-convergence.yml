@@ -25,8 +25,15 @@ permissions:
   issues: read
   pull-requests: read
 jobs:
+  # The job id is also this check's required-status-check context name
+  # and the check-run name the idd-rerun-advisory-convergence helper and
+  # external-check-waiver mechanism hardcode
+  # (DEFAULT_ADVISORY_CONVERGENCE_CHECK_SELECTOR /
+  # RERUN_PLAN_CHECK_NAME in idd-skill's advisory-wait-policy.mjs /
+  # rerun-advisory-convergence.mjs, both an exact-string match) -- do not
+  # give this job an explicit `name:` override, or those lookups silently
+  # find zero check-run instances.
   idd-advisory-convergence:
-    name: The idd-advisory-convergence check
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

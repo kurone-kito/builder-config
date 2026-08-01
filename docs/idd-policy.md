@@ -214,6 +214,17 @@ its own SHA-pinned action conventions (matching `push-feature.yml`/
 `workflow_dispatch`. Registering it as a **required** status check is
 maintainer-only work tracked in #51, not part of this issue.
 
+The job intentionally carries no `name:` override, unlike this
+repository's other jobs — its id, `idd-advisory-convergence`, is also
+the check-run name the `idd-rerun-advisory-convergence` helper and the
+external-check-waiver mechanism both hardcode as an exact-string match
+(`DEFAULT_ADVISORY_CONVERGENCE_CHECK_SELECTOR` /
+`RERUN_PLAN_CHECK_NAME` in idd-skill). A friendlier display name here
+would silently break both: they'd query GitHub's check-runs API for a
+check named exactly `idd-advisory-convergence` and find nothing —
+confirmed empirically on this PR after the job briefly carried a
+`name:` override.
+
 **Waiver re-trigger procedure**: posting a maintainer waiver comment
 does **not** by itself turn this check green — a PR conversation
 comment fires GitHub's `issue_comment` event, which this workflow does
