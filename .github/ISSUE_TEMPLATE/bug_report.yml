@@ -18,6 +18,8 @@ body:
         🇨🇳 首先，阅读以下文档:
         https://github.com/kurone-kito/builder-config/blob/main/.github/CONTRIBUTING.zh.md
 
+        Before submitting logs, screenshots, or other context, please remove any secrets, credentials, tokens, or personal data.
+
   - type: textarea
     id: overview
     attributes:
@@ -50,7 +52,7 @@ body:
     attributes:
       label: Environment Details
       description: Please provide details about your environment.
-      value: |
+      placeholder: |
         - Target deployment platform: [e.g. AWS/GCP/local cluster/etc...]
         - Target OS: [e.g. RHEL 9/Ubuntu 24.04/etc...]
         - Version of this project or specific commit: [e.g. 1.4.3/commit hash]

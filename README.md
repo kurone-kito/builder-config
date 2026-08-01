@@ -36,6 +36,15 @@ corepack enable
 pnpm install
 ```
 
+Node.js 26 and later no longer bundle Corepack. On those versions, install
+it from npm first:
+
+```sh
+npm install --global corepack
+corepack enable
+pnpm install
+```
+
 ### Building
 
 ```sh

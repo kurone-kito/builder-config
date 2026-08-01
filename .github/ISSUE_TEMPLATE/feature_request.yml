@@ -18,6 +18,8 @@ body:
         🇨🇳 首先，阅读以下文档:
         https://github.com/kurone-kito/builder-config/blob/main/.github/CONTRIBUTING.zh.md
 
+        Before submitting logs, screenshots, or other context, please remove any secrets, credentials, tokens, or personal data.
+
   - type: textarea
     id: overview
     attributes:
