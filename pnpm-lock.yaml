@@ -61,6 +61,9 @@ importers:
       '@kurone-kito/example-cli':
         specifier: workspace:^
         version: link:packages/example-cli
+      '@kurone-kito/idd-skill':
+        specifier: https://codeload.github.com/kurone-kito/idd-skill/tar.gz/bc811500653a3bd504d34e4a08ad00a18eb72a9e
+        version: https://codeload.github.com/kurone-kito/idd-skill/tar.gz/bc811500653a3bd504d34e4a08ad00a18eb72a9e
       '@kurone-kito/lint-staged-config':
         specifier: ^0.21.0
         version: 0.21.0(cspell@10.0.1)(lint-staged@17.2.0)
@@ -877,6 +880,12 @@ packages:
     peerDependenciesMeta:
       cspell:
         optional: true
+
+  '@kurone-kito/idd-skill@https://codeload.github.com/kurone-kito/idd-skill/tar.gz/bc811500653a3bd504d34e4a08ad00a18eb72a9e':
+    resolution: {gitHosted: true, integrity: sha512-vVVE8mW8FLp9iuDI4w0k/tFwqwkcnexvGmB/caoCWj8WCH3G5UpZRc6A5ORSAM1bKJFKhVhmoMF+USm17+R9Kw==, tarball: https://codeload.github.com/kurone-kito/idd-skill/tar.gz/bc811500653a3bd504d34e4a08ad00a18eb72a9e}
+    version: 0.4.0
+    engines: {node: ^22.22.2 || >=24.2.0}
+    hasBin: true
 
   '@kurone-kito/lint-staged-config@0.21.0':
     resolution: {integrity: sha512-5Rh9JV+Q5mL3HrB6vEUHjTXQfLzL9dyAqGLd4ckaIFRnC6IlXVZUTSw/tnqLlu5vs1zRX5SStCFc9A00AowMzw==}
@@ -3259,6 +3268,8 @@ snapshots:
   '@kurone-kito/cspell-config@0.21.0(cspell@10.0.1)':
     optionalDependencies:
       cspell: 10.0.1
+
+  '@kurone-kito/idd-skill@https://codeload.github.com/kurone-kito/idd-skill/tar.gz/bc811500653a3bd504d34e4a08ad00a18eb72a9e': {}
 
   '@kurone-kito/lint-staged-config@0.21.0(cspell@10.0.1)(lint-staged@17.2.0)':
     optionalDependencies:
