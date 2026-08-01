@@ -37,10 +37,10 @@ jobs:
         name: Install the dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
       - if: ${{ inputs.next == true }}
-        name: Check the whether the current version is prerelease
+        name: Check whether the current version is a prerelease
         run: pnpm run is:prerelease
       - if: ${{ inputs.next != true }}
-        name: Check the whether the current version is not prerelease
+        name: Check whether the current version is not a prerelease
         run: pnpm run is:release
       - name: Build the project explicitly. The workaround is provisional because the publish command does not perform topological sorting.
         run: pnpm run build
@@ -84,10 +84,10 @@ jobs:
         name: Install the dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
       - if: ${{ inputs.next == true }}
-        name: Check the whether the current version is prerelease
+        name: Check whether the current version is a prerelease
         run: pnpm run is:prerelease
       - if: ${{ inputs.next != true }}
-        name: Check the whether the current version is not prerelease
+        name: Check whether the current version is not a prerelease
         run: pnpm run is:release
       - name: Build the project explicitly. The workaround is provisional because the publish command does not perform topological sorting.
         run: pnpm run build
@@ -131,10 +131,10 @@ jobs:
         name: Install the dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
       - if: ${{ inputs.next == true }}
-        name: Check the whether the current version is prerelease
+        name: Check whether the current version is a prerelease
         run: pnpm run is:prerelease
       - if: ${{ inputs.next != true }}
-        name: Check the whether the current version is not prerelease
+        name: Check whether the current version is not a prerelease
         run: pnpm run is:release
       - name: Build the project explicitly. The workaround is provisional because the publish command does not perform topological sorting.
         run: pnpm run build
