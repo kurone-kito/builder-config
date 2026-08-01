@@ -3,9 +3,12 @@ concurrency:
   cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
 name: The CI workflow on push as a feature branch
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
-      - '*'
+      - '**'
       - '!main'
 permissions:
   contents: read
