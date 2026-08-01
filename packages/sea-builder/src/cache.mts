@@ -1,4 +1,4 @@
-#!/usr/bin/env node --enable-source-maps
+#!/usr/bin/env -S node --enable-source-maps
 
 import { createListrCacheTasks } from './listr2/createCacheTasks.mjs';
 import { runIfMain } from './utils/runIfMain.mjs';

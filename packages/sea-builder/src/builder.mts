@@ -1,4 +1,4 @@
-#!/usr/bin/env node --enable-source-maps
+#!/usr/bin/env -S node --enable-source-maps
 
 import { isNativeError } from 'node:util/types';
 import { createBuildTasks } from './listr2/createBuildTasks.mjs';
