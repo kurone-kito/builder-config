@@ -29,7 +29,7 @@ overrides:
   '@babel/parser': 7.29.7
   '@babel/types': 7.29.7
 
-packageExtensionsChecksum: sha256-cLaiXMI0bZ29PgbU8DvldTpU9J1d/+Ub/mhndYqrvs8=
+packageExtensionsChecksum: sha256-+IqWFRtcp34JmS6LMA9w4hWTD/XsSmmAt7J+Rz/azNc=
 
 pnpmfileChecksum: sha256-nVOmFZ6JT8FxIhcN+S5sJXuP1DtIhTre5ZGvjJU+4tk=
 
