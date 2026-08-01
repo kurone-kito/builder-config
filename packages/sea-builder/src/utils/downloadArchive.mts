@@ -1,11 +1,14 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { createWriteStream } from 'node:fs';
-import { rename, rm } from 'node:fs/promises';
+import { access, rename, rm } from 'node:fs/promises';
 import { basename } from 'node:path/posix';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import type { ReadableStream as NodeWebReadableStream } from 'node:stream/web';
 import type { DownloadFunction } from './types.mjs';
+
+/** Matches a 64-character lowercase or uppercase hex SHA-256 digest. */
+const SHA256_HEX = /^[0-9a-fA-F]{64}$/;
 
 /**
  * Convert a Fetch API {@link Response.body} into a Node.js
@@ -29,7 +32,8 @@ const toNodeReadable = (body: ReadableStream<Uint8Array>): Readable =>
  * @param shasums Contents of the `SHASUMS256.txt` file.
  * @param filename Archive file name to look up.
  * @returns The expected lowercase hex SHA-256 digest.
- * @throws {Error} If no parseable checksum line names `filename`.
+ * @throws {Error} If no parseable checksum line names `filename`, or the
+ *   token found is not a 64-character hex digest.
  */
 const findExpectedChecksum = (shasums: string, filename: string): string => {
   const line = shasums
@@ -39,7 +43,34 @@ const findExpectedChecksum = (shasums: string, filename: string): string => {
   if (!checksum) {
     throw new Error(`No checksum entry found for ${filename}`);
   }
-  return checksum;
+  if (!SHA256_HEX.test(checksum)) {
+    throw new Error(`Malformed checksum entry for ${filename}: ${checksum}`);
+  }
+  return checksum.toLowerCase();
+};
+
+/**
+ * Move a verified temporary download onto its final destination.
+ *
+ * `rename` is atomic on POSIX even when {@link dest} already exists, but
+ * Windows can refuse to replace a destination that another process holds
+ * open (`EPERM`/`EBUSY`) — notably when a concurrent {@link downloadArchive}
+ * call for the same target already won the race. In that case {@link dest}
+ * now holds bytes another call already checksum-verified, so this call's
+ * own (identical) temporary file is redundant and simply discarded rather
+ * than surfaced as an error.
+ * @param tempPath Path to the verified temporary file.
+ * @param dest Final destination path.
+ */
+const moveIntoPlace = async (tempPath: string, dest: string): Promise<void> => {
+  try {
+    await rename(tempPath, dest);
+  } catch (error) {
+    await access(dest).catch(() => {
+      throw error;
+    });
+    await rm(tempPath, { force: true });
+  }
 };
 
 /**
@@ -73,7 +104,7 @@ export const downloadArchive: DownloadFunction = async (url, dest) => {
     filename,
   );
 
-  const tempPath = `${dest}.download-${process.pid}`;
+  const tempPath = `${dest}.download-${process.pid}-${randomUUID()}`;
   try {
     const hash = createHash('sha256');
     await pipeline(
@@ -92,7 +123,7 @@ export const downloadArchive: DownloadFunction = async (url, dest) => {
         `Checksum mismatch for ${filename}: expected ${expectedChecksum}, got ${actualChecksum}`,
       );
     }
-    await rename(tempPath, dest);
+    await moveIntoPlace(tempPath, dest);
   } catch (error) {
     await rm(tempPath, { force: true });
     throw error;

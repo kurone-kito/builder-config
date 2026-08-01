@@ -5,11 +5,18 @@ import {
   readdirSync,
   readFileSync,
   rmSync,
+  writeFileSync,
 } from 'node:fs';
+import { rename as nodeRename } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { downloadArchive } from './downloadArchive.mjs';
+
+vi.mock('node:fs/promises', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:fs/promises')>();
+  return { ...actual, rename: vi.fn(actual.rename) };
+});
 
 const ARCHIVE_CONTENT = 'fake-archive-bytes';
 const ARCHIVE_NAME = 'node-v22.23.1-linux-x64.tar.gz';
@@ -95,6 +102,79 @@ describe('downloadArchive', () => {
     expect(readFileSync(renamedDest, 'utf8')).toBe(ARCHIVE_CONTENT);
   });
 
+  it('accepts an uppercase-hex checksum entry', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: string | URL) =>
+        input.toString().endsWith('SHASUMS256.txt')
+          ? shasumsResponse(`${ARCHIVE_HASH.toUpperCase()}  ${ARCHIVE_NAME}\n`)
+          : archiveResponse(bodyStream(ARCHIVE_CONTENT)),
+      ),
+    );
+
+    await downloadArchive(ARCHIVE_URL, dest);
+
+    expect(readFileSync(dest, 'utf8')).toBe(ARCHIVE_CONTENT);
+  });
+
+  it('throws on a checksum entry that is not a 64-character hex digest', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: string | URL) =>
+        input.toString().endsWith('SHASUMS256.txt')
+          ? shasumsResponse(`not-a-hash  ${ARCHIVE_NAME}\n`)
+          : archiveResponse(bodyStream(ARCHIVE_CONTENT)),
+      ),
+    );
+
+    await expect(downloadArchive(ARCHIVE_URL, dest)).rejects.toThrow(
+      /Malformed checksum entry/,
+    );
+    expect(existsSync(dest)).toBe(false);
+  });
+
+  it('treats a rename refused by an already-placed destination as success', async () => {
+    writeFileSync(dest, ARCHIVE_CONTENT);
+    vi.mocked(nodeRename).mockRejectedValueOnce(
+      Object.assign(new Error('EPERM: operation not permitted, rename'), {
+        code: 'EPERM',
+      }),
+    );
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: string | URL) =>
+        input.toString().endsWith('SHASUMS256.txt')
+          ? shasumsResponse(`${ARCHIVE_HASH}  ${ARCHIVE_NAME}\n`)
+          : archiveResponse(bodyStream(ARCHIVE_CONTENT)),
+      ),
+    );
+
+    await expect(downloadArchive(ARCHIVE_URL, dest)).resolves.toBeUndefined();
+
+    expect(readFileSync(dest, 'utf8')).toBe(ARCHIVE_CONTENT);
+    expect(readdirSync(dir)).toEqual([ARCHIVE_NAME]);
+  });
+
+  it('propagates a rename failure when the destination was not placed by a winner', async () => {
+    const eperm = Object.assign(
+      new Error('EPERM: operation not permitted, rename'),
+      { code: 'EPERM' },
+    );
+    vi.mocked(nodeRename).mockRejectedValueOnce(eperm);
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: string | URL) =>
+        input.toString().endsWith('SHASUMS256.txt')
+          ? shasumsResponse(`${ARCHIVE_HASH}  ${ARCHIVE_NAME}\n`)
+          : archiveResponse(bodyStream(ARCHIVE_CONTENT)),
+      ),
+    );
+
+    await expect(downloadArchive(ARCHIVE_URL, dest)).rejects.toThrow(eperm);
+    expect(existsSync(dest)).toBe(false);
+    expect(readdirSync(dir)).toEqual([]);
+  });
+
   it('throws and leaves no file for a non-2xx archive response', async () => {
     vi.stubGlobal(
       'fetch',
@@ -140,11 +220,12 @@ describe('downloadArchive', () => {
   });
 
   it('throws and leaves no file when the checksum does not match', async () => {
+    const wrongChecksum = 'd'.repeat(64);
     vi.stubGlobal(
       'fetch',
       vi.fn(async (input: string | URL) =>
         input.toString().endsWith('SHASUMS256.txt')
-          ? shasumsResponse(`deadbeef  ${ARCHIVE_NAME}\n`)
+          ? shasumsResponse(`${wrongChecksum}  ${ARCHIVE_NAME}\n`)
           : archiveResponse(bodyStream(ARCHIVE_CONTENT)),
       ),
     );
