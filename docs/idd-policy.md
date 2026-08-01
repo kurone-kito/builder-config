@@ -187,6 +187,21 @@ cannot push the scan past this workflow's 10-minute timeout. This
 narrows only the CI invocation; a local `pnpm exec idd-doctor` run
 still uses the full 14-day default.
 
+The job's `permissions:` grants `issues: read` and `pull-requests: read`
+alongside `contents: read`, and its `gh`-calling step sets
+`GH_TOKEN: ${{ github.token }}`. Without both, `gh` has no credential
+at all inside the job and every GitHub-API-backed check (cleanup
+backlog, branch protection, autopilot-suitability) silently degrades
+to one `github checks skipped: gh repo view unavailable` warning
+instead of actually running — confirmed empirically by reproducing the
+missing-token case locally. `idd-doctor` never escalates a missing or
+insufficiently-scoped `gh` call to an error by default (only
+`--require-github`/`--strict` would), so the branch-protection check
+still degrades gracefully to a warning here: reading branch protection
+settings needs `administration: read`, a materially more sensitive
+scope than this gate's diagnostic purpose warrants, so it is
+deliberately not granted.
+
 ### `idd-advisory-convergence` workflow
 
 `.github/workflows/idd-advisory-convergence.yml` mirrors

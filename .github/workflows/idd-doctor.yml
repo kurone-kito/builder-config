@@ -3,6 +3,8 @@ on:
   pull_request:
 permissions:
   contents: read
+  issues: read
+  pull-requests: read
 jobs:
   idd-doctor:
     name: The idd-doctor health check
@@ -26,5 +28,7 @@ jobs:
           node-version-file: .node-version
       - name: Install the dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
-      - name: Run idd-doctor
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        name: Run idd-doctor
         run: pnpm exec idd-doctor --cleanup-backlog-window-days 1
