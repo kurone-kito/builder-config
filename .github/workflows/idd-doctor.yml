@@ -27,4 +27,4 @@ jobs:
       - name: Install the dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
       - name: Run idd-doctor
-        run: pnpm exec idd-doctor
+        run: pnpm exec idd-doctor --cleanup-backlog-window-days 1

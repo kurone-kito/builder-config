@@ -173,11 +173,19 @@ worktree guard.
 
 ### `idd-doctor` CI health gate
 
-`.github/workflows/idd-doctor.yml` runs `pnpm exec idd-doctor` on every
-pull request (checked out at a detached `github.sha`, which keeps the
+`.github/workflows/idd-doctor.yml` runs
+`pnpm exec idd-doctor --cleanup-backlog-window-days 1` on every pull
+request (checked out at a detached `github.sha`, which keeps the
 worktree-guard check inert in CI — see below). It is **not** a required
 status check; registering it as a required check is maintainer-only
 work tracked in issue 51.
+
+The `--cleanup-backlog-window-days 1` flag narrows `idd-doctor`'s
+default 14-day post-merge cleanup backlog scan (one serial `gh api`
+call per merged PR in the window) to a 1-day window, so a merge burst
+cannot push the scan past this workflow's 10-minute timeout. This
+narrows only the CI invocation; a local `pnpm exec idd-doctor` run
+still uses the full 14-day default.
 
 ### `idd-advisory-convergence` workflow
 
@@ -192,9 +200,11 @@ its own SHA-pinned action conventions (matching `push-feature.yml`/
 maintainer-only work tracked in #51, not part of this issue.
 
 **Waiver re-trigger procedure**: posting a maintainer waiver comment
-does **not** by itself turn this check green — a PR comment is not one
-of this workflow's trigger events, and a completed run's conclusion
-never changes on its own. After posting a waiver, also trigger a new
+does **not** by itself turn this check green — a PR conversation
+comment fires GitHub's `issue_comment` event, which this workflow does
+not listen for (only `pull_request_review_comment`, scoped to comments
+on the diff), and a completed run's conclusion never changes on its
+own. After posting a waiver, also trigger a new
 run: a push, a fresh Copilot review, the Actions UI "Re-run jobs"
 button on the *existing* PR-linked run for the *current HEAD SHA*, or
 `gh run rerun <run-id>` on that same run. **`workflow_dispatch` does
