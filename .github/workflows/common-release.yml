@@ -34,9 +34,7 @@ jobs:
           cache: pnpm
           check-latest: true
           node-version-file: .node-version
-      - env:
-          HUSKY: 0
-        name: Install the dependencies
+      - name: Install the dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
       - if: ${{ inputs.next == true }}
         name: Check whether the current version is a prerelease
@@ -83,9 +81,7 @@ jobs:
           cache: pnpm
           check-latest: true
           node-version-file: .node-version
-      - env:
-          HUSKY: 0
-        name: Install the dependencies
+      - name: Install the dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
       - if: ${{ inputs.next == true }}
         name: Check whether the current version is a prerelease
@@ -132,9 +128,7 @@ jobs:
           cache: pnpm
           check-latest: true
           node-version-file: .node-version
-      - env:
-          HUSKY: 0
-        name: Install the dependencies
+      - name: Install the dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
       - if: ${{ inputs.next == true }}
         name: Check whether the current version is a prerelease
@@ -172,9 +166,7 @@ jobs:
           cache: pnpm
           check-latest: true
           node-version-file: .node-version
-      - env:
-          HUSKY: 0
-        name: Install the dependencies
+      - name: Install the dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
       - name: Build the project explicitly. The workaround is provisional because the publish command does not perform topological sorting.
         run: pnpm run build:sea
