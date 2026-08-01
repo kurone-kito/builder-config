@@ -247,8 +247,13 @@ rather than accepting the permanent false-positive warning:
   `pnpm install`.
 
   ```sh
-  git config core.hooksPath .githooks && chmod +x .githooks/pre-commit .githooks/pre-push .githooks/commit-msg
+  git rev-parse --git-dir > /dev/null 2>&1 && git config core.hooksPath .githooks && chmod +x .githooks/pre-commit .githooks/pre-push .githooks/commit-msg || true
   ```
+
+  The leading `git rev-parse --git-dir` guard keeps this a no-op
+  (exit 0) when `pnpm install` runs outside a Git worktree — a
+  "Download ZIP" checkout or a registry-tarball install has no `.git`
+  to configure, and hooks are meaningless there anyway.
 
 `lint-staged`'s and `commitlint`'s own configuration
 (`.lintstagedrc.mjs`, `.commitlintrc.yml`) are unchanged; only which
