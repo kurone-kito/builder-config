@@ -6,7 +6,7 @@
 
 # Function: viteConfig()
 
-> **viteConfig**(`overrides`, `options`): `UserConfig`
+> **viteConfig**(`overrides?`, `options?`): [`UserConfig`](https://vite.dev/config/)
 
 Create a Vite configuration for the current project.
 
@@ -20,18 +20,18 @@ declaration output instead — since the check requires every remaining
 entry to have a shebang, a mixed set of entries also falls into
 library mode. Both branches build with `ssr: true` unconditionally.
 Additional settings can override these defaults via
-mergeConfig.
+[mergeConfig](https://vite.dev/config/#config-intellisense).
 
 ## Parameters
 
-### overrides
+### overrides?
 
-`UserConfig` = `{}`
+[`UserConfig`](https://vite.dev/config/) = `{}`
 
 Additional configuration options to merge with the base
 config.
 
-### options
+### options?
 
 [`ViteConfigOptions`](../interfaces/ViteConfigOptions.md) = `{}`
 
@@ -40,6 +40,6 @@ directory.
 
 ## Returns
 
-`UserConfig`
+[`UserConfig`](https://vite.dev/config/)
 
-A Vite UserConfig object with the merged configuration.
+A Vite [UserConfig](https://vite.dev/config/) object with the merged configuration.

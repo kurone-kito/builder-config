@@ -1,4 +1,26 @@
-onlyBuiltDependencies:
-  - esbuild
+allowBuilds:
+  esbuild: true
+configDependencies:
+  '@pnpm/plugin-types-fixer': 0.1.0+sha512-bLww63gRHi7siYTqFJb5qNdcXadU0jv20Et6z5AryMZ7FlLolbEJOrXLpg8+amQZNHHNW1dfFUBGVw/9ezQbFg==
+enableGlobalVirtualStore: true
+engineStrict: true
+gitChecks: false
+ignoreWorkspaceRootCheck: true
+linkWorkspacePackages: true
+# Time-boxed pnpm 11 minimumReleaseAge workaround: both patches clear the
+# 24h cutoff at 2026-08-01T15:07Z. Drop this override and re-resolve after
+# that, rather than carrying it indefinitely.
+overrides:
+  '@babel/parser': 7.29.7
+  '@babel/types': 7.29.7
+packageExtensions:
+  undici-types:
+    dependencies:
+      '@types/node': ^24.6.2
 packages:
   - packages/*
+pmOnFail: warn
+shellEmulator: true
+# Prevent parallel execution of publish. Since no `--workspace-concurrency`
+# option exists for pnpm publish, keep this value at 1.
+workspaceConcurrency: 1

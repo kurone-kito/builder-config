@@ -23,15 +23,24 @@ And the example library:
 ## System Requirements
 
 - Node.js: Any of the following versions
-  - Iron LTS (`^20.11.x`)
-  - Jod LTS (`^22.x.x`)
-  - Latest (`>=24.x.x`)
+  - Jod LTS (`^22.23.1`)
+  - Krypton LTS (`^24.2.0`)
+  - Latest (`>=26.0.0`)
 
 ## Development
 
 ### Install the dependencies
 
 ```sh
+corepack enable
+pnpm install
+```
+
+Node.js 26 and later no longer bundle Corepack. On those versions, install
+it from npm first:
+
+```sh
+npm install --global corepack
 corepack enable
 pnpm install
 ```

@@ -1,5 +1,10 @@
 {
   "disableSources": true,
   "entryPoints": ["./src/index.mts"],
-  "plugin": ["typedoc-plugin-markdown"]
+  "externalSymbolLinkMappings": {
+    "vite": {
+      "UserConfig": "https://vite.dev/config/",
+      "mergeConfig": "https://vite.dev/config/#config-intellisense"
+    }
+  }
 }

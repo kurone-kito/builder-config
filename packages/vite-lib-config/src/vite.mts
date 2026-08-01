@@ -47,7 +47,7 @@ const staticConfig = {
     },
     sourcemap: true,
     ssr: true,
-    target: 'node20.11',
+    target: 'node22.23',
   },
 } as const satisfies UserConfig;
 
