@@ -23,7 +23,7 @@
   ],
   "scripts": {
     "build": "vite build",
-    "build:sea": "sea-builder --node=20 --targets=darwin-arm64,darwin-x64,linux-arm64,linux-x64,win-arm64,win-x64 example-cli",
+    "build:sea": "sea-builder --node=22 --targets=darwin-arm64,darwin-x64,linux-arm64,linux-x64,win-arm64,win-x64 example-cli",
     "clean": "rimraf -g \"*.tgz\" \"*.tsbuildinfo\" coverage dist LICENSE node_modules/.cache sea",
     "dev": "vite build --watch",
     "devPreinstall": "node ../../scripts/createEntryStub.mjs src/index.mts dist/index.mjs",
@@ -48,7 +48,7 @@
     "xsea": "^0.1.1"
   },
   "engines": {
-    "node": "^20.11 || ^22 || >=24"
+    "node": "^22.23.1 || ^24.2.0 || >=26.0.0"
   },
   "publishConfig": {
     "access": "public"
