@@ -1,4 +1,10 @@
 {
   "disableSources": true,
-  "entryPoints": ["./src/index.mts"]
+  "entryPoints": ["./src/index.mts"],
+  "externalSymbolLinkMappings": {
+    "vite": {
+      "UserConfig": "https://vite.dev/config/",
+      "mergeConfig": "https://vite.dev/config/#config-intellisense"
+    }
+  }
 }
