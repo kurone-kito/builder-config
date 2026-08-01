@@ -36,8 +36,8 @@ importers:
         specifier: ^0.21.0
         version: 0.21.0(cspell@9.2.1)(lint-staged@16.2.3)
       '@kurone-kito/markdownlint-config':
-        specifier: ^0.21.0
-        version: 0.21.0
+        specifier: ^0.22.0
+        version: 0.22.0
       '@types/semver':
         specifier: ^7.7.1
         version: 7.7.1
@@ -852,8 +852,8 @@ packages:
       lint-staged:
         optional: true
 
-  '@kurone-kito/markdownlint-config@0.21.0':
-    resolution: {integrity: sha512-mTbVM6wWk1XK6m2WJQAeOtynqSZHBTHieDH5VPqtLce2JFCcV8/x/7HlcJC8iO3Zn63Kyhricq9f8YrU6ic0cQ==}
+  '@kurone-kito/markdownlint-config@0.22.0':
+    resolution: {integrity: sha512-eldayG/vr7tXDfbQczUwRr6YsR6Zlm/PS85ix7BL3MQjUTi6dP79zY/bq4usZ+bWPBIHswTBRSwpUOTax8gKiA==}
     engines: {node: ^20.11 || ^22 || >=24}
 
   '@microsoft/api-extractor-model@7.30.9':
@@ -1682,6 +1682,7 @@ packages:
   git-raw-commits@4.0.0:
     resolution: {integrity: sha512-ICsMM1Wk8xSGMowkOmPrzo2Fgmfo4bMHLNX6ytHjajRJUqvHOw/TFapQ+QG75c3X/tTDDhOSRPGC52dDbNM8FQ==}
     engines: {node: '>=16'}
+    deprecated: This package is no longer maintained. For the JavaScript API, please use @conventional-changelog/git-client instead.
     hasBin: true
 
   glob-parent@5.1.2:
@@ -1690,11 +1691,13 @@ packages:
 
   glob@10.4.5:
     resolution: {integrity: sha512-7Bv8RF0k6xjo7d4A/PxYLbUCfb6c+Vpd2/mB2yRDlew7Jb5hEXiCD9ibfO7wpk8i4sevK6DFny9h7EYbM3/sHg==}
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   glob@11.0.3:
     resolution: {integrity: sha512-2Nim7dha1KVkaiF4q6Dj+ngPPMdfvLJEOpZk/jKiUAkqKebpGAWQXAq9z1xu9HKu5lWfqw/FASuccEjyznjPaA==}
     engines: {node: 20 || >=22}
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   global-cache-dir@6.0.1:
@@ -2481,6 +2484,7 @@ packages:
   tar@7.5.1:
     resolution: {integrity: sha512-nlGpxf+hv0v7GkWBK2V9spgactGOp0qvfWRxUMjqHyzrt3SgwE48DIv/FhqPHJYLHpgW1opq3nERbz5Anq7n1g==}
     engines: {node: '>=18'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   test-exclude@7.0.1:
     resolution: {integrity: sha512-pFYqmTw68LXVjeWJMST4+borgQP2AyMNbg1BpZh9LbyhUeNkeaPF9gzfPGUAnSMV3qPYdWUwDIjjCLiSDOl7vg==}
@@ -3254,7 +3258,7 @@ snapshots:
       cspell: 9.2.1
       lint-staged: 16.2.3
 
-  '@kurone-kito/markdownlint-config@0.21.0': {}
+  '@kurone-kito/markdownlint-config@0.22.0': {}
 
   '@microsoft/api-extractor-model@7.30.9(@types/node@24.6.2)':
     dependencies:
