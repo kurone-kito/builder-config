@@ -258,6 +258,18 @@ $RECYCLE.BIN/
 
 ### THE PROJECT SPECIFIES #################################################
 
+### AI Agents ###
+# Claude Code local config (cache, local overrides, etc.) stays
+# local-only, but project-shared resources under .claude/skills,
+# .claude/agents, .claude/commands, and the committed permission
+# baseline .claude/settings.json ship with the repository (see
+# docs/idd-policy.md#claude-code-permission-baseline-claudesettingsjson).
+.claude/*
+!.claude/skills/
+!.claude/agents/
+!.claude/commands/
+!.claude/settings.json
+
 ### Node ###
 # pnpm
 pnpm-lock.yaml.*

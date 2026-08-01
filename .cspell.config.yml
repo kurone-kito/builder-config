@@ -7,6 +7,25 @@ import:
   - '@kurone-kito/cspell-config'
 version: '0.2'
 words:
+  - dedup
+  - deprioritize
+  - desync
+  - desynced
+  - Esync
+  - isort
+  - onnx
+  - pylint
+  - pyproject
+  - pytest
+  - qwen
   - rcompare
+  - toctou
+  - undispositioned
+  - unioned
+  - unpushed
+  - unreplied
+  - unscored
   - unstub
+  - unwaived
+  - waivable
   - xsea
