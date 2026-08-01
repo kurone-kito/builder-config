@@ -29,9 +29,9 @@
     "build": "vite build",
     "clean": "rimraf -g \"*.tgz\" \"*.tsbuildinfo\" coverage dist LICENSE node_modules/.cache",
     "dev": "vite build --watch",
-    "devPreinstall": "pnpm dlx mkdirp dist && pnpm run \"/devPreinstall:.+/\"",
-    "devPreinstall:builder": "pnpm dlx shx head -n 1 src/builder.mts > dist/builder.mjs",
-    "devPreinstall:cache": "pnpm dlx shx head -n 1 src/cache.mts > dist/cache.mjs",
+    "devPreinstall": "pnpm run \"/devPreinstall:.+/\"",
+    "devPreinstall:builder": "node ../../scripts/createEntryStub.mjs src/builder.mts dist/builder.mjs",
+    "devPreinstall:cache": "node ../../scripts/createEntryStub.mjs src/cache.mts dist/cache.mjs",
     "prebuild": "cpy --flat ../../LICENSE .",
     "prepack": "pnpm run clean && pnpm run build",
     "test": "vitest run --coverage"
