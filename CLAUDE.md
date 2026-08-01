@@ -67,6 +67,18 @@ This is a pnpm workspace (`packages/*`): `@kurone-kito/example-cli`,
 Prefer `pnpm --filter <package>` over root-level commands when working
 on a single package.
 
+## IDD Workflow
+
+This project uses Issue-Driven Development (IDD) with parallel AI
+agents. Start with [docs/idd-workflow.md](docs/idd-workflow.md) for the
+cross-agent entry path and phase routing.
+
+Before starting IDD work, open
+`.github/instructions/idd-overview-core.instructions.md`. Open the
+routed phase file manually when the current step changes. Repository
+policy decisions (merge policy, review policy, helper runtime, etc.)
+are recorded in [docs/idd-policy.md](docs/idd-policy.md).
+
 ## Canonical reference
 
 The full, detailed project guidance lives in
