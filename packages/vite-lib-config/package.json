@@ -44,7 +44,7 @@
     "@kurone-kito/typescript-config": "workspace:^",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^24.6.2",
-    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/coverage-v8": "^4.1.0",
     "cpy-cli": "^7.0.0",
     "rimraf": "^6.0.1",
     "typedoc": "^0.28.13",

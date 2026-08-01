@@ -1,15 +1,19 @@
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
-name: The CI workflow on push as a feature branch
+name: The CI workflow for feature branches and pull requests
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
-      - '*'
+      - '**'
       - '!main'
 permissions:
   contents: read
-run-name: Pushed the feature branch by @${{ github.actor }}
+run-name: >-
+  ${{ github.event_name == 'pull_request' && format('Verified the pull request #{0} by @{1}', github.event.pull_request.number, github.actor) || format('Pushed the feature branch by @{0}', github.actor) }}
 jobs:
   build:
     defaults:
