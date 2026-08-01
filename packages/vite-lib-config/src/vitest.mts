@@ -11,9 +11,9 @@ const staticConfig = {
 /**
  * Create a Vitest configuration for the current project.
  *
- * The entry point is `src/index.mts` under the provided working directory.
- * If the file starts with a shebang(`#!...`), the build uses library mode;
- * otherwise it performs an SSR build. Additional settings can override
+ * Merges a `test.environment: 'node'` default under the {@link viteConfig}
+ * produced for the same entry point, so Vitest inherits the same build
+ * settings the project builds with. Additional settings can override
  * these defaults via {@link mergeConfig}.
  * @param overrides Additional configuration options to merge with the base
  * config.
