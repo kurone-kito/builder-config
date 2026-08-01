@@ -54,9 +54,14 @@ const staticConfig = {
 /**
  * Creates a Vite configuration based on the provided entry point.
  *
- * The entry point is `src/index.mts` under the provided working directory.
- * If the file starts with a shebang(`#!...`), the build uses library mode;
- * otherwise it performs an SSR build.
+ * When every file in `entries` starts with a shebang(`#!...`), the build
+ * treats them as executables: no `build.lib` and no declaration output.
+ * When any entry does not, the build runs in library mode with
+ * {@link dts} emitting declarations instead — since the check requires
+ * every entry to have a shebang, a mixed set (some with, some without)
+ * also falls into library mode. Both branches build with `ssr: true`
+ * unconditionally. When no file in `entries` exists on disk, the result
+ * is an empty configuration.
  * @param entries Entry point files for the Vite configuration.
  * @return A Vite {@link UserConfig} object with the configuration
  */
@@ -79,9 +84,15 @@ const innerCreateConfig = (entries: readonly string[]): UserConfig => {
  * Create a Vite configuration for the current project.
  *
  * The entry point is `src/index.mts` under the provided working directory.
- * If the file starts with a shebang(`#!...`), the build uses library mode;
- * otherwise it performs an SSR build. Additional settings can override
- * these defaults via {@link mergeConfig}.
+ * When every entry file starts with a shebang(`#!...`), the build treats
+ * them as executables: no `build.lib` and no declaration output. When any
+ * entry does not, the build runs in library mode with declaration output
+ * instead — since the check requires every entry to have a shebang, a
+ * mixed set of entries also falls into library mode. Both branches build
+ * with `ssr: true` unconditionally. An entry file that does not exist on
+ * disk is filtered out, and an empty result yields an empty
+ * configuration. Additional settings can override these defaults via
+ * {@link mergeConfig}.
  * @param overrides Additional configuration options to merge with the base
  * config.
  * @param options Options for creating the config, including the working
