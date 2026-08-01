@@ -16,7 +16,7 @@ Type definition for options used when creating a Vite configuration.
 
 ### cwd?
 
-> `readonly` `optional` **cwd**: `string`
+> `readonly` `optional` **cwd?**: `string`
 
 Base directory of the target project.
 
@@ -30,7 +30,7 @@ process.cwd()
 
 ### entries?
 
-> `readonly` `optional` **entries**: `Readonly`\<`Arrayable`\<`string`\>\>
+> `readonly` `optional` **entries?**: `Readonly`\<`Arrayable`\<`string`\>\>
 
 Entry files relative to [srcDir](#srcdir).
 
@@ -44,7 +44,7 @@ Entry files relative to [srcDir](#srcdir).
 
 ### srcDir?
 
-> `readonly` `optional` **srcDir**: `string`
+> `readonly` `optional` **srcDir?**: `string`
 
 Directory where the source files are located.
 

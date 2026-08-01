@@ -25,7 +25,7 @@
   ],
   "scripts": {
     "build": "pnpm run \"/^build:.+/\"",
-    "build:doc": "rimraf -g docs && typedoc",
+    "build:doc": "rimraf -g docs && node scripts/buildDoc.mjs",
     "build:vite": "vite build",
     "clean": "rimraf -g \"*.tgz\" \"*.tsbuildinfo\" coverage dist LICENSE node_modules/.cache",
     "dev": "vite build --watch",
