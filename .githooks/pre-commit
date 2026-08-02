@@ -3,6 +3,12 @@
 # worktreeGuard.enabled in .github/idd/config.json. See
 # _idd-worktree-guard.sh for the full behavior. Enable the hooks with:
 #   git config core.hooksPath .githooks
+#
+# This repository also runs lint-staged from here (replacing husky's
+# former pre-commit hook): core.hooksPath must point at .githooks, not
+# husky's auto-regenerated .husky/_ shim directory, for idd-doctor's own
+# static check to see that this hook wires the guard. See
+# docs/idd-policy.md for why.
 . "$(dirname "$0")/_idd-worktree-guard.sh"
 idd_worktree_guard_check commit || exit 1
-exit 0
+pnpm exec lint-staged -r

@@ -1,0 +1,7 @@
+#!/bin/sh
+# This repository's own commit-msg hook (commitlint), added alongside the
+# IDD worktree guard since core.hooksPath points at .githooks instead of
+# husky's auto-regenerated .husky/_ shim directory. See docs/idd-policy.md
+# for why. Enable the hooks with:
+#   git config core.hooksPath .githooks
+pnpm exec commitlint --edit "${1}"

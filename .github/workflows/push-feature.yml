@@ -40,9 +40,7 @@ jobs:
           cache: pnpm
           check-latest: true
           node-version: ${{ matrix.node-version }}
-      - env:
-          HUSKY: 0
-        name: Install the dependencies
+      - name: Install the dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
       - name: Build the project
         run: pnpm run build

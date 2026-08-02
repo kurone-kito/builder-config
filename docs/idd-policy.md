@@ -163,3 +163,142 @@ prompt) with no corresponding IDD-helper benefit here.
 
 Personal additions belong in `.claude/settings.local.json`, which
 layers on top of the committed baseline.
+
+## IDD Enforcement Gates (issue #50)
+
+The maintainer opted in (2026-07-14) to all three optional IDD
+enforcement surfaces on top of the core import: the `idd-doctor` CI
+health gate, the `idd-advisory-convergence` workflow, and the local
+worktree guard.
+
+### `idd-doctor` CI health gate
+
+`.github/workflows/idd-doctor.yml` runs `pnpm exec idd-doctor` on every
+pull request (checked out at a detached `github.sha`, which keeps the
+worktree-guard check inert in CI — see below). It is **not** a required
+status check; registering it as a required check is maintainer-only
+work tracked in issue 51. It uses `idd-doctor`'s full 14-day default
+cleanup-backlog window rather than narrowing it: measured directly on
+this PR, the entire `Run idd-doctor` step (14-day scan included)
+completed in under a second, so there is no timeout risk to trade
+coverage against here.
+
+The job's `permissions:` grants `issues: read` and `pull-requests: read`
+alongside `contents: read`, and its `gh`-calling step sets
+`GH_TOKEN: ${{ github.token }}`. Without both, `gh` has no credential
+at all inside the job and every GitHub-API-backed check (cleanup
+backlog, branch protection, autopilot-suitability) silently degrades
+to one `github checks skipped: gh repo view unavailable` warning
+instead of actually running — confirmed empirically by reproducing the
+missing-token case locally. `idd-doctor` never escalates a missing or
+insufficiently-scoped `gh` call to an error by default (only
+`--require-github`/`--strict` would), so the branch-protection check
+still degrades gracefully to a warning here: reading branch protection
+settings needs `administration: read`, a materially more sensitive
+scope than this gate's diagnostic purpose warrants, so it is
+deliberately not granted.
+
+### `idd-advisory-convergence` workflow
+
+`.github/workflows/idd-advisory-convergence.yml` mirrors
+`idd-template/.github/workflows/idd-advisory-convergence.yml`, adjusted
+to this repository's `package-manager` helper profile
+(`pnpm exec idd-advisory-convergence --pr "$PR_NUMBER" --assert`) and
+its own SHA-pinned action conventions (matching `push-feature.yml`/
+`common-release.yml`, per issue #55). It checks out `ref: main`
+(trusted code), not the PR head, for every trigger including
+`workflow_dispatch`. Registering it as a **required** status check is
+maintainer-only work tracked in #51, not part of this issue.
+
+The job intentionally carries no `name:` override, unlike this
+repository's other jobs — its id, `idd-advisory-convergence`, is also
+the check-run name the `idd-rerun-advisory-convergence` helper and the
+external-check-waiver mechanism both hardcode as an exact-string match
+(`DEFAULT_ADVISORY_CONVERGENCE_CHECK_SELECTOR` /
+`RERUN_PLAN_CHECK_NAME` in idd-skill). A friendlier display name here
+would silently break both: they'd query GitHub's check-runs API for a
+check named exactly `idd-advisory-convergence` and find nothing —
+confirmed empirically on this PR after the job briefly carried a
+`name:` override.
+
+**Waiver re-trigger procedure**: posting a maintainer waiver comment
+does **not** by itself turn this check green — a PR conversation
+comment fires GitHub's `issue_comment` event, which this workflow does
+not listen for (only `pull_request_review_comment`, scoped to comments
+on the diff), and a completed run's conclusion never changes on its
+own. After posting a waiver, also trigger a new
+run: a push, a fresh Copilot review, the Actions UI "Re-run jobs"
+button on the *existing* PR-linked run for the *current HEAD SHA*, or
+`gh run rerun <run-id>` on that same run. **`workflow_dispatch` does
+NOT reliably do this**: a dispatched run has no `pull_request` context
+of its own, so GitHub associates it with the dispatch ref rather than
+the PR's HEAD SHA, and the resulting run's conclusion can be invisible
+to the PR's required-check rollup.
+
+### Worktree guard
+
+**Policy**: `worktreeGuard.enabled: true` in `.github/idd/config.json`.
+The guard refuses a commit or push made from the **primary** worktree
+while `HEAD` is on an `issue/*` or `roadmap-audit/*` branch, enforcing
+the B1 disposable-worktree rule locally (`--no-verify` bypasses it for
+an intentional exception). CI cannot detect this class of violation —
+it checks out a detached HEAD, which the guard treats as a no-op — so
+this local hook, together with `idd-doctor --strict`, is the practical
+enforcement surface.
+
+**Deliberate divergence from the generic activation instructions**:
+ONBOARDING.md's default guidance points `core.hooksPath` at
+`.githooks`, assuming no other hook manager is in play. This repository
+previously used **husky** (`core.hooksPath = .husky/_`) for
+`lint-staged`/`commitlint`. Verified empirically that these two cannot
+coexist: husky v9's `husky` CLI (run from the `prepare` npm script on
+every `pnpm install`) unconditionally resets `core.hooksPath` back to
+`.husky/_`, and `.husky/_`'s own hook files are auto-regenerated
+one-line shims (`. "$(dirname "$0")/h"`) that never textually contain
+the guard's `_idd-worktree-guard.sh` source line — so `idd-doctor`'s
+own static self-check (`hookWiresWorktreeGuard`, which reads whatever
+`core.hooksPath` resolves to) would report an "enabled-but-inert"
+warning forever, even though the guard would actually run correctly
+via husky-side chaining.
+
+Resolved by **replacing husky with `.githooks`-based hooks entirely**,
+rather than accepting the permanent false-positive warning:
+
+- `.githooks/pre-commit` now runs the worktree guard, then
+  `pnpm exec lint-staged -r` (previously husky's job).
+- `.githooks/commit-msg` (new) runs `pnpm exec commitlint --edit "$1"`
+  (previously husky's job).
+- `.githooks/pre-push` is unchanged (guard only; this repository never
+  had a husky `pre-push` hook to replace).
+- The `husky` devDependency and `.husky/` directory are removed.
+- `package.json`'s `prepare` script now runs the following instead of
+  `husky`, so every `pnpm install` — including in a fresh clone, CI
+  checkout, or coding-agent environment's setup step — wires the hooks
+  with the same zero-manual-step convenience husky provided. No
+  separate per-clone activation command is needed beyond the normal
+  `pnpm install`.
+
+  ```sh
+  git rev-parse --git-dir > /dev/null 2>&1 || exit 0; git config core.hooksPath .githooks && chmod +x .githooks/pre-commit .githooks/pre-push .githooks/commit-msg
+  ```
+
+  The `git rev-parse --git-dir` guard keeps this a no-op (exit 0) when
+  `pnpm install` runs outside a Git worktree — a "Download ZIP"
+  checkout or a registry-tarball install has no `.git` to configure,
+  and hooks are meaningless there anyway. Inside a Git worktree, a
+  genuine `git config`/`chmod` failure still propagates (fails the
+  install) rather than being silently swallowed — an earlier
+  `... || true` shape suppressed that class of failure too, which
+  would have left hooks silently unwired (worktree guard, lint-staged,
+  commitlint all inert) with no signal to the developer. This uses
+  `exit 0` plus `;`/`&&`/`||` chaining rather than `if`/`then`/`fi`:
+  this repository's `pnpm-workspace.yaml` sets `shellEmulator: true`
+  for cross-platform lifecycle scripts (Windows CI included), and that
+  emulator supports simple command chaining but not full POSIX
+  control-flow keywords — confirmed empirically (`if` fails with
+  `command not found: if` under the emulator, even though it works
+  under a real POSIX shell).
+
+`lint-staged`'s and `commitlint`'s own configuration
+(`.lintstagedrc.mjs`, `.commitlintrc.yml`) are unchanged; only which
+hook file invokes them changed.

@@ -1,0 +1,73 @@
+name: IDD advisory-convergence gate
+concurrency:
+  cancel-in-progress: true
+  # Grouped by PR number, not github.ref: pull_request_review and
+  # pull_request_review_comment are not pull_request-family events, so
+  # github.ref does not resolve the same way for them as it does for a
+  # pull_request-only workflow. workflow_dispatch has no pull_request
+  # context either, so it falls back to its own input.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || inputs.pr_number }}
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  pull_request_review:
+    types: [submitted]
+  pull_request_review_comment:
+    types: [created, edited, deleted]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: PR number to re-check (e.g. after posting a maintainer waiver)
+        required: true
+        type: number
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+jobs:
+  # The job id is also this check's required-status-check context name
+  # and the check-run name the idd-rerun-advisory-convergence helper and
+  # external-check-waiver mechanism hardcode
+  # (DEFAULT_ADVISORY_CONVERGENCE_CHECK_SELECTOR /
+  # RERUN_PLAN_CHECK_NAME in idd-skill's advisory-wait-policy.mjs /
+  # rerun-advisory-convergence.mjs, both an exact-string match) -- do not
+  # give this job an explicit `name:` override, or those lookups silently
+  # find zero check-run instances.
+  idd-advisory-convergence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Trusted default-branch checkout, not the PR head, for any trigger
+      # type including workflow_dispatch: the enforcement script and its
+      # config (.github/idd/config.json) must be the trusted copy, not the
+      # PR's own -- otherwise a PR could edit the verdict logic itself to
+      # force `ready: true`. The verdict still correctly evaluates the
+      # intended PR: `--pr <number>` below drives every live GitHub API
+      # call the helper makes, independent of what is checked out locally.
+      - name: Stages the main branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Setup the pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        with:
+          run_install: false
+      - name: Prepare the Node.js environment
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          cache: pnpm
+          check-latest: true
+          node-version-file: .node-version
+      - name: Install the dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          # workflow_dispatch's `pr_number` input is `type: number` in the
+          # UI, but that constraint is not strictly enforced for direct API
+          # dispatches, so route it through env: and reference it as a
+          # quoted shell variable rather than interpolating the `${{ }}`
+          # expression directly into the run: script.
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
+        name: Run idd-advisory-convergence
+        run: pnpm exec idd-advisory-convergence --pr "$PR_NUMBER" --assert
