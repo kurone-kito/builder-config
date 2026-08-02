@@ -31,4 +31,4 @@ jobs:
       - env:
           GH_TOKEN: ${{ github.token }}
         name: Run idd-doctor
-        run: pnpm exec idd-doctor --cleanup-backlog-window-days 1
+        run: pnpm exec idd-doctor

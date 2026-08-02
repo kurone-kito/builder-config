@@ -173,19 +173,15 @@ worktree guard.
 
 ### `idd-doctor` CI health gate
 
-`.github/workflows/idd-doctor.yml` runs
-`pnpm exec idd-doctor --cleanup-backlog-window-days 1` on every pull
-request (checked out at a detached `github.sha`, which keeps the
+`.github/workflows/idd-doctor.yml` runs `pnpm exec idd-doctor` on every
+pull request (checked out at a detached `github.sha`, which keeps the
 worktree-guard check inert in CI — see below). It is **not** a required
 status check; registering it as a required check is maintainer-only
-work tracked in issue 51.
-
-The `--cleanup-backlog-window-days 1` flag narrows `idd-doctor`'s
-default 14-day post-merge cleanup backlog scan (one serial `gh api`
-call per merged PR in the window) to a 1-day window, so a merge burst
-cannot push the scan past this workflow's 10-minute timeout. This
-narrows only the CI invocation; a local `pnpm exec idd-doctor` run
-still uses the full 14-day default.
+work tracked in issue 51. It uses `idd-doctor`'s full 14-day default
+cleanup-backlog window rather than narrowing it: measured directly on
+this PR, the entire `Run idd-doctor` step (14-day scan included)
+completed in under a second, so there is no timeout risk to trade
+coverage against here.
 
 The job's `permissions:` grants `issues: read` and `pull-requests: read`
 alongside `contents: read`, and its `gh`-calling step sets
