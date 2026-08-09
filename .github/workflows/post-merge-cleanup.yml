@@ -261,7 +261,7 @@ jobs:
           # line-oriented `read` loop below.
           COMMENTS_TSV=$(gh api --paginate \
             "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
-            --jq '.[] | select(.body | startswith("<!-- idd-cleanup-evidence:")) | [.id, .user.login, ((.body | capture("idd-cleanup-evidence:\\s*(?<s>\\S+)")).s // "unknown")] | @tsv')
+            --jq '.[] | select(.body | startswith("<!-- idd-cleanup-evidence:")) | [.id, .user.login, ((.body | try capture("idd-cleanup-evidence:\\s*(?<s>\\S+)") catch null).s // "unknown")] | @tsv')
           LIST_EXIT=$?
           set -e
           if [ "$LIST_EXIT" -ne 0 ]; then
