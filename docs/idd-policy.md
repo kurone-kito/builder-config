@@ -324,6 +324,29 @@ of its own, so GitHub associates it with the dispatch ref rather than
 the PR's HEAD SHA, and the resulting run's conclusion can be invisible
 to the PR's required-check rollup.
 
+**Policy-engine model (v0.5.0/v0.6.0)**: the workflow file itself is a
+thin wrapper — `--pr "$PR_NUMBER" --assert` — around
+`@kurone-kito/idd-skill`'s `advisory-convergence.mjs` helper. The
+same-HEAD reroll cap, Copilot stall-recovery state contract, and
+maintainer-waiver backstop upstream added in `v0.5.0` all live inside
+that vendored helper, not in the workflow YAML, so bumping the pinned
+`idd-skill` version (issue #92, now `v0.6.0`) already brought this
+workflow's *behavior* fully current with no shape change needed here.
+This repository's own workflow file already matched upstream's
+dogfooded copy (triggers, permissions, concurrency group, job id, even
+the pinned `actions/checkout` SHA) before this issue, confirmed by a
+line-by-line diff against `idd-skill`'s repository at the pinned
+commit.
+
+**Claimless external-check-waiver** (`v0.6.0`'s claim-id `none`
+sentinel plus a `--claimless` authoring-CLI flag, for a waiver on a PR
+with no active IDD claim to bind to) is deliberately **not** adopted:
+this repository's PR history has exactly two authors,
+`app/dependabot` (already exempt via `advisoryWait.exemptBotAuthoredPrs`)
+and the sole maintainer (whose PRs always carry an active claim), so
+the claim-id `none` sentinel has no real use case here. Revisit if this
+repository ever accepts a non-bot, non-maintainer contribution.
+
 ### Worktree guard
 
 **Policy**: `worktreeGuard.enabled: true` in `.github/idd/config.json`.
