@@ -35,6 +35,9 @@
     "coderabbitai[bot]",
     "chatgpt-codex-connector[bot]"
   ],
+  "ciGate": {
+    "trustSourcePinnedRequiredChecks": false
+  },
   "autopilotSuitability": {
     "floor": 3
   },

@@ -109,8 +109,11 @@ repository does not want to exempt non-IDD PRs from convergence.
 
 ## External CI-Check Trust
 
-**`ciGate.trustSourcePinnedRequiredChecks`**: left unset (default
-`false`), not enabled. This flag only matters once a required-check
+**`ciGate.trustSourcePinnedRequiredChecks`**: explicitly `false`
+(matching the schema default, recorded rather than left implicit so
+the decision stays stable and self-documenting against a future
+upstream default change), not enabled. This flag only matters once a
+required-check
 Ruleset entry is itself source-pinned (an optional choice in GitHub's
 Ruleset UI, picking a specific reporting App from a dropdown rather than
 a bare check-name match). Issue #51 — which will register
