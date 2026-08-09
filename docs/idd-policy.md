@@ -62,7 +62,7 @@ repository does not want to exempt non-IDD PRs from convergence.
   `reviewPolicy` is `copilot-advisory`, so the advisory-wait gate's
   primary signal is GitHub Copilot's PR-review bot. This is the
   GraphQL/requestable login `gh pr edit --add-reviewer`/`--remove-reviewer`
-  resolve, and matches idd-skill's own distributed default (explicit
+  resolves, and matches idd-skill's own distributed default (explicit
   here for self-documentation rather than left implicit). It is
   deliberately **not** `copilot-pull-request-reviewer[bot]` — the
   distinct REST identity that appears as the review author in
