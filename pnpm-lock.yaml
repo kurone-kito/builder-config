@@ -62,8 +62,8 @@ importers:
         specifier: workspace:^
         version: link:packages/example-cli
       '@kurone-kito/idd-skill':
-        specifier: https://codeload.github.com/kurone-kito/idd-skill/tar.gz/bc811500653a3bd504d34e4a08ad00a18eb72a9e
-        version: https://codeload.github.com/kurone-kito/idd-skill/tar.gz/bc811500653a3bd504d34e4a08ad00a18eb72a9e
+        specifier: https://codeload.github.com/kurone-kito/idd-skill/tar.gz/0a9c90dc277e05e0d7d96f1b09d79ff668860cc6
+        version: https://codeload.github.com/kurone-kito/idd-skill/tar.gz/0a9c90dc277e05e0d7d96f1b09d79ff668860cc6
       '@kurone-kito/lint-staged-config':
         specifier: ^0.21.0
         version: 0.21.0(cspell@10.0.1)(lint-staged@17.2.0)
@@ -878,9 +878,9 @@ packages:
       cspell:
         optional: true
 
-  '@kurone-kito/idd-skill@https://codeload.github.com/kurone-kito/idd-skill/tar.gz/bc811500653a3bd504d34e4a08ad00a18eb72a9e':
-    resolution: {gitHosted: true, integrity: sha512-vVVE8mW8FLp9iuDI4w0k/tFwqwkcnexvGmB/caoCWj8WCH3G5UpZRc6A5ORSAM1bKJFKhVhmoMF+USm17+R9Kw==, tarball: https://codeload.github.com/kurone-kito/idd-skill/tar.gz/bc811500653a3bd504d34e4a08ad00a18eb72a9e}
-    version: 0.4.0
+  '@kurone-kito/idd-skill@https://codeload.github.com/kurone-kito/idd-skill/tar.gz/0a9c90dc277e05e0d7d96f1b09d79ff668860cc6':
+    resolution: {gitHosted: true, integrity: sha512-qyywo8fuUnEW95BimFE77E85NscLot0/hug5fs60b4wyeSyT5yqp98BX+ZZZBS87m//MT+uZ+vLAbPAE45F17w==, tarball: https://codeload.github.com/kurone-kito/idd-skill/tar.gz/0a9c90dc277e05e0d7d96f1b09d79ff668860cc6}
+    version: 0.6.0
     engines: {node: ^22.22.2 || >=24.2.0}
     hasBin: true
 
@@ -3261,7 +3261,7 @@ snapshots:
     optionalDependencies:
       cspell: 10.0.1
 
-  '@kurone-kito/idd-skill@https://codeload.github.com/kurone-kito/idd-skill/tar.gz/bc811500653a3bd504d34e4a08ad00a18eb72a9e': {}
+  '@kurone-kito/idd-skill@https://codeload.github.com/kurone-kito/idd-skill/tar.gz/0a9c90dc277e05e0d7d96f1b09d79ff668860cc6': {}
 
   '@kurone-kito/lint-staged-config@0.21.0(cspell@10.0.1)(lint-staged@17.2.0)':
     optionalDependencies:
