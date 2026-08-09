@@ -393,9 +393,15 @@ never stacks a duplicate success record — even when this run's own apply
 returned `applied` for residual markers a concurrent `post-merge-cleanup`
 workflow run minimized first; still post when no prior success record
 exists, or to correct an existing `failed` / `incomplete` /
-`permission-blocked` record. The `post-merge-cleanup` workflow instead
-uses a simpler presence-only guard (it skips on any existing marker),
-which suffices for its single-shot post-merge run:
+`permission-blocked` record. A generic `post-merge-cleanup` workflow
+using a simpler presence-only guard (skip on any existing marker,
+regardless of its recorded status) would still suffice for a genuinely
+single-shot post-merge run, but this repository's own
+`.github/workflows/post-merge-cleanup.yml` (issue #96) implements the
+same status-aware rule as the agent-side one above instead — its
+`workflow_dispatch` re-run path makes "single-shot" not actually hold
+here, so a stale `failed` record needs the same correction path a
+manual re-run could otherwise never clear:
 
 ```markdown
 <!-- idd-cleanup-evidence: {status} applied:{N} failed:{N} skipped:{N} viewer-cannot-minimize:{N} -->

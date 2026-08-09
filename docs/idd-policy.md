@@ -255,6 +255,23 @@ this PR, the entire `Run idd-doctor` step (14-day scan included)
 completed in under a second, so there is no timeout risk to trade
 coverage against here.
 
+The checkout step passes `fetch-depth: 0` (full history and tags): the
+default shallow `fetch-depth: 1` hides tag refs, which silently skips
+`idd-doctor`'s release-tag-drift check (`git describe --tags` fails and
+the check returns with no warning, rather than erroring) — confirmed
+by tracing `checkReleaseTagDrift` in the pinned `idd-skill` source. The
+job also carries a `concurrency:` block (`cancel-in-progress: true`,
+grouped by `${{ github.workflow }}-${{ github.ref }}`), matching
+`idd-advisory-convergence.yml`'s own pattern, so a rapid string of
+pushes to the same PR does not queue redundant runs.
+
+`idd-doctor`'s post-merge cleanup-backlog scan already scopes itself to
+IDD-branch merged PRs only (`idd-skill` upstream issue #1829), so a
+routine Dependabot merge never counts toward the backlog total. This
+scoping lives inside the vendored `@kurone-kito/idd-skill` package
+(pinned to `v0.6.0` by issue #92) — it took effect automatically when
+the pin was bumped, with no workflow-file or config change needed here.
+
 The job's `permissions:` grants `issues: read` and `pull-requests: read`
 alongside `contents: read`, and its `gh`-calling step sets
 `GH_TOKEN: ${{ github.token }}`. Without both, `gh` has no credential
@@ -306,6 +323,61 @@ NOT reliably do this**: a dispatched run has no `pull_request` context
 of its own, so GitHub associates it with the dispatch ref rather than
 the PR's HEAD SHA, and the resulting run's conclusion can be invisible
 to the PR's required-check rollup.
+
+**Policy-engine model (v0.5.0/v0.6.0)**: the workflow file itself is a
+thin wrapper — `--pr "$PR_NUMBER" --assert` — around
+`@kurone-kito/idd-skill`'s `advisory-convergence.mjs` helper. The
+same-HEAD reroll cap, Copilot stall-recovery state contract, and
+maintainer-waiver backstop upstream added in `v0.5.0` all live inside
+that vendored helper, not in the workflow YAML, so bumping the pinned
+`idd-skill` version (issue #92, now `v0.6.0`) already brought this
+workflow's *behavior* fully current with no shape change needed here.
+This repository's own workflow file already matched upstream's
+dogfooded copy (triggers, permissions, concurrency group, job id, even
+the pinned `actions/checkout` SHA) before this issue, confirmed by a
+line-by-line diff against `idd-skill`'s repository at the pinned
+commit.
+
+**Claimless external-check-waiver** (`v0.6.0`'s claim-id `none`
+sentinel plus a `--claimless` authoring-CLI flag, for a waiver on a PR
+with no active IDD claim to bind to) is deliberately **not** adopted:
+this repository's PR history has exactly two authors,
+`app/dependabot` (already exempt via `advisoryWait.exemptBotAuthoredPrs`)
+and the sole maintainer (whose PRs always carry an active claim), so
+the claim-id `none` sentinel has no real use case here. Revisit if this
+repository ever accepts a non-bot, non-maintainer contribution.
+
+### `post-merge-cleanup` workflow
+
+`.github/workflows/post-merge-cleanup.yml` (added by issue #96,
+mirroring `idd-template`'s `v0.6.0` core file) is a server-side
+fallback for the agent's own F4 cleanup step
+(`idd-merge.instructions.md`): it re-runs
+`pnpm exec idd-audit-pr-cleanup --pr <n> --apply --skip-claim-check`
+unconditionally on every merged PR, so cleanup coverage never depends
+on the merging session having completed F4 itself (for example, a
+session that exits at the F4/F5 boundary before posting evidence).
+It skips posting a duplicate `<!-- idd-cleanup-evidence: -->` comment
+when a trusted-author one already exists — the ordinary case, since
+F4 already runs the same helper in-session.
+
+It triggers on `pull_request_target: closed` (not `pull_request`) so a
+fork PR's merge still runs it with base-repository credentials, gated
+by `github.event.pull_request.merged == true` so it never fires on a
+closed-without-merge PR. Two separate checkout steps handle the two
+triggers: the `pull_request_target` path carries no `ref:` override at
+all (resolving to that trigger's own trusted base-branch-tip default —
+the pattern GitHub's `actions/untrusted-checkout` CodeQL query
+recognizes as safe), and the `workflow_dispatch` path pins `ref:` to
+the hardcoded default branch — never to `github.ref`'s own implicit
+default, which for `workflow_dispatch` is whatever ref the dispatcher
+targeted and is not restricted to a trusted value by the platform.
+Neither path ever checks out PR-head content, and `permissions:` stays
+`contents: read` / `issues: write` /
+`pull-requests: write`, matching this workflow's actual mutation
+surface (comment minimization and a single evidence comment; no
+repository-content write). See the workflow file's own header comment
+for the full trust-model rationale.
 
 ### Worktree guard
 
