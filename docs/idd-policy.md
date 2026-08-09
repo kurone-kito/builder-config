@@ -379,6 +379,38 @@ surface (comment minimization and a single evidence comment; no
 repository-content write). See the workflow file's own header comment
 for the full trust-model rationale.
 
+### `strip-untrusted-labels` workflow
+
+`.github/workflows/strip-untrusted-labels.yml` (added by issue #65,
+adapted from upstream `idd-skill`'s dogfooded
+`docs/customization.md#reserved-label-guard-recipe`) removes a reserved
+IDD label (the exact `roadmap` label, or any `status:*` label) the
+instant `coderabbitai[bot]` applies it to an issue or pull request —
+CodeRabbit auto-labels issues in this repository despite
+`.coderabbit.yaml`'s `issue_enrichment.labeling.auto_apply_labels:
+false` (confirmed by repeated reproduction in issue #65's history; a
+dashboard-level override is suspected to take precedence over the
+committed config), which would otherwise silently corrupt Discover's
+routing (a mislabeled `roadmap` on an execution child routes it into
+roadmap-audit handling instead of the normal claim path).
+
+It triggers on `issues: labeled` / `pull_request_target: labeled`,
+scoped by `github.event.sender.login` and `github.event.label.name` in
+the job `if:` — no repository content is ever checked out and no
+issue/PR-supplied content is executed, so a fork-originated
+`pull_request_target` label event is safe to act on with
+`issues: write` / `pull-requests: write` only. A human re-applying the
+same label afterward is a separate event whose actor does not match, so
+the guard never fights a genuine human decision. The actor list is
+scoped to `coderabbitai[bot]` only — this repository's
+`advisoryBotLogins` array also lists `copilot-pull-request-reviewer[bot]`
+and `chatgpt-codex-connector[bot]`, but a full repository-wide sweep of
+every `labeled` event in this repository's history found no label-write
+activity from either, so they are excluded pending actual evidence
+rather than copied from upstream's own (differently-scoped) hardcoded
+list. See the workflow file's own header comment for the full
+trust-model rationale and the evidence-sweep command.
+
 ### Worktree guard
 
 **Policy**: `worktreeGuard.enabled: true` in `.github/idd/config.json`.
