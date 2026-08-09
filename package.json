@@ -96,7 +96,7 @@
     "@kurone-kito/commitlint-config": "^0.21.0",
     "@kurone-kito/cspell-config": "^0.21.0",
     "@kurone-kito/example-cli": "workspace:^",
-    "@kurone-kito/idd-skill": "https://codeload.github.com/kurone-kito/idd-skill/tar.gz/bc811500653a3bd504d34e4a08ad00a18eb72a9e",
+    "@kurone-kito/idd-skill": "https://codeload.github.com/kurone-kito/idd-skill/tar.gz/0a9c90dc277e05e0d7d96f1b09d79ff668860cc6",
     "@kurone-kito/lint-staged-config": "^0.21.0",
     "@kurone-kito/markdownlint-config": "^0.22.0",
     "@types/semver": "^7.7.1",
