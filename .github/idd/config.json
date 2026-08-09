@@ -26,8 +26,16 @@
   "issueScope": "roadmap-first",
   "orphanFirstPolicy": "none",
   "advisoryWait": {
-    "convergenceScope": "all-prs"
+    "convergenceScope": "all-prs",
+    "primaryBotLogin": "copilot-pull-request-reviewer[bot]",
+    "secondaryBotLogin": "coderabbitai[bot]",
+    "exemptBotAuthoredPrs": true
   },
+  "advisoryBotLogins": [
+    "copilot-pull-request-reviewer[bot]",
+    "coderabbitai[bot]",
+    "chatgpt-codex-connector[bot]"
+  ],
   "autopilotSuitability": {
     "floor": 3
   },

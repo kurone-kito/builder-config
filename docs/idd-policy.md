@@ -56,6 +56,48 @@ default). Kept rather than switched to `idd-claimed`, so advisory
 convergence applies to every PR, not only verified IDD-owned PRs — this
 repository does not want to exempt non-IDD PRs from convergence.
 
+## Advisory-Bot Policy
+
+- **`advisoryWait.primaryBotLogin`**: `copilot-pull-request-reviewer[bot]`
+  — this repository's `reviewPolicy` is `copilot-advisory`, so the
+  advisory-wait gate's primary signal is GitHub Copilot's PR-review bot.
+  The exact login (including the `[bot]` suffix) was confirmed against a
+  live `gh api repos/{owner}/{repo}/pulls/{n}/reviews` read on a recent
+  PR rather than assumed.
+- **`advisoryWait.secondaryBotLogin`**: `coderabbitai[bot]` — CodeRabbit
+  already reviews every PR in this repository. Confirmed via a live
+  `gh api` timeline-event read (`sender.login` + `type: Bot`); the
+  similarly-named `coderabbitai` `Organization` actor seen in the same
+  event stream is a distinct identity and not the review bot.
+- **`advisoryBotLogins`**: `["copilot-pull-request-reviewer[bot]",
+  "coderabbitai[bot]", "chatgpt-codex-connector[bot]"]` — the same two
+  bots, plus `chatgpt-codex-connector[bot]`, a third review bot first
+  observed on PR #99 (issue #94) that was not previously configured
+  anywhere. Listing it here lets its post-disposition acknowledgement
+  comments classify as structurally ack-only going forward instead of
+  counting as fresh review activity.
+- **`advisoryWait.exemptBotAuthoredPrs`**: `true` (opt-in, non-default)
+  — this repository has a long history of Dependabot-authored PRs (see
+  PR #28 through #86 among others) that never carry an IDD claim.
+  Enabled so those PRs are classified `not_applicable` under
+  `convergenceScope: all-prs` instead of being forced through the
+  advisory-convergence gate meant for claimed IDD work.
+
+## External CI-Check Trust
+
+**`ciGate.trustSourcePinnedRequiredChecks`**: left unset (default
+`false`), not enabled. This flag only matters once a required-check
+Ruleset entry is itself source-pinned (an optional choice in GitHub's
+Ruleset UI, picking a specific reporting App from a dropdown rather than
+a bare check-name match). Issue #51 — which will register
+`idd-advisory-convergence` as a required status check — describes only
+the standard check-name registration flow, with no mention of pinning a
+specific integration source, and has not run yet, so there is no live
+ruleset entry to inspect and confirm either way. Revisit this decision
+once #51 actually executes and the resulting entry can be inspected via
+`gh api repos/{owner}/{repo}/rules/branches/main`; enable only if that
+entry turns out to be source-pinned.
+
 ## Credential Scope
 
 **Worker credentials**: repository write access for issue/PR/branch
