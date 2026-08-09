@@ -275,24 +275,43 @@ jobs:
           # correction rule in idd-merge.instructions.md's duplicate-
           # success-record skip rule) -- update that comment in place
           # instead of creating a second one.
+          #
+          # Scan every trusted row rather than stopping at the first match:
+          # the issues-comments API returns comments oldest-first, so if an
+          # older trusted failure record and a newer trusted success record
+          # ever coexist (for example, the agent-side F4 rule's own
+          # duplicate-success-record skip rule posts a fresh comment for a
+          # correction rather than updating one in place), stopping at the
+          # first (oldest) row would grab the stale failure, miss the
+          # already-present success, and -- worse -- go on to PATCH that
+          # old failure into a second success record. A success anywhere in
+          # the list always wins regardless of position; only when none
+          # exists does the last-seen non-success row become the one this
+          # run updates in place.
           EXISTING=""
           EXISTING_STATUS=""
+          SUCCESS_ID=""
           while IFS=$'\t' read -r candidate_id candidate_login candidate_status; do
             [ -z "$candidate_id" ] && continue
             lower_login=$(printf '%s' "$candidate_login" | tr '[:upper:]' '[:lower:]')
-            if printf '%s\n' "$TRUSTED_LOGINS" | grep -Fxq "$lower_login"; then
-              EXISTING="$candidate_id"
-              EXISTING_STATUS="$candidate_status"
-              break
+            if ! printf '%s\n' "$TRUSTED_LOGINS" | grep -Fxq "$lower_login"; then
+              continue
             fi
-          done <<< "$COMMENTS_TSV"
-          if [ -n "$EXISTING" ]; then
-            case "$EXISTING_STATUS" in
+            case "$candidate_status" in
               applied | clean)
-                echo "::notice::PR #${PR_NUMBER} already has a trusted-author idd-cleanup-evidence comment recording a settled success (id: ${EXISTING}, status: ${EXISTING_STATUS}); skipping workflow post."
-                exit 0
+                SUCCESS_ID="$candidate_id"
+                ;;
+              *)
+                EXISTING="$candidate_id"
+                EXISTING_STATUS="$candidate_status"
                 ;;
             esac
+          done <<< "$COMMENTS_TSV"
+          if [ -n "$SUCCESS_ID" ]; then
+            echo "::notice::PR #${PR_NUMBER} already has a trusted-author idd-cleanup-evidence comment recording a settled success (id: ${SUCCESS_ID}); skipping workflow post."
+            exit 0
+          fi
+          if [ -n "$EXISTING" ]; then
             echo "::notice::PR #${PR_NUMBER}'s existing idd-cleanup-evidence comment (id: ${EXISTING}) records a non-success status \"${EXISTING_STATUS}\"; updating it in place with this run's outcome instead of posting a second one."
           fi
           case "$STATUS" in
@@ -312,9 +331,12 @@ jobs:
               ;;
             *)
               # docs/idd-comment-minimization.md's "Cleanup-failure comment"
-              # format: distinct from the success table above, and carries
-              # the Notes the failure-detail extraction above built.
-              BODY=$(printf '%s\n\n%s\n\n%s\n\n%s\n%s\n%s\n%s\n%s\n\n%s\n%s\n' \
+              # format: distinct from the success table above, carries the
+              # Notes the failure-detail extraction above built, and the
+              # doc's own required manual-recovery line (using this
+              # repository's package-manager CLI facade, not the doc's
+              # vendored-node example command).
+              BODY=$(printf '%s\n\n%s\n\n%s\n\n%s\n%s\n%s\n%s\n%s\n\n%s\n%s\n\n%s\n%s\n' \
                 "<!-- idd-cleanup-evidence: ${STATUS} applied:${APPLIED} failed:${FAILED} skipped:${SKIPPED} viewer-cannot-minimize:${BLOCKED} -->" \
                 "**F4 Cleanup Failure** (server-side fallback via \`post-merge-cleanup.yml\`)" \
                 "Cleanup candidates were detected but not all could be applied." \
@@ -325,6 +347,8 @@ jobs:
                 "- Permission-blocked: ${BLOCKED}" \
                 "Notes:" \
                 "${NOTES:-- (no per-candidate detail captured; see the workflow run log)}" \
+                "This does not re-block the merge. A maintainer may run cleanup manually:" \
+                "\`pnpm exec idd-audit-pr-cleanup --pr ${PR_NUMBER} --apply --skip-claim-check\`" \
               )
               ;;
           esac
