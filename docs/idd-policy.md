@@ -364,14 +364,16 @@ F4 already runs the same helper in-session.
 It triggers on `pull_request_target: closed` (not `pull_request`) so a
 fork PR's merge still runs it with base-repository credentials, gated
 by `github.event.pull_request.merged == true` so it never fires on a
-closed-without-merge PR. The checkout step pins `ref:` to the merge
-commit (`github.event.pull_request.merge_commit_sha`) for a real merge
-event, or the hardcoded default branch for a manual
-`workflow_dispatch` — never to `github.ref`'s own implicit default,
-which for `workflow_dispatch` is whatever ref the dispatcher targeted
-and is not restricted to a trusted value by the platform. Either way
-it is never PR-head content — and `permissions:` stays `contents:
-read` / `issues: write` /
+closed-without-merge PR. Two separate checkout steps handle the two
+triggers: the `pull_request_target` path carries no `ref:` override at
+all (resolving to that trigger's own trusted base-branch-tip default —
+the pattern GitHub's `actions/untrusted-checkout` CodeQL query
+recognizes as safe), and the `workflow_dispatch` path pins `ref:` to
+the hardcoded default branch — never to `github.ref`'s own implicit
+default, which for `workflow_dispatch` is whatever ref the dispatcher
+targeted and is not restricted to a trusted value by the platform.
+Neither path ever checks out PR-head content, and `permissions:` stays
+`contents: read` / `issues: write` /
 `pull-requests: write`, matching this workflow's actual mutation
 surface (comment minimization and a single evidence comment; no
 repository-content write). See the workflow file's own header comment
