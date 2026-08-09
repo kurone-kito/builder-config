@@ -28,14 +28,29 @@
 #     through `env:` and referenced as a quoted shell variable, never
 #     interpolated directly into a `run:` script.
 #   - The `cleanup` job only runs when `github.event.pull_request.merged ==
-#     true`, or via an explicit, human-triggered `workflow_dispatch` --
-#     never against an open or unmerged pull request.
+#     true`; for `workflow_dispatch` the run F4 cleanup step separately
+#     verifies the target PR is actually merged before doing anything, and
+#     fails closed (not best-effort) if that check itself cannot be made --
+#     never against an open or unmerged pull request either way.
 #   - `permissions:` stays least-privilege: `contents: read`, `issues:
 #     write`, `pull-requests: write` -- no `contents: write` and no
 #     elevated or secret-bearing scopes.
-# If a future change adds a `ref:` override on the checkout step, downloads
-# or executes PR-head content, widens `permissions:`, or removes the
-# merged-only guard, re-review this trust model before merging that change.
+#   - The job `if:` also requires `github.ref == 'refs/heads/main'` for
+#     `workflow_dispatch` specifically. This is accident-protection, not a
+#     security boundary: workflow_dispatch already requires collaborator
+#     write access to trigger at all, and GitHub resolves a dispatch's own
+#     workflow *definition* (not just the checkout content) from whichever
+#     ref the dispatcher targets -- a modified copy of this very file on a
+#     non-default branch could remove this guard before it ever runs. The
+#     realistic threat model this narrows is a maintainer's own mistaken
+#     `--ref <branch>` dispatch, not an external escalation; only dispatch
+#     this workflow from the default branch (the GitHub UI's "Run workflow"
+#     button already defaults to it) and never via an explicit non-default
+#     `--ref`.
+# If a future change adds a `ref:` override on the pull_request_target
+# checkout step, downloads or executes PR-head content, widens
+# `permissions:`, or removes the merged-only guard, re-review this trust
+# model before merging that change.
 #
 # Server-side fallback for the agent's own F4 cleanup step
 # (idd-merge.instructions.md): the agent's local F4 run stays the primary,
@@ -71,7 +86,9 @@ concurrency:
   cancel-in-progress: false
 jobs:
   cleanup:
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    # See the header comment's accident-protection note on the
+    # workflow_dispatch + github.ref == 'refs/heads/main' clause.
+    if: github.event.pull_request.merged == true || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -121,6 +138,24 @@ jobs:
             echo "::error::PR_NUMBER is not a valid positive integer: \"$PR_NUMBER\""
             exit 1
           fi
+          # For workflow_dispatch specifically: the job-level if: has no way
+          # to check an *arbitrary dispatched* PR number's own merge state
+          # (only the triggering event's own pull_request.merged, which is
+          # absent for workflow_dispatch). An unmerged target here would run
+          # the helper against an open PR's comments and then post an
+          # idd-cleanup-evidence marker as if F4 had genuinely run -- which
+          # would poison the presence-only-record dedup guard below and
+          # suppress the real evidence post once the PR actually merges
+          # later. This check guards a mutation, so it fails closed (unlike
+          # the best-effort handling further down): if `gh api` itself
+          # cannot be reached, do not proceed on an unverified assumption.
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            MERGED=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.merged')
+            if [ "$MERGED" != "true" ]; then
+              echo "::error::PR #${PR_NUMBER} is not merged (gh reports merged=${MERGED}); refusing to run post-merge cleanup against it."
+              exit 1
+            fi
+          fi
           set +e
           JSON=$(pnpm exec idd-audit-pr-cleanup --pr "$PR_NUMBER" --apply --skip-claim-check --format json 2>cleanup-stderr.log)
           HELPER_EXIT=$?
@@ -139,6 +174,15 @@ jobs:
             FAILED=$(printf '%s' "$JSON" | jq -r '.summary.failed // 0')
             SKIPPED=$(printf '%s' "$JSON" | jq -r '.summary.skipped // 0')
             BLOCKED=$(printf '%s' "$JSON" | jq -r '.summary["viewer-cannot-minimize"] // 0')
+            # Up to 5 failed-candidate reasons for the failure-format
+            # comment's Notes field (docs/idd-comment-minimization.md); a
+            # summary count alone leaves a maintainer with no way to tell
+            # what needs remediation from the PR conversation.
+            NOTES=$(printf '%s' "$JSON" | jq -r '
+              [.failed[] | "- \(.url // .subjectId): \(.error // "unknown error")"]
+              | if length > 5 then .[0:5] + ["- ...and \(length - 5) more (see workflow run log)"] else . end
+              | join("\n")
+            ')
             if [ "$HELPER_EXIT" -ne 0 ]; then
               echo "::warning::idd-audit-pr-cleanup exited $HELPER_EXIT but emitted a valid JSON report; using helper status \"$STATUS\""
             fi
@@ -150,6 +194,7 @@ jobs:
             FAILED=0
             SKIPPED=0
             BLOCKED=0
+            NOTES="- idd-audit-pr-cleanup exited $HELPER_EXIT with no parseable JSON. First stderr line: $(head -n1 cleanup-stderr.log 2>/dev/null || echo '(none captured)')"
           fi
           {
             echo "pr_number=$PR_NUMBER"
@@ -158,6 +203,9 @@ jobs:
             echo "failed=$FAILED"
             echo "skipped=$SKIPPED"
             echo "blocked=$BLOCKED"
+            echo "notes<<NOTES_EOF"
+            echo "$NOTES"
+            echo "NOTES_EOF"
           } >> "$GITHUB_OUTPUT"
       - name: Post cleanup evidence comment
         env:
@@ -168,20 +216,29 @@ jobs:
           FAILED: ${{ steps.cleanup.outputs.failed }}
           SKIPPED: ${{ steps.cleanup.outputs.skipped }}
           BLOCKED: ${{ steps.cleanup.outputs.blocked }}
+          NOTES: ${{ steps.cleanup.outputs.notes }}
         run: |
-          # Avoid a duplicate evidence comment: an agent's own local F4 run
-          # can have already posted one before this workflow fires. Skip if
-          # a `<!-- idd-cleanup-evidence: ... -->` comment already on the PR
-          # was posted by a trusted author -- this workflow's own posts are
-          # authored by `github-actions[bot]` (the GITHUB_TOKEN actor), and
-          # an agent's local F4 post is authored by a configured
-          # `trustedMarkerActors` login. An untrusted commenter pre-posting
-          # this marker prefix must never suppress the genuine evidence post
-          # or be treated as a completed cleanup record -- the same
-          # trust-scoping every other IDD operational marker already
-          # applies. `|| true` on the config read keeps a missing/unreadable
-          # config file a soft "no extra trusted logins" instead of aborting
-          # this step under the default `set -e`/`pipefail`.
+          # Avoid stacking a duplicate evidence comment on top of one an
+          # agent's own local F4 run (or an earlier run of this same
+          # workflow) already posted -- scoped to a trusted author, same as
+          # every other IDD operational marker: this workflow's own posts
+          # are authored by `github-actions[bot]` (the GITHUB_TOKEN actor),
+          # an agent's local F4 post by a configured `trustedMarkerActors`
+          # login. An untrusted commenter pre-posting this marker prefix
+          # must never suppress the genuine evidence post or be treated as
+          # a completed cleanup record. `|| true` on the config read keeps a
+          # missing/unreadable config file a soft "no extra trusted logins"
+          # instead of aborting this step under the default `-e`/`pipefail`.
+          #
+          # Known, accepted residual race (not fixed here): the agent's own
+          # local F4 step and this workflow can both list comments before
+          # either has posted, both see no existing marker, and both post --
+          # a cosmetic duplicate record, not a correctness issue (the
+          # underlying comment-minimization work is idempotent either way).
+          # Upstream idd-skill's own post-merge-cleanup.yml template has the
+          # identical presence-check-then-post race; a fully atomic guard
+          # would need cross-process coordination this best-effort fallback
+          # does not warrant.
           TRUSTED_LOGINS=$(
             {
               jq -r '(.trustedMarkerActors // [])[]' .github/idd/config.json 2>/dev/null || true
@@ -198,43 +255,86 @@ jobs:
           # empty and post a duplicate comment. `set +e`/`set -e` bounds
           # only this one fallible call.
           set +e
+          # Extracts just the marker's {status} token (not the full,
+          # multi-line comment body) into the TSV row -- @tsv does not
+          # escape embedded newlines, so a full body would break the
+          # line-oriented `read` loop below.
           COMMENTS_TSV=$(gh api --paginate \
             "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
-            --jq '.[] | select(.body | startswith("<!-- idd-cleanup-evidence:")) | [.id, .user.login] | @tsv')
+            --jq '.[] | select(.body | startswith("<!-- idd-cleanup-evidence:")) | [.id, .user.login, ((.body | capture("idd-cleanup-evidence:\\s*(?<s>\\S+)")).s // "unknown")] | @tsv')
           LIST_EXIT=$?
           set -e
           if [ "$LIST_EXIT" -ne 0 ]; then
             echo "::warning::could not list PR #${PR_NUMBER}'s comments (gh exit $LIST_EXIT); skipping evidence post to avoid guessing at duplicate state. Cleanup itself already ran in the previous step."
             exit 0
           fi
+          # Status-aware, not presence-only: an existing trusted marker
+          # blocks a new post only when it already records a settled
+          # success (applied/clean). A failed/incomplete/helper-error
+          # record must not permanently mask a later successful rerun (the
+          # correction rule in idd-merge.instructions.md's duplicate-
+          # success-record skip rule) -- update that comment in place
+          # instead of creating a second one.
           EXISTING=""
-          while IFS=$'\t' read -r candidate_id candidate_login; do
+          EXISTING_STATUS=""
+          while IFS=$'\t' read -r candidate_id candidate_login candidate_status; do
             [ -z "$candidate_id" ] && continue
             lower_login=$(printf '%s' "$candidate_login" | tr '[:upper:]' '[:lower:]')
             if printf '%s\n' "$TRUSTED_LOGINS" | grep -Fxq "$lower_login"; then
               EXISTING="$candidate_id"
+              EXISTING_STATUS="$candidate_status"
               break
             fi
           done <<< "$COMMENTS_TSV"
           if [ -n "$EXISTING" ]; then
-            echo "::notice::PR #${PR_NUMBER} already has a trusted-author idd-cleanup-evidence comment (id: ${EXISTING}); skipping workflow post."
-            exit 0
+            case "$EXISTING_STATUS" in
+              applied | clean)
+                echo "::notice::PR #${PR_NUMBER} already has a trusted-author idd-cleanup-evidence comment recording a settled success (id: ${EXISTING}, status: ${EXISTING_STATUS}); skipping workflow post."
+                exit 0
+                ;;
+            esac
+            echo "::notice::PR #${PR_NUMBER}'s existing idd-cleanup-evidence comment (id: ${EXISTING}) records a non-success status \"${EXISTING_STATUS}\"; updating it in place with this run's outcome instead of posting a second one."
           fi
-          BODY=$(printf '%s\n\n%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n' \
-            "<!-- idd-cleanup-evidence: ${STATUS} applied:${APPLIED} failed:${FAILED} skipped:${SKIPPED} viewer-cannot-minimize:${BLOCKED} -->" \
-            "**F4 Cleanup Evidence** (server-side fallback via \`post-merge-cleanup.yml\`)" \
-            "| Field              | Value |" \
-            "| ------------------ | ----- |" \
-            "| Status             | ${STATUS} |" \
-            "| Applied            | ${APPLIED} |" \
-            "| Failed             | ${FAILED} |" \
-            "| Skipped            | ${SKIPPED} |" \
-            "| Permission-blocked | ${BLOCKED} |" \
-            "| Posted by          | post-merge-cleanup workflow |" \
-          )
+          case "$STATUS" in
+            applied | clean)
+              BODY=$(printf '%s\n\n%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n' \
+                "<!-- idd-cleanup-evidence: ${STATUS} applied:${APPLIED} failed:${FAILED} skipped:${SKIPPED} viewer-cannot-minimize:${BLOCKED} -->" \
+                "**F4 Cleanup Evidence** (server-side fallback via \`post-merge-cleanup.yml\`)" \
+                "| Field              | Value |" \
+                "| ------------------ | ----- |" \
+                "| Status             | ${STATUS} |" \
+                "| Applied            | ${APPLIED} |" \
+                "| Failed             | ${FAILED} |" \
+                "| Skipped            | ${SKIPPED} |" \
+                "| Permission-blocked | ${BLOCKED} |" \
+                "| Posted by          | post-merge-cleanup workflow |" \
+              )
+              ;;
+            *)
+              # docs/idd-comment-minimization.md's "Cleanup-failure comment"
+              # format: distinct from the success table above, and carries
+              # the Notes the failure-detail extraction above built.
+              BODY=$(printf '%s\n\n%s\n\n%s\n\n%s\n%s\n%s\n%s\n%s\n\n%s\n%s\n' \
+                "<!-- idd-cleanup-evidence: ${STATUS} applied:${APPLIED} failed:${FAILED} skipped:${SKIPPED} viewer-cannot-minimize:${BLOCKED} -->" \
+                "**F4 Cleanup Failure** (server-side fallback via \`post-merge-cleanup.yml\`)" \
+                "Cleanup candidates were detected but not all could be applied." \
+                "- Status: ${STATUS}" \
+                "- Applied: ${APPLIED}" \
+                "- Failed: ${FAILED}" \
+                "- Skipped: ${SKIPPED}" \
+                "- Permission-blocked: ${BLOCKED}" \
+                "Notes:" \
+                "${NOTES:-- (no per-candidate detail captured; see the workflow run log)}" \
+              )
+              ;;
+          esac
           # Best-effort post, same rationale as the comment-list read above:
           # a failed post (permissions/rate limit/transient) must not fail
           # this job when the actual cleanup already succeeded.
-          if ! printf '%s' "$BODY" | gh pr comment "$PR_NUMBER" --body-file -; then
+          if [ -n "$EXISTING" ]; then
+            if ! gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${EXISTING}" -f body="$BODY" >/dev/null; then
+              echo "::warning::could not update the existing cleanup evidence comment (id: ${EXISTING}) on PR #${PR_NUMBER}. Cleanup itself already ran in the previous step; update it manually or re-run this workflow via workflow_dispatch."
+            fi
+          elif ! printf '%s' "$BODY" | gh pr comment "$PR_NUMBER" --body-file -; then
             echo "::warning::could not post the cleanup evidence comment on PR #${PR_NUMBER}. Cleanup itself already ran in the previous step; post it manually or re-run this workflow via workflow_dispatch."
           fi
