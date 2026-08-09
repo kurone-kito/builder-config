@@ -27,7 +27,7 @@
   "orphanFirstPolicy": "none",
   "advisoryWait": {
     "convergenceScope": "all-prs",
-    "primaryBotLogin": "copilot-pull-request-reviewer[bot]",
+    "primaryBotLogin": "copilot",
     "secondaryBotLogin": "coderabbitai[bot]",
     "exemptBotAuthoredPrs": true
   },

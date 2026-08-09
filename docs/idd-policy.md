@@ -58,12 +58,21 @@ repository does not want to exempt non-IDD PRs from convergence.
 
 ## Advisory-Bot Policy
 
-- **`advisoryWait.primaryBotLogin`**: `copilot-pull-request-reviewer[bot]`
-  — this repository's `reviewPolicy` is `copilot-advisory`, so the
-  advisory-wait gate's primary signal is GitHub Copilot's PR-review bot.
-  The exact login (including the `[bot]` suffix) was confirmed against a
-  live `gh api repos/{owner}/{repo}/pulls/{n}/reviews` read on a recent
-  PR rather than assumed.
+- **`advisoryWait.primaryBotLogin`**: `copilot` — this repository's
+  `reviewPolicy` is `copilot-advisory`, so the advisory-wait gate's
+  primary signal is GitHub Copilot's PR-review bot. This is the
+  GraphQL/requestable login `gh pr edit --add-reviewer`/`--remove-reviewer`
+  resolve, and matches idd-skill's own distributed default (explicit
+  here for self-documentation rather than left implicit). It is
+  deliberately **not** `copilot-pull-request-reviewer[bot]` — the
+  distinct REST identity that appears as the review author in
+  `gh api repos/{owner}/{repo}/pulls/{n}/reviews` and as the entry in
+  `advisoryBotLogins` below. idd-skill resolves both forms
+  automatically for the default Copilot bot (`EXACT_COPILOT_REVIEWER_LOGINS`
+  in `protocol-helpers.mts`) only when `primaryBotLogin` is left at (or
+  set to) `copilot`; setting it to the REST form instead would leave
+  `--add-reviewer`/`--remove-reviewer` targeting an identity `gh` cannot
+  resolve via GraphQL.
 - **`advisoryWait.secondaryBotLogin`**: `coderabbitai[bot]` — CodeRabbit
   already reviews every PR in this repository. Confirmed via a live
   `gh api` timeline-event read (`sender.login` + `type: Bot`); the
