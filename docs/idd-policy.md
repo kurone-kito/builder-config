@@ -255,6 +255,23 @@ this PR, the entire `Run idd-doctor` step (14-day scan included)
 completed in under a second, so there is no timeout risk to trade
 coverage against here.
 
+The checkout step passes `fetch-depth: 0` (full history and tags): the
+default shallow `fetch-depth: 1` hides tag refs, which silently skips
+`idd-doctor`'s release-tag-drift check (`git describe --tags` fails and
+the check returns with no warning, rather than erroring) — confirmed
+by tracing `checkReleaseTagDrift` in the pinned `idd-skill` source. The
+job also carries a `concurrency:` block (`cancel-in-progress: true`,
+grouped by `${{ github.workflow }}-${{ github.ref }}`), matching
+`idd-advisory-convergence.yml`'s own pattern, so a rapid string of
+pushes to the same PR does not queue redundant runs.
+
+`idd-doctor`'s post-merge cleanup-backlog scan already scopes itself to
+IDD-branch merged PRs only (`idd-skill` upstream issue #1829), so a
+routine Dependabot merge never counts toward the backlog total. This
+scoping lives inside the vendored `@kurone-kito/idd-skill` package
+(pinned to `v0.6.0` by issue #92) — it took effect automatically when
+the pin was bumped, with no workflow-file or config change needed here.
+
 The job's `permissions:` grants `issues: read` and `pull-requests: read`
 alongside `contents: read`, and its `gh`-calling step sets
 `GH_TOKEN: ${{ github.token }}`. Without both, `gh` has no credential
