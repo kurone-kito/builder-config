@@ -54,7 +54,79 @@ repository override.
 **Scope**: `advisoryWait.convergenceScope` = `all-prs` (distributed
 default). Kept rather than switched to `idd-claimed`, so advisory
 convergence applies to every PR, not only verified IDD-owned PRs — this
-repository does not want to exempt non-IDD PRs from convergence.
+repository does not want to exempt non-IDD PRs from convergence, other
+than the narrow `exemptBotAuthoredPrs` carve-out below (a genuinely
+`Bot`-typed author with no claim history, such as Dependabot — not a
+blanket non-IDD-PR exemption).
+
+## Advisory-Bot Policy
+
+- **`advisoryWait.primaryBotLogin`**: `copilot` — this repository's
+  `reviewPolicy` is `copilot-advisory`, so the advisory-wait gate's
+  primary signal is GitHub Copilot's PR-review bot. `gh pr edit
+  --add-reviewer`/`--remove-reviewer` resolve this login via GraphQL
+  when requesting or removing a review; it matches idd-skill's own
+  distributed default (explicit here for self-documentation rather
+  than left implicit). It is deliberately
+  **not** `copilot-pull-request-reviewer[bot]` — the
+  distinct REST identity that appears as the review author in
+  `gh api repos/{owner}/{repo}/pulls/{n}/reviews` and as the entry in
+  `advisoryBotLogins` below. idd-skill resolves both forms
+  automatically for the default Copilot bot (`EXACT_COPILOT_REVIEWER_LOGINS`
+  in `protocol-helpers.mts`) only when `primaryBotLogin` is left at (or
+  set to) `copilot`; setting it to the REST form instead would leave
+  `--add-reviewer`/`--remove-reviewer` targeting an identity `gh` cannot
+  resolve via GraphQL.
+- **`advisoryWait.secondaryBotLogin`**: left unset. CodeRabbit was
+  evaluated (its bot login is `coderabbitai[bot]`, confirmed via a live
+  `gh api` timeline-event read — `sender.login` + `type: Bot`,
+  distinguishing it from the separate `coderabbitai` `Organization`
+  actor) but is **not requestable** the way this field requires: it
+  runs as an installed GitHub App with no user-resolvable login, so
+  `gh pr edit --add-reviewer "@coderabbitai[bot]"` fails outright
+  (`Could not resolve user`) and the REST `requested_reviewers`
+  fallback silently no-ops (both verified empirically against a live
+  PR in this repository) — neither path posts the `review_requested`
+  timeline event the once-per-HEAD guard needs. Configuring it anyway
+  would leave `secondaryRequestNeeded` permanently true, causing
+  repeated failed/no-op requests during primary-bot-stall recovery. Per
+  the schema, omitting this field disables the non-gating secondary
+  supplement entirely — CodeRabbit still contributes as ordinary
+  advisory input via its own automatic per-push reviews, just not
+  through this on-demand request path.
+- **`advisoryBotLogins`**: `["copilot-pull-request-reviewer[bot]",
+  "coderabbitai[bot]", "chatgpt-codex-connector[bot]"]` — the REST
+  review-author identities these bots' comments/reviews actually carry
+  (a separate concern from requestability above), including
+  `chatgpt-codex-connector[bot]`, a third review bot first observed on
+  PR #99 (issue #94) that was not previously configured anywhere.
+  Listing all three here lets their post-disposition acknowledgement
+  comments classify as structurally ack-only going forward instead of
+  counting as fresh review activity.
+- **`advisoryWait.exemptBotAuthoredPrs`**: `true` (opt-in, non-default)
+  — this repository has a long history of Dependabot-authored PRs (see
+  PR #28 through #86 among others) that never carry an IDD claim.
+  Enabled so those PRs are classified `not_applicable` under
+  `convergenceScope: all-prs` instead of being forced through the
+  advisory-convergence gate meant for claimed IDD work.
+
+## External CI-Check Trust
+
+**`ciGate.trustSourcePinnedRequiredChecks`**: explicitly `false`
+(matching the schema default, recorded rather than left implicit so
+the decision stays stable and self-documenting against a future
+upstream default change), not enabled. This flag only matters once a
+required-check
+Ruleset entry is itself source-pinned (an optional choice in GitHub's
+Ruleset UI, picking a specific reporting App from a dropdown rather than
+a bare check-name match). Issue #51 — which will register
+`idd-advisory-convergence` as a required status check — describes only
+the standard check-name registration flow, with no mention of pinning a
+specific integration source, and has not run yet, so there is no live
+ruleset entry to inspect and confirm either way. Revisit this decision
+once #51 actually executes and the resulting entry can be inspected via
+`gh api repos/{owner}/{repo}/rules/branches/main`; enable only if that
+entry turns out to be source-pinned.
 
 ## Credential Scope
 
