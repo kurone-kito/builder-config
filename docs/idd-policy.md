@@ -347,6 +347,31 @@ and the sole maintainer (whose PRs always carry an active claim), so
 the claim-id `none` sentinel has no real use case here. Revisit if this
 repository ever accepts a non-bot, non-maintainer contribution.
 
+### `post-merge-cleanup` workflow
+
+`.github/workflows/post-merge-cleanup.yml` (added by issue #96,
+mirroring `idd-template`'s `v0.6.0` core file) is a server-side
+fallback for the agent's own F4 cleanup step
+(`idd-merge.instructions.md`): it re-runs
+`pnpm exec idd-audit-pr-cleanup --pr <n> --apply --skip-claim-check`
+unconditionally on every merged PR, so cleanup coverage never depends
+on the merging session having completed F4 itself (for example, a
+session that exits at the F4/F5 boundary before posting evidence).
+It skips posting a duplicate `<!-- idd-cleanup-evidence: -->` comment
+when a trusted-author one already exists — the ordinary case, since
+F4 already runs the same helper in-session.
+
+It triggers on `pull_request_target: closed` (not `pull_request`) so a
+fork PR's merge still runs it with base-repository credentials, gated
+by `github.event.pull_request.merged == true` so it never fires on a
+closed-without-merge PR. The checkout step carries no `ref:` override —
+it resolves to the base branch's tip, never PR-head content — and
+`permissions:` stays `contents: read` / `issues: write` /
+`pull-requests: write`, matching this workflow's actual mutation
+surface (comment minimization and a single evidence comment; no
+repository-content write). See the workflow file's own header comment
+for the full trust-model rationale.
+
 ### Worktree guard
 
 **Policy**: `worktreeGuard.enabled: true` in `.github/idd/config.json`.
