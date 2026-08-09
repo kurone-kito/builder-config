@@ -54,7 +54,10 @@ repository override.
 **Scope**: `advisoryWait.convergenceScope` = `all-prs` (distributed
 default). Kept rather than switched to `idd-claimed`, so advisory
 convergence applies to every PR, not only verified IDD-owned PRs — this
-repository does not want to exempt non-IDD PRs from convergence.
+repository does not want to exempt non-IDD PRs from convergence, other
+than the narrow `exemptBotAuthoredPrs` carve-out below (a genuinely
+`Bot`-typed author with no claim history, such as Dependabot — not a
+blanket non-IDD-PR exemption).
 
 ## Advisory-Bot Policy
 
