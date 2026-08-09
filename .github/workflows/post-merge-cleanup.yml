@@ -90,6 +90,15 @@ jobs:
           # expression directly into the run: script.
           PR_NUMBER: ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
         run: |
+          # workflow_dispatch's `type: number` constraint is a UI hint only,
+          # not enforced for a direct API dispatch -- validate here so an
+          # empty or non-numeric value fails loudly and immediately, rather
+          # than as a confusing downstream `gh`/helper error (also protects
+          # the next step, which only runs after this one succeeds).
+          if ! [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
+            echo "::error::PR_NUMBER is not a valid positive integer: \"$PR_NUMBER\""
+            exit 1
+          fi
           set +e
           JSON=$(pnpm exec idd-audit-pr-cleanup --pr "$PR_NUMBER" --apply --skip-claim-check --format json 2>cleanup-stderr.log)
           HELPER_EXIT=$?
