@@ -1,3 +1,10 @@
+---
+type: reference
+title: Onboarding Reference — Agent Entry and Verification
+description: Provides the detailed agent-entry examples and verification checklist referenced by ONBOARDING.md steps 5 and 6.
+tags: [onboarding, agent-entry]
+---
+
 # Onboarding Reference — Agent Entry and Verification
 
 Use this reference alongside `idd-template/ONBOARDING.md` when you need
@@ -170,18 +177,35 @@ workflow stub above to every session; the steps below are an
   ```
 
 - If the operator installs the optional `issue-authoring` companion
-  from Step 2 under a directory OpenCode reads natively —
-  `.claude/skills/` or `.opencode/skills/` — it is already available to
-  OpenCode without extra configuration. Step 2 also allows other
-  runtime-specific locations (for example `.github/skills/`); OpenCode
-  does not discover a bundle placed only in one of those, so copy or
-  symlink it into `.claude/skills/` or `.opencode/skills/` as well when
-  OpenCode also needs it.
+  from Step 2 under one of the native roots OpenCode reads —
+  `.claude/skills/`, `.opencode/skills/`, or `.agents/skills/` — it is
+  already available without an additional copy. Keep the selected
+  destination recorded in the onboarding policy; do not add the same skill
+  ID to another root merely to support a second runtime (preventive; no
+  observed incident yet).
 - If a target repository runs OpenCode as an autonomous worker under
   its own GitHub identity (not just an interactive assistant), add
   that login to `trustedMarkerActors` (and the advisory-bot lists if
   it also reviews) in `.github/idd/config.json` — a config-values edit
   only; `schemas/policy.schema.json` stays agent-agnostic.
+
+### Issue-authoring companion verification
+
+When the optional companion is installed, verify the source-versus-
+destination contract separately from the entry-file checks:
+
+- The canonical source inventory remains `skills/issue-authoring/` in the
+  idd-skill checkout and includes `SKILL.md` plus all bundled references.
+- The selected target destination is recorded alongside the `installed`
+  decision in the policy record. The Codex example is
+  `.agents/skills/issue-authoring/SKILL.md`.
+- The `gh api`, `curl`, and local-copy examples write every source file under
+  that selected destination and do not fall back to target
+  `skills/issue-authoring/`.
+- A default onboarding import adds no checked-in `.agents/skills/` or
+  `.opencode/skills/` mirror. A mixed-runtime target uses one native copy
+  plus an explicit manual route unless the operator deliberately accepts
+  identical duplicates (preventive; no observed incident yet).
 
 ### GEMINI.md
 
@@ -282,10 +306,9 @@ checks, confirm the detailed items below.
 - [ ] The selected helper runtime profile is recorded, including whether
       the repository stays on `instructions-only` or opted into
       `package-manager`, `vendored-node`, or `ephemeral-npx`.
-- [ ] If the operator opted into issue authoring,
-      `skills/issue-authoring/SKILL.md`,
-      `skills/issue-authoring/agents/openai.yaml`, and the
-      `skills/issue-authoring/references/` files are present.
+- [ ] If the operator opted into issue authoring, the native destination
+      recorded in the policy contains `SKILL.md` and every bundled reference
+      file.
 
 ### Placeholder, marker, and config alignment
 
@@ -300,8 +323,8 @@ checks, confirm the detailed items below.
       `orphan-first-policy` value is recorded as `none`,
       `maintainer-approved`, or `public-disabled`. Public repositories
       use either `maintainer-approved` or `public-disabled`, not `none`.
-- [ ] The `builder-config-roadmap-id` and
-      `builder-config-blocked-by` marker names in
+- [ ] The `{{PROJECT_MARKER_PREFIX}}-roadmap-id` and
+      `{{PROJECT_MARKER_PREFIX}}-blocked-by` marker names in
       `.github/instructions/idd-discover.instructions.md` and
       `.github/instructions/idd-overview-core.instructions.md`
       match the prefix chosen for this project.
