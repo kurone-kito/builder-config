@@ -74,16 +74,30 @@ repository does not want to exempt non-IDD PRs from convergence.
   set to) `copilot`; setting it to the REST form instead would leave
   `--add-reviewer`/`--remove-reviewer` targeting an identity `gh` cannot
   resolve via GraphQL.
-- **`advisoryWait.secondaryBotLogin`**: `coderabbitai[bot]` — CodeRabbit
-  already reviews every PR in this repository. Confirmed via a live
-  `gh api` timeline-event read (`sender.login` + `type: Bot`); the
-  similarly-named `coderabbitai` `Organization` actor seen in the same
-  event stream is a distinct identity and not the review bot.
+- **`advisoryWait.secondaryBotLogin`**: left unset. CodeRabbit was
+  evaluated (its bot login is `coderabbitai[bot]`, confirmed via a live
+  `gh api` timeline-event read — `sender.login` + `type: Bot`,
+  distinguishing it from the separate `coderabbitai` `Organization`
+  actor) but is **not requestable** the way this field requires: it
+  runs as an installed GitHub App with no user-resolvable login, so
+  `gh pr edit --add-reviewer "@coderabbitai[bot]"` fails outright
+  (`Could not resolve user`) and the REST `requested_reviewers`
+  fallback silently no-ops (both verified empirically against a live
+  PR in this repository) — neither path posts the `review_requested`
+  timeline event the once-per-HEAD guard needs. Configuring it anyway
+  would leave `secondaryRequestNeeded` permanently true, causing
+  repeated failed/no-op requests during primary-bot-stall recovery. Per
+  the schema, omitting this field disables the non-gating secondary
+  supplement entirely — CodeRabbit still contributes as ordinary
+  advisory input via its own automatic per-push reviews, just not
+  through this on-demand request path.
 - **`advisoryBotLogins`**: `["copilot-pull-request-reviewer[bot]",
-  "coderabbitai[bot]", "chatgpt-codex-connector[bot]"]` — the same two
-  bots, plus `chatgpt-codex-connector[bot]`, a third review bot first
-  observed on PR #99 (issue #94) that was not previously configured
-  anywhere. Listing it here lets its post-disposition acknowledgement
+  "coderabbitai[bot]", "chatgpt-codex-connector[bot]"]` — the REST
+  review-author identities these bots' comments/reviews actually carry
+  (a separate concern from requestability above), including
+  `chatgpt-codex-connector[bot]`, a third review bot first observed on
+  PR #99 (issue #94) that was not previously configured anywhere.
+  Listing all three here lets their post-disposition acknowledgement
   comments classify as structurally ack-only going forward instead of
   counting as fresh review activity.
 - **`advisoryWait.exemptBotAuthoredPrs`**: `true` (opt-in, non-default)

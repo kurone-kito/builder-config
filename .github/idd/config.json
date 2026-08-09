@@ -28,7 +28,6 @@
   "advisoryWait": {
     "convergenceScope": "all-prs",
     "primaryBotLogin": "copilot",
-    "secondaryBotLogin": "coderabbitai[bot]",
     "exemptBotAuthoredPrs": true
   },
   "advisoryBotLogins": [
