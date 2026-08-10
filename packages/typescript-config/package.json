@@ -20,6 +20,7 @@
   "type": "module",
   "exports": "./tsconfig.json",
   "files": [
+    "CHANGELOG.md",
     "tsconfig.json"
   ],
   "scripts": {

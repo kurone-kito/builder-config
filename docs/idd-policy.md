@@ -478,3 +478,58 @@ rather than accepting the permanent false-positive warning:
 `lint-staged`'s and `commitlint`'s own configuration
 (`.lintstagedrc.mjs`, `.commitlintrc.yml`) are unchanged; only which
 hook file invokes them changed.
+
+## CHANGELOG Policy
+
+**Policy**: confirmed by the maintainer (`kurone-kito`) on 2026-08-10
+(issue #106).
+
+- **Format**: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
+  1.1.0. Each published package —
+  `@kurone-kito/sea-builder`, `@kurone-kito/typescript-config`, and
+  `@kurone-kito/vite-lib-config` — ships its own
+  `packages/<name>/CHANGELOG.md`, listed in that package's
+  `package.json` `files` array so it reaches the npm tarball (modern
+  npm does **not** auto-include `CHANGELOG.md` the way it does
+  `README*` / `LICENSE*` / `package.json`).
+- **Release-time-batch-only rule**: `CHANGELOG.md` entries are added
+  only as part of a release cut — never by an individual feature/fix
+  PR. This repository runs parallel IDD agents, and every feature/fix
+  PR editing the same shared `CHANGELOG.md` would be ordinary Git merge
+  contention between concurrent branches — the
+  `idd:discover-shared-file-overlap` helper's own high-contention set
+  (the review/merge bundle files plus `audit/sync-manifest.json`) does
+  not currently cover package changelogs, so this rule's purpose is
+  avoiding that merge contention directly, not routing through that
+  helper.
+- **Per-package heading rule (lockstep versioning)**: the root and
+  every package share one version number, but a package's CHANGELOG
+  only gets a version heading for a release that actually changed that
+  package. A release that did not touch a given package does not get
+  an empty heading there — the three CHANGELOGs are expected to
+  diverge in which version headings they contain, even though the
+  version *numbers* they use stay shared across packages.
+- **Release-cut procedure**: in the same pre-release change that bumps
+  `package.json` versions:
+  1. For every package the release actually changed, add an entry
+     under its `## [Unreleased]` heading for each user-facing change
+     since the last release (source: the merged PRs in range, using
+     the same 🚀 Features / 🐛 Bug Fixes / 🧰 Maintenance categorization
+     `.github/release-drafter.yml` already applies).
+  2. For every touched package that now has `[Unreleased]` entries,
+     insert a new `## [<version>] - <YYYY-MM-DD>` heading directly
+     below `## [Unreleased]` and move those entries under it, then
+     leave `## [Unreleased]` in place, empty, ready for the next
+     round. Never rename or remove the `## [Unreleased]` heading
+     itself — the file always keeps exactly one, or the next release
+     has no heading left to batch entries under.
+  3. **Prerelease cuts** (`.github/workflows/release-next.yml`'s `next`
+     tag, versions like `0.22.0-alpha.0`) do **not** get their own
+     CHANGELOG heading — entries stay under `## [Unreleased]` through
+     every prerelease cut and only move under a version heading when
+     the corresponding **stable** release cuts, since a CHANGELOG
+     records user-facing release notes, not internal prerelease
+     iteration.
+
+  See the matching step in the release checklist in
+  [`.github/copilot-instructions.md`](../.github/copilot-instructions.md#release-checklist).
