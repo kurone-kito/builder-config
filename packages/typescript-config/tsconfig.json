@@ -7,10 +7,9 @@
     "checkJs": true,
     "composite": true,
     "declarationMap": true,
-    "esModuleInterop": true,
     "exactOptionalPropertyTypes": true,
     "isolatedModules": true,
-    "lib": ["ES2023"],
+    "lib": ["ES2024"],
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "noEmitOnError": true,
@@ -26,10 +25,9 @@
     "resolveJsonModule": true,
     "rewriteRelativeImportExtensions": true,
     "sourceMap": true,
-    "strict": true,
     "stripInternal": true,
     "erasableSyntaxOnly": true,
-    "target": "ES2023",
+    "target": "ES2024",
     "verbatimModuleSyntax": true
   },
   "typeAcquisition": {

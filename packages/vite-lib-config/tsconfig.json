@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["DOM", "ES2023"],
+    "lib": ["DOM", "ES2024"],
     "noEmit": true,
     "rootDir": "src",
     "types": ["node"]
