@@ -362,14 +362,15 @@ _Released as part of
 [kurone-kito/lints-config@v0.7.4](https://github.com/kurone-kito/lints-config/releases/tag/v0.7.4)
 before this package migrated to this repository._
 
-### Added
-
-- Added explicit `exports` map entries for `.` and `./tsconfig.json`,
-  and a `module` field, both pointing at `tsconfig.json`
-  (kurone-kito/lints-config#43).
-
 ### Changed
 
+- **Breaking:** added an explicit `exports` map restricting resolvable
+  subpaths to `.` and `./tsconfig.json` only (both pointing at
+  `tsconfig.json`), and a `module` field pointing at the same file.
+  Node.js rejects any other subpath import (e.g.
+  `@kurone-kito/typescript-config/package.json`) with
+  `ERR_PACKAGE_PATH_NOT_EXPORTED` once an `exports` map is present,
+  where it previously resolved (kurone-kito/lints-config#43).
 - Bumped the `@typescript-eslint/parser` devDependency to `^6.4.1`,
   `eslint` to `^8.47.0`, `prettier` to `^3.0.2`, and `typescript` to
   `~5.2.2` (kurone-kito/lints-config#43).
@@ -517,9 +518,10 @@ installs from npm in this range is `0.2.5`._
 
 ### Removed
 
-- Removed `forceConsistentCasingInFileNames`, `importsNotUsedAsValues`,
-  `incremental`, and `preserveValueImports`, all added in the `0.2.0`
-  range above (kurone-kito/lints-config#10).
+- Removed `forceConsistentCasingInFileNames` and `incremental` (both
+  present since `0.1.2`), and `importsNotUsedAsValues` and
+  `preserveValueImports` (both added in the `0.2.0` range above)
+  (kurone-kito/lints-config#10).
 
 ## [0.2.0] - 2023-03-29
 
