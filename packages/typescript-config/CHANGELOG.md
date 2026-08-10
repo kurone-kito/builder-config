@@ -49,13 +49,15 @@ _Released as part of
 [kurone-kito/lints-config@v0.19.0](https://github.com/kurone-kito/lints-config/releases/tag/v0.19.0)
 before this package migrated to this repository._
 
-### Added
-
-- Added the `lib: ["ES2023"]` compiler option
-  (kurone-kito/lints-config#111).
-
 ### Changed
 
+- **Breaking:** added an explicit `lib: ["ES2023"]` compiler option.
+  TypeScript replaces its default library set with an explicit `lib`
+  array rather than augmenting it, so consumers who don't override
+  `lib` themselves lose the `DOM`/`DOM.Iterable`/`ScriptHost` globals
+  (`window`, `document`, `fetch`, etc.) that `target`'s default
+  inference had been including; such consumers must now add `DOM`
+  explicitly if they need it (kurone-kito/lints-config#111).
 - Bumped `target` from `ES2022` to `ES2023`
   (kurone-kito/lints-config#111).
 
@@ -73,10 +75,11 @@ before this package migrated to this repository._
 ### Removed
 
 - Removed the `typescript-eslint-language-service` compiler plugin
-  entry from `tsconfig.json`, and dropped `@typescript-eslint/parser`,
-  `eslint`, and `typescript-eslint-language-service` — both peer and
-  dev — along with the matching README install-command line
-  (kurone-kito/lints-config#110).
+  entry from `tsconfig.json`. Dropped `@typescript-eslint/parser` and
+  `typescript-eslint-language-service` from both `peerDependencies`
+  and `devDependencies`, and `eslint` from `devDependencies` only (it
+  was never a peer dependency); also removed the matching README
+  install-command line (kurone-kito/lints-config#110).
 
 ### Changed
 
@@ -109,9 +112,10 @@ before this package migrated to this repository._
 
 ### Changed
 
-- Bumped the `@typescript-eslint/parser` peer/devDependency range to
-  `>=8.x.x`, the `typescript` devDependency to `~5.7.2`, and `eslint`
-  to `^9.17.0` (kurone-kito/lints-config#108).
+- Bumped the `@typescript-eslint/parser` peerDependency range to
+  `>=8.x.x` and its devDependency to `^8.18.0`, the `typescript`
+  devDependency to `~5.7.2`, and `eslint` to `^9.17.0`
+  (kurone-kito/lints-config#108).
 
 ## [0.16.1] - 2024-09-09
 
