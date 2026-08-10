@@ -496,11 +496,12 @@ hook file invokes them changed.
   only as part of a release cut — never by an individual feature/fix
   PR. This repository runs parallel IDD agents, and every feature/fix
   PR editing the same shared `CHANGELOG.md` would be ordinary Git merge
-  contention between concurrent branches — the `idd:discover-shared-
-  file-overlap` helper's own high-contention set (the review/merge
-  bundle files plus `audit/sync-manifest.json`) does not currently
-  cover package changelogs, so this rule's purpose is avoiding that
-  merge contention directly, not routing through that helper.
+  contention between concurrent branches — the
+  `idd:discover-shared-file-overlap` helper's own high-contention set
+  (the review/merge bundle files plus `audit/sync-manifest.json`) does
+  not currently cover package changelogs, so this rule's purpose is
+  avoiding that merge contention directly, not routing through that
+  helper.
 - **Per-package heading rule (lockstep versioning)**: the root and
   every package share one version number, but a package's CHANGELOG
   only gets a version heading for a release that actually changed that
