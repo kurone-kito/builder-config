@@ -39,7 +39,7 @@ libraries:
 {
   "extends": "@kurone-kito/typescript-config",
   "compilerOptions": {
-    "lib": ["DOM", "ES2023"],
+    "lib": ["DOM", "ES2024"],
     "outDir": "dist",
     "rootDir": "src"
   },
