@@ -30,5 +30,5 @@ project adheres to
 
 ### Added
 
-- Migrated from `kurone-kito/lints-config`; its pre-migration history
-  will be backfilled in a follow-up (#108) (#2).
+- Migrated from `kurone-kito/lints-config` (#2); its pre-migration
+  history will be backfilled in a follow-up (#108).
