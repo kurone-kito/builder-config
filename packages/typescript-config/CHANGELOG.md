@@ -416,9 +416,9 @@ before this package migrated to this repository._
 ### Changed
 
 - Relaxed the `typescript` and `typescript-eslint-language-service`
-  peer dependencies from exact-pinned versions to `>=4.7.x` and
-  `>=5.x.x`, and marked both `optional` via `peerDependenciesMeta`
-  (kurone-kito/lints-config#25).
+  peer dependencies from the narrow ranges `~5.1.3` and `^5.0.5` to
+  the broad `>=4.7.x` and `>=5.x.x`, and marked both `optional` via
+  `peerDependenciesMeta` (kurone-kito/lints-config#25).
 - Bumped the `@typescript-eslint/parser` devDependency to `^5.60.0`
   and `eslint` to `^8.43.0` (kurone-kito/lints-config#25).
 
@@ -438,7 +438,8 @@ before this package migrated to this repository._
 
 _Released as part of
 [kurone-kito/lints-config@v0.4.0](https://github.com/kurone-kito/lints-config/releases/tag/v0.4.0)
-before this package migrated to this repository._
+before this package migrated to this repository. This release also
+folded in the untagged `0.3.4` version bump._
 
 ### Changed
 
