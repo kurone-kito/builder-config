@@ -18,7 +18,6 @@ project adheres to
 - Bumped the `cpy-cli` devDependency to v7 (#41).
 - Bumped the `semver` dependency to `^7.8.1` (#42).
 - Bumped dependencies via a grouped Dependabot update (#44).
-- Bumped the `undici` devDependency to v7.24.0 (#45).
 - Bumped the `undici` devDependency to v7.28.0 (#66).
 - Removed the unused, exact-pinned `undici` devDependency (#75).
 - **Breaking:** migrated the Node.js baseline from LTS Iron (v20) to
@@ -36,6 +35,12 @@ project adheres to
   permanent download cache (#72).
 - Stopped `devPreinstall` from executing unpinned `pnpm dlx` packages
   (#76).
+
+## [0.21.0] - 2025-10-03
+
+### Changed
+
+- Bumped the `listr2` dependency to `^9.0.4` (#19).
 
 ## [0.20.0] - 2025-06-30
 
