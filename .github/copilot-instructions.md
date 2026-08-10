@@ -276,23 +276,24 @@ it:
 
 ### Release checklist
 
-- Before cutting a **stable** release, in the same pre-release change
-  that bumps `package.json` versions:
-  1. For every package the release actually changed, add an entry
-     under its `packages/<name>/CHANGELOG.md` `## [Unreleased]`
-     heading for each user-facing change since the last release.
-  2. For every touched package that now has `[Unreleased]` entries,
-     insert a new `## [<version>] - <YYYY-MM-DD>` heading below
-     `## [Unreleased]` and move those entries under it. Keep
-     `## [Unreleased]` in place, empty, for the next round — never
-     rename or remove it. A package the release did not touch keeps no
-     heading for that version.
-  - A **prerelease** cut (the `next` tag, e.g. `0.22.0-alpha.0`) does
-    not get its own heading — leave entries under `## [Unreleased]`
-    until the matching stable release cuts.
-  - See the CHANGELOG Policy section in
-    [docs/idd-policy.md](../docs/idd-policy.md#changelog-policy) for
-    the full rule and its rationale.
+- Before cutting **any** release (stable or prerelease), in the same
+  pre-release change that bumps `package.json` versions: for every
+  package the release actually changed, add an entry under its
+  `packages/<name>/CHANGELOG.md` `## [Unreleased]` heading for each
+  user-facing change since the last release.
+- Before cutting a **stable** release only, in that same change: for
+  every touched package that now has `[Unreleased]` entries, insert a
+  new `## [<version>] - <YYYY-MM-DD>` heading below `## [Unreleased]`
+  and move those entries under it. Keep `## [Unreleased]` in place,
+  empty, for the next round — never rename or remove it. A package the
+  release did not touch keeps no heading for that version.
+- A **prerelease** cut (the `next` tag, e.g. `0.22.0-alpha.0`) does not
+  get its own heading — its populated entries stay under
+  `## [Unreleased]` until the matching stable release cuts and moves
+  them.
+- See the CHANGELOG Policy section in
+  [docs/idd-policy.md](../docs/idd-policy.md#changelog-policy) for the
+  full rule and its rationale.
 
 ## IDD Workflow
 
