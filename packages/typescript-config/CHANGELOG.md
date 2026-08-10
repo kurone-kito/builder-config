@@ -79,7 +79,7 @@ before this package migrated to this repository._
   `typescript-eslint-language-service` from both `peerDependencies`
   and `devDependencies`, and `eslint` from `devDependencies` only (it
   was never a peer dependency); also removed the matching README
-  install-command line (kurone-kito/lints-config#110).
+  install command line (kurone-kito/lints-config#110).
 
 ### Changed
 
@@ -558,7 +558,7 @@ _Earliest git-tagged release, as part of
 [kurone-kito/lints-config@v0.1.2](https://github.com/kurone-kito/lints-config/releases/tag/v0.1.2)
 before this package migrated to this repository. The package was
 first published as `0.1.0` (2023-03-21), an untagged version with no
-distinct package.json commit of its own; this entry's content covers
+distinct `package.json` commit of its own; this entry's content covers
 everything since the package's introduction
 (kurone-kito/lints-config#2)._
 
