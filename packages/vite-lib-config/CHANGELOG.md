@@ -16,7 +16,7 @@ project adheres to
 ### Changed
 
 - Bumped the `cpy-cli` devDependency to v7 (#41).
-- Bumped dependencies via a grouped Dependabot update (#44).
+- Bumped the `vitest` devDependency to `^4.1.0` (#44).
 - **Breaking:** raised the `engines.node` floor from
   `^20.11 || ^22 || >=24` to `^22.23.1 || ^24.2.0 || >=26.0.0`,
   dropping Node.js 20, Node.js 22 below 22.23.1, Node.js 24 below
@@ -46,6 +46,8 @@ project adheres to
 - Bumped the `type-fest` dependency to `^5.0.1` (a major bump; used
   by the exported `ViteConfigOptions` type) and `vite` to `^7.1.9`
   (#19).
+- Bumped the `cpy-cli` devDependency to `^6.0.0` and `typescript` to
+  `~5.9.3` (#19).
 
 ## [0.20.0] - 2025-06-30
 

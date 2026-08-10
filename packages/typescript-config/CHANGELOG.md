@@ -30,6 +30,8 @@ project adheres to
   syntax that requires emit-time transformation (enums, parameter
   properties, legacy `namespace`/`module` with runtime code, etc.)
   (#19).
+- Bumped the `cpy-cli` devDependency to `^6.0.0` and `typescript` to
+  `~5.9.3` (#19).
 
 ## [0.20.0] - 2025-06-30
 

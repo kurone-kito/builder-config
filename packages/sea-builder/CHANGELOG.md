@@ -17,7 +17,8 @@ project adheres to
 
 - Bumped the `cpy-cli` devDependency to v7 (#41).
 - Bumped the `semver` dependency to `^7.8.1` (#42).
-- Bumped dependencies via a grouped Dependabot update (#44).
+- Bumped the `undici` devDependency to `7.24.0` and `vitest` to
+  `^4.1.0` (#44).
 - Bumped the `undici` devDependency to v7.28.0 (#66).
 - Removed the unused, exact-pinned `undici` devDependency (#75).
 - **Breaking:** raised the `engines.node` floor from
@@ -43,6 +44,9 @@ project adheres to
 ### Changed
 
 - Bumped the `listr2` dependency to `^9.0.4` (#19).
+- Bumped the `cpy-cli` devDependency to `^6.0.0`, `type-fest` to
+  `^5.0.1` (a major bump), `typescript` to `~5.9.3`, and `undici` to
+  `7.16.0` (#19).
 
 ## [0.20.0] - 2025-06-30
 
