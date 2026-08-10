@@ -24,7 +24,10 @@ project adheres to
 
 ### Changed
 
-- Improved the TypeScript configuration (#19).
+- **Breaking:** enabled `erasableSyntaxOnly`, which rejects TypeScript
+  syntax that requires emit-time transformation (enums, parameter
+  properties, legacy `namespace`/`module` with runtime code, etc.)
+  (#19).
 
 ## [0.20.0] - 2025-06-30
 
