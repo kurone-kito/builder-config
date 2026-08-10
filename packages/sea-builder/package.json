@@ -23,6 +23,7 @@
     "sea-cache": "./dist/cache.mjs"
   },
   "files": [
+    "CHANGELOG.md",
     "dist"
   ],
   "scripts": {

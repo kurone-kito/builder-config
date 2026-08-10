@@ -274,6 +274,16 @@ it:
   `workspaceConcurrency: 1` (see `pnpm-workspace.yaml`) so that
   publish steps do not race; do not remove that setting
 
+### Release checklist
+
+- Before cutting a release, for every package that has `[Unreleased]`
+  entries in its `packages/<name>/CHANGELOG.md`, rename that heading to
+  `## [<version>] - <YYYY-MM-DD>` in the same pre-release change that
+  bumps `package.json` versions. A package a release did not touch
+  keeps no heading for that version — see the CHANGELOG Policy section
+  in [docs/idd-policy.md](../docs/idd-policy.md#changelog-policy) for
+  the full rule and its rationale.
+
 ## IDD Workflow
 
 This project uses Issue-Driven Development (IDD) with parallel AI

@@ -478,3 +478,36 @@ rather than accepting the permanent false-positive warning:
 `lint-staged`'s and `commitlint`'s own configuration
 (`.lintstagedrc.mjs`, `.commitlintrc.yml`) are unchanged; only which
 hook file invokes them changed.
+
+## CHANGELOG Policy
+
+**Policy**: confirmed by the maintainer (`kurone-kito`) on 2026-08-10
+(issue #106).
+
+- **Format**: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
+  1.1.0. Each published package —
+  `@kurone-kito/sea-builder`, `@kurone-kito/typescript-config`, and
+  `@kurone-kito/vite-lib-config` — ships its own
+  `packages/<name>/CHANGELOG.md`, listed in that package's
+  `package.json` `files` array so it reaches the npm tarball (modern
+  npm does **not** auto-include `CHANGELOG.md` the way it does
+  `README*` / `LICENSE*` / `package.json`).
+- **Release-time-batch-only rule**: `CHANGELOG.md` entries are added
+  only as part of a release cut — never by an individual feature/fix
+  PR. This repository runs parallel IDD agents; if every PR edited a
+  shared `CHANGELOG.md`, `idd:discover-shared-file-overlap` would flag
+  every such PR as touching the same shared file, and concurrent claims
+  would collide on it.
+- **Per-package heading rule (lockstep versioning)**: the root and
+  every package share one version number, but a package's CHANGELOG
+  only gets a version heading for a release that actually changed that
+  package. A release that did not touch a given package does not get
+  an empty heading there — the three CHANGELOGs are expected to
+  diverge in which version headings they contain, even though the
+  version *numbers* they use stay shared across packages.
+- **Release-cut procedure**: in the same pre-release change that bumps
+  `package.json` versions, rename each touched package's
+  `## [Unreleased]` heading to `## [<version>] - <YYYY-MM-DD>`, for
+  every package that has `[Unreleased]` entries at that point. See the
+  matching step in the release checklist in
+  [`.github/copilot-instructions.md`](../.github/copilot-instructions.md#release-checklist).
