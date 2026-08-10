@@ -45,8 +45,8 @@ project adheres to
 
 - Bumped the `listr2` dependency to `^9.0.4` (#19).
 - Bumped the `cpy-cli` devDependency to `^6.0.0`, `type-fest` to
-  `^5.0.1` (a major bump), `typescript` to `~5.9.3`, and `undici` to
-  `7.16.0` (#19).
+  `^5.0.1` (a major bump), `typescript` to `~5.9.3`, `undici` to
+  `7.16.0`, and `vite` to `^7.1.9` (#19).
 
 ## [0.20.0] - 2025-06-30
 
