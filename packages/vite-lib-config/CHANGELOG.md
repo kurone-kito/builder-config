@@ -41,6 +41,12 @@ project adheres to
 
 - Added a TypeDoc-based API documentation generation pipeline (#19).
 
+### Changed
+
+- Bumped the `type-fest` dependency to `^5.0.1` (a major bump; used
+  by the exported `ViteConfigOptions` type) and `vite` to `^7.1.9`
+  (#19).
+
 ## [0.20.0] - 2025-06-30
 
 ### Added
