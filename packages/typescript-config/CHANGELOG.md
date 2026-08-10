@@ -85,6 +85,7 @@ before this package migrated to this repository._
 
 - **Breaking:** raised the `engines.node` floor from
   `^18.20 || ^20.10 || >=22` to `^20.11 || >=22`, dropping Node.js 18
+  and the previously-supported Node.js 20.10 line
   (kurone-kito/lints-config#110).
 
 ## [0.17.3] - 2024-12-15
@@ -125,8 +126,10 @@ before this package migrated to this repository._
 
 ### Changed
 
-- Raised the `engines.node` floor from `>=18` to
-  `^18.20 || ^20.10 || >=22` (kurone-kito/lints-config#92).
+- **Breaking:** raised the `engines.node` floor from `>=18` to
+  `^18.20 || ^20.10 || >=22`, dropping Node.js 18 below 18.20, every
+  Node.js 19 release, Node.js 20 below 20.10, and every Node.js 21
+  release (kurone-kito/lints-config#92).
 
 ## [0.16.0] - 2024-08-20
 
@@ -347,7 +350,8 @@ before this package migrated to this repository._
 ### Changed
 
 - **Breaking:** raised the `engines.node` floor from `>=16.20` to
-  `>=18`, dropping Node.js 16 (kurone-kito/lints-config#49).
+  `>=18`, dropping Node.js 16 and every Node.js 17 release
+  (kurone-kito/lints-config#49).
 - Bumped the `@typescript-eslint/parser` devDependency to `^6.7.2`,
   `eslint` to `^8.49.0`, and `prettier` to `^3.0.3`
   (kurone-kito/lints-config#49).
@@ -471,7 +475,8 @@ before this package migrated to this repository._
 ### Changed
 
 - **Breaking:** raised the `engines.node` floor from `>=14.21` to
-  `>=16.20`, dropping Node.js 14 (kurone-kito/lints-config#12).
+  `>=16.20`, dropping Node.js 14, every Node.js 15 release, and
+  Node.js 16 below 16.20 (kurone-kito/lints-config#12).
 - Bumped the `@typescript-eslint/parser` devDependency to `^5.59.1`
   and `prettier` to `^2.8.8` (kurone-kito/lints-config#12).
 
@@ -510,6 +515,12 @@ installs from npm in this range is `0.2.5`._
   `typescript-eslint-language-service` to `^5.0.5`
   (kurone-kito/lints-config#4, kurone-kito/lints-config#10).
 
+### Removed
+
+- Removed `forceConsistentCasingInFileNames`, `importsNotUsedAsValues`,
+  `incremental`, and `preserveValueImports`, all added in the `0.2.0`
+  range above (kurone-kito/lints-config#10).
+
 ## [0.2.0] - 2023-03-29
 
 _Released as part of
@@ -523,10 +534,10 @@ exact version._
 ### Added
 
 - Enabled `allowJs`, `checkJs`, `composite`,
-  `exactOptionalPropertyTypes`, `isolatedModules`, `noEmitOnError`,
-  `noErrorTruncation`, `noUnusedLocals`, `preserveValueImports`, and
-  `stripInternal`; enabled `typeAcquisition.enable`
-  (kurone-kito/lints-config#3).
+  `exactOptionalPropertyTypes`, `importsNotUsedAsValues: "error"`,
+  `isolatedModules`, `noEmitOnError`, `noErrorTruncation`,
+  `noUnusedLocals`, `preserveValueImports`, and `stripInternal`;
+  enabled `typeAcquisition.enable` (kurone-kito/lints-config#3).
 
 ### Changed
 
@@ -556,4 +567,4 @@ everything since the package's introduction
 - Introduced the package: a `tsconfig.json` extending base with a
   `typescript-eslint-language-service` compiler plugin, `strict`
   compiler options, `target: "ES2019"`, and a `typescript` peer
-  dependency pinned to `~5.0.2` (kurone-kito/lints-config#2).
+  dependency set to the narrow range `~5.0.2` (kurone-kito/lints-config#2).
