@@ -32,8 +32,19 @@ project adheres to
 
 - Restored CI signal on feature branches and pull requests, and
   aligned the `@vitest/coverage-v8` peer with `vitest` v4 (#68).
-- Corrected published JSDoc that had the shebang and library-mode
-  build branches inverted (#70).
+- Corrected the published API documentation for `viteConfig` and
+  `vitestConfig`. `viteConfig`'s JSDoc had the shebang/library-mode
+  branches inverted and omitted that nonexistent entries are filtered
+  out first (an empty result after filtering yields an empty
+  configuration) and that a mixed set of entries falls into library
+  mode; `vitestConfig`'s JSDoc had incorrectly described the same
+  shebang/library-mode logic instead of its actual behavior — merging
+  a `test.environment: 'node'` default under the `viteConfig` built
+  for the same entry point (#70).
+- Resolved `typedoc-plugin-markdown` explicitly to avoid a lookup
+  failure under pnpm's global virtual store, and added external link
+  mappings for Vite's `UserConfig`/`mergeConfig` symbols in the
+  generated API docs (#88).
 
 ## [0.21.0] - 2025-10-03
 

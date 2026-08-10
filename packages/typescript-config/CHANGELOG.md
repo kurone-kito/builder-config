@@ -29,7 +29,10 @@ project adheres to
 - **Breaking:** enabled `erasableSyntaxOnly`, which rejects TypeScript
   syntax that requires emit-time transformation (enums, parameter
   properties, legacy `namespace`/`module` with runtime code, etc.)
-  (#19).
+  (#19). This option requires TypeScript 5.8+; the advertised
+  `peerDependencies` range (`>=5.7.x`) was not updated, so consumers
+  on TypeScript 5.7 must upgrade their compiler to avoid an unknown
+  compiler option error.
 - Bumped the `cpy-cli` devDependency to `^6.0.0` and `typescript` to
   `~5.9.3` (#19).
 
