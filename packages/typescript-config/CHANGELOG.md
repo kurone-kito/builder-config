@@ -16,8 +16,10 @@ project adheres to
 ### Changed
 
 - Bumped the `cpy-cli` devDependency to v7 (#41).
-- **Breaking:** migrated the Node.js baseline from LTS Iron (v20) to
-  LTS Jod (v22), and pnpm to v11 (#88).
+- **Breaking:** raised the `engines.node` floor from
+  `^20.11 || ^22 || >=24` to `^22.23.1 || ^24.2.0 || >=26.0.0`,
+  dropping Node.js 20, Node.js 22 below 22.23.1, Node.js 24 below
+  24.2.0, and every Node.js 25 release; bumped pnpm to v11 (#88).
 - Bumped the `typescript` devDependency to `~6.0.3` (#113).
 
 ## [0.21.0] - 2025-10-03
