@@ -8,7 +8,7 @@ My TypeScript configuration for general Node.js projects.
   - Jod LTS (`^22.23.1`)
   - Krypton LTS (`^24.2.0`)
   - Latest (`>=26.0.0`)
-- TypeScript: `>=5.7.x`
+- TypeScript: `>=7.0.0`
 
 ## Usage
 
