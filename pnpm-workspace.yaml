@@ -8,12 +8,6 @@ engineStrict: true
 gitChecks: false
 ignoreWorkspaceRootCheck: true
 linkWorkspacePackages: true
-# Time-boxed pnpm 11 minimumReleaseAge workaround: both patches clear the
-# 24h cutoff at 2026-08-01T15:07Z. Drop this override and re-resolve after
-# that, rather than carrying it indefinitely.
-overrides:
-  '@babel/parser': 7.29.7
-  '@babel/types': 7.29.7
 packageExtensions:
   undici-types:
     dependencies:
