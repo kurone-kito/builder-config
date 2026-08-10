@@ -486,11 +486,13 @@ before this package migrated to this repository._
 _Released as part of
 [kurone-kito/lints-config@v0.2.7](https://github.com/kurone-kito/lints-config/releases/tag/v0.2.7)
 before this package migrated to this repository. This release also
-folded in the untagged `0.2.1`, `0.2.5`, and `0.2.6` version bumps,
-which fixed a broken `publishConfig` that had blocked public npm
-publishing since `0.2.0` (kurone-kito/lints-config#8,
-kurone-kito/lints-config#9); the first version that installs from npm
-in this range is `0.2.5`._
+folded in the untagged `0.2.1`, `0.2.4`, `0.2.5`, and `0.2.6` version
+bumps, which fixed a broken `publishConfig` that had blocked public
+npm publishing since `0.2.0` (kurone-kito/lints-config#8,
+kurone-kito/lints-config#9); `0.2.4` was itself a failed publish
+attempt during that fix (lints-config's own release for `0.2.5` is
+titled "0.2.5: Republish"), and the first version that actually
+installs from npm in this range is `0.2.5`._
 
 ### Changed
 
@@ -536,13 +538,17 @@ exact version._
 
 ## [0.1.2] - 2023-03-22
 
-_Released as part of
+_Earliest git-tagged release, as part of
 [kurone-kito/lints-config@v0.1.2](https://github.com/kurone-kito/lints-config/releases/tag/v0.1.2)
-before this package migrated to this repository._
+before this package migrated to this repository. The package was
+first published as `0.1.0` (2023-03-21), an untagged version with no
+distinct package.json commit of its own; this entry's content covers
+everything since the package's introduction
+(kurone-kito/lints-config#2)._
 
 ### Added
 
-- Initial release: a `tsconfig.json` extending base with a
+- Introduced the package: a `tsconfig.json` extending base with a
   `typescript-eslint-language-service` compiler plugin, `strict`
   compiler options, `target: "ES2019"`, and a `typescript` peer
   dependency pinned to `~5.0.2` (kurone-kito/lints-config#2).
