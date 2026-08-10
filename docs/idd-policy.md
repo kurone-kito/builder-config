@@ -506,8 +506,13 @@ hook file invokes them changed.
   diverge in which version headings they contain, even though the
   version *numbers* they use stay shared across packages.
 - **Release-cut procedure**: in the same pre-release change that bumps
-  `package.json` versions, rename each touched package's
-  `## [Unreleased]` heading to `## [<version>] - <YYYY-MM-DD>`, for
-  every package that has `[Unreleased]` entries at that point. See the
-  matching step in the release checklist in
+  `package.json` versions, for every touched package that has
+  `[Unreleased]` entries at that point, insert a new
+  `## [<version>] - <YYYY-MM-DD>` heading directly below
+  `## [Unreleased]` and move those entries under it, then leave
+  `## [Unreleased]` in place, empty, ready for the next round of
+  entries. Never rename or remove the `## [Unreleased]` heading itself
+  — the file always keeps exactly one, or the next release has no
+  heading left to batch entries under. See the matching step in the
+  release checklist in
   [`.github/copilot-instructions.md`](../.github/copilot-instructions.md#release-checklist).

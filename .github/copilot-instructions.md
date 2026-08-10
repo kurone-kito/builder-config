@@ -277,12 +277,15 @@ it:
 ### Release checklist
 
 - Before cutting a release, for every package that has `[Unreleased]`
-  entries in its `packages/<name>/CHANGELOG.md`, rename that heading to
-  `## [<version>] - <YYYY-MM-DD>` in the same pre-release change that
-  bumps `package.json` versions. A package a release did not touch
-  keeps no heading for that version — see the CHANGELOG Policy section
-  in [docs/idd-policy.md](../docs/idd-policy.md#changelog-policy) for
-  the full rule and its rationale.
+  entries in its `packages/<name>/CHANGELOG.md`, insert a new
+  `## [<version>] - <YYYY-MM-DD>` heading below `## [Unreleased]` and
+  move those entries under it, in the same pre-release change that
+  bumps `package.json` versions. Keep `## [Unreleased]` in place,
+  empty, for the next round of entries — never rename or remove it. A
+  package a release did not touch keeps no heading for that version —
+  see the CHANGELOG Policy section in
+  [docs/idd-policy.md](../docs/idd-policy.md#changelog-policy) for the
+  full rule and its rationale.
 
 ## IDD Workflow
 
