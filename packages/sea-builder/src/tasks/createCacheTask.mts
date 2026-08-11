@@ -8,6 +8,8 @@ import type { Task } from './createTaskFactory.mjs';
  * @returns Listr task object.
  */
 export const createCacheTask = (opts: CacheOptions): Task => ({
-  title: 'Download the Node.js archives',
-  task: () => createListrCacheTasks(opts).run(),
+  title: opts.nodeVersion
+    ? `Download the Node.js archives (${opts.nodeVersion})`
+    : 'Download the Node.js archives',
+  task: async () => (await createListrCacheTasks(opts)).run(),
 });

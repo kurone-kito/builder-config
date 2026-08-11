@@ -1,4 +1,4 @@
-import type { Listr } from 'listr2';
+import { resolveNodeVersion } from '../utils/resolveNodeVersion.mjs';
 import type { DownloadFunction, ExistsSync, Mkdir } from '../utils/types.mjs';
 import { createMetaFactory } from './createMetaFactory.mjs';
 import type { Task } from './createTaskFactory.mjs';
@@ -34,12 +34,21 @@ export interface CacheOptions {
 
 /**
  * Create Listr tasks for downloading Node.js archives.
+ *
+ * Resolves an omitted or spec-only `nodeVersion` the same way
+ * {@link createBuildTasks} does, so `sea-cache` and `sea-builder` agree on
+ * which archive to fetch when neither specifies an explicit version.
  * @param options Options controlling the task generation.
- * @returns Configured {@link Listr} instance.
+ * @returns A promise that resolves to the configured cache tasks.
  */
-export const createCacheTasks = (options: CacheOptions = {}): Task[] => {
+export const createCacheTasks = async (
+  options: CacheOptions = {},
+): Promise<Task[]> => {
   const { cacheDir, download, existsSync, mkdir, nodeVersion, targets } =
-    normalizeCacheOptions(options);
+    normalizeCacheOptions({
+      ...options,
+      nodeVersion: await resolveNodeVersion(options.nodeVersion),
+    });
   const metaFor = createMetaFactory(cacheDir, nodeVersion);
   const toTask = createTaskFactory(download, existsSync, mkdir, cacheDir);
   return targets.map((t) => toTask(metaFor(t)));

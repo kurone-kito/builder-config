@@ -27,7 +27,7 @@ export const createBuildTasks = async (
   options: BuildTasksOptions,
 ): Promise<Listr> => {
   const { arch, platform = process.platform, projectRoot } = options;
-  const { basename, download, execa, existsSync, mkdir, nodeVersion, targets } =
+  const { basename, download, execa, existsSync, mkdir, targets } =
     await normalizeBuildOptions(options);
   return new Listr([
     createBuildTask(execa),
@@ -36,7 +36,7 @@ export const createBuildTasks = async (
       download,
       existsSync,
       mkdir,
-      nodeVersion: await resolveNodeVersion(nodeVersion),
+      nodeVersion: await resolveNodeVersion(options.nodeVersion),
       platform,
       projectRoot,
       targets,
