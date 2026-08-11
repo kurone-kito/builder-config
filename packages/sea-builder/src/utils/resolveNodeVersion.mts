@@ -9,13 +9,17 @@ import { toSemver } from './toSemver.mjs';
  * @param spec Version specification, e.g. `20`, `20.11`, `22.1.0`, etc.
  * If not specified, the latest patch version of the oldest currently
  * supported LTS line is used.
+ * @param now Current time, used to determine which LTS lines are still
+ * within their support window. Defaults to the real current time; only
+ * meant to be overridden in tests.
  * @returns Resolved Node.js version, e.g. `v20.12.0`.
  */
 export const resolveNodeVersion = async (
   spec?: string | undefined,
+  now: Date = new Date(),
 ): Promise<`v${SemverVersion}`> => {
   const { majors, versions } = await allNodeVersions({ fetch: false });
-  const range = toSemver(spec, filterSupportedLts(majors));
+  const range = toSemver(spec, filterSupportedLts(majors, now));
   const resolved = versions
     .map(({ node }) => node)
     .filter((v) => satisfies(v, range))

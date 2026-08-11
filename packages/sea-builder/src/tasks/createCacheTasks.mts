@@ -1,4 +1,3 @@
-import type { Listr } from 'listr2';
 import { resolveNodeVersion } from '../utils/resolveNodeVersion.mjs';
 import type { DownloadFunction, ExistsSync, Mkdir } from '../utils/types.mjs';
 import { createMetaFactory } from './createMetaFactory.mjs';
@@ -40,7 +39,7 @@ export interface CacheOptions {
  * {@link createBuildTasks} does, so `sea-cache` and `sea-builder` agree on
  * which archive to fetch when neither specifies an explicit version.
  * @param options Options controlling the task generation.
- * @returns Configured {@link Listr} instance.
+ * @returns A promise that resolves to the configured cache tasks.
  */
 export const createCacheTasks = async (
   options: CacheOptions = {},
