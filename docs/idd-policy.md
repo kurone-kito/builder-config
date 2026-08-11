@@ -113,14 +113,15 @@ blanket non-IDD-PR exemption).
 ## External CI-Check Trust
 
 **`ciGate.trustSourcePinnedRequiredChecks`**: `true`, enabled.
-Issue #51 registered `idd-advisory-convergence` as a required status
-check via a repository Ruleset (`gh api
-repos/kurone-kito/builder-config/rules/branches/main`), and the
-resulting entry is source-pinned to a specific reporting App
-(`integration_id: 15368`, GitHub Actions) rather than a bare
-check-name match. Confirmed via a live PR (#117) that the pinned
-integration correctly resolves to this repository's own
-`idd-advisory-convergence.yml` workflow, so trusting it is safe.
+`idd-advisory-convergence` is registered as a required status check
+via a repository Ruleset (`gh api
+repos/kurone-kito/builder-config/rules/branches/main`; the maintainer
+action tracked by #51, which remains open pending its own remaining
+acceptance criteria), and the resulting entry is source-pinned to a
+specific reporting App (`integration_id: 15368`, GitHub Actions)
+rather than a bare check-name match. Confirmed via a live PR (#117)
+that the pinned integration correctly resolves to this repository's
+own `idd-advisory-convergence.yml` workflow, so trusting it is safe.
 
 ## Credential Scope
 
