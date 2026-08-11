@@ -54,4 +54,12 @@ describe('resolveNodeVersion', () => {
       'v24.0.0',
     );
   });
+
+  it('throws rather than silently falling back to the newest release when every LTS in scope has ended', async () => {
+    // Node 24 (Krypton), the newest mocked major, ends 2028-04-30.
+    const afterEveryMockedLts = new Date('2030-01-01');
+    await expect(
+      resolveNodeVersion(undefined, afterEveryMockedLts),
+    ).rejects.toThrow(/no currently-supported lts line/i);
+  });
 });

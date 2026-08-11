@@ -21,7 +21,13 @@ export const resolveNodeVersion = async (
   const { majors, versions } = await allNodeVersions({ fetch: false });
   // toSemver only consults majors for its spec-absent branch, so skip
   // filtering it against node-releases' schedule when spec is given.
-  const range = toSemver(spec, spec ? [] : filterSupportedLts(majors, now));
+  const supportedLts = spec ? [] : filterSupportedLts(majors, now);
+  if (!spec && supportedLts.length === 0) {
+    throw new Error(
+      'No currently-supported LTS line found in the bundled node-releases schedule data; it may be stale. Try updating dependencies, or pass an explicit --node version.',
+    );
+  }
+  const range = toSemver(spec, supportedLts);
   const resolved = versions
     .map(({ node }) => node)
     .filter((v) => satisfies(v, range))
