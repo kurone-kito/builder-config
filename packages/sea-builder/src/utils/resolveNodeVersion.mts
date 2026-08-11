@@ -19,7 +19,9 @@ export const resolveNodeVersion = async (
   now: Date = new Date(),
 ): Promise<`v${SemverVersion}`> => {
   const { majors, versions } = await allNodeVersions({ fetch: false });
-  const range = toSemver(spec, filterSupportedLts(majors, now));
+  // toSemver only consults majors for its spec-absent branch, so skip
+  // filtering it against node-releases' schedule when spec is given.
+  const range = toSemver(spec, spec ? [] : filterSupportedLts(majors, now));
   const resolved = versions
     .map(({ node }) => node)
     .filter((v) => satisfies(v, range))

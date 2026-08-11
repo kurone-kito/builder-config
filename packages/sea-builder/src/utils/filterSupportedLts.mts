@@ -35,7 +35,12 @@ export const filterSupportedLts = <
     const entry = (releaseSchedule as Record<string, ScheduleEntry>)[
       `v${major}`
     ];
-    return Boolean(
-      entry?.lts && entry.end && new Date(entry.end).getTime() > now.getTime(),
-    );
+    if (!entry?.lts || !entry.end) {
+      return false;
+    }
+    // `entry.end` is a date-only string (e.g. "2026-04-30"), which
+    // Date parses as that day's UTC midnight; add a day so the entire
+    // end date itself still counts as supported.
+    const endOfSupportWindow = new Date(entry.end).getTime() + 86_400_000;
+    return endOfSupportWindow > now.getTime();
   });

@@ -41,4 +41,21 @@ describe('filterSupportedLts', () => {
     expect(result).toContainEqual(expect.objectContaining({ major: 24 }));
     expect(result).toContainEqual(expect.objectContaining({ major: 22 }));
   });
+
+  it('still counts the scheduled end date itself as supported', () => {
+    // Node 20 (Iron) ends 2026-04-30; a date-only string parses as that
+    // day's UTC midnight, so a naive `> now` comparison would treat the
+    // entire end date as already unsupported.
+    const stillOnEndDate = new Date('2026-04-30T18:00:00.000Z');
+    expect(filterSupportedLts(majors, stillOnEndDate)).toContainEqual(
+      expect.objectContaining({ major: 20 }),
+    );
+  });
+
+  it('excludes it starting the day after the scheduled end date', () => {
+    const dayAfterEnd = new Date('2026-05-01T00:00:00.001Z');
+    expect(filterSupportedLts(majors, dayAfterEnd)).not.toContainEqual(
+      expect.objectContaining({ major: 20 }),
+    );
+  });
 });
