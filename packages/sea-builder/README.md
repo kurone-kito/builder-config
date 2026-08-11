@@ -45,7 +45,8 @@ as `linux-x64` or `win32-x64`. `sea-builder` automatically invokes
 `sea-builder` also accepts a `--node` option to choose the Node.js version.
 Omitting this option uses the latest patch of the oldest supported LTS line.
 Passing `--node=22` is equivalent to specifying `^22`, while
-`--node=22.23` behaves like `~22.23`.
+`--node=22.23` behaves like `~22.23`. The resolved version is shown in
+the build output.
 
 ### Cache directory
 

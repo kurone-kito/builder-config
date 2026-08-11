@@ -38,6 +38,12 @@ project adheres to
   permanent download cache (#72).
 - Stopped `devPreinstall` from executing unpinned `pnpm dlx` packages
   (#76).
+- Made `--node`'s omitted default match its documentation: `sea-builder`
+  now actually resolves the latest patch of the oldest supported LTS
+  line when the option isn't passed, instead of silently embedding
+  whatever Node.js version happened to run the build, making SEA
+  builds reproducible across machines. The resolved version is now
+  also shown in the build output (#59).
 
 ## [0.21.0] - 2025-10-03
 

@@ -15,4 +15,9 @@ describe('createCacheTask', () => {
 
   it('sets title', () =>
     expect(createCacheTask(opts).title).toBe('Download the Node.js archives'));
+
+  it('includes the resolved Node.js version in the title when provided', () =>
+    expect(createCacheTask({ ...opts, nodeVersion: 'v22.23.2' }).title).toBe(
+      'Download the Node.js archives (v22.23.2)',
+    ));
 });
