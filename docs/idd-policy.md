@@ -123,6 +123,20 @@ rather than a bare check-name match. Confirmed via a live PR (#117)
 that the pinned integration correctly resolves to this repository's
 own `idd-advisory-convergence.yml` workflow, so trusting it is safe.
 
+**Known, accepted limitation**: `integration_id`-pinning verifies only
+that the check was reported *by GitHub Actions*, not that the specific
+workflow content is immutable — a PR can edit
+`.github/workflows/idd-advisory-convergence.yml` on its own branch to
+make the job trivially succeed while keeping the same check name and
+`integration_id`, since the Ruleset checkout doesn't pin the workflow
+file to a specific ref/SHA. Accepted rather than mitigated (e.g. by
+pinning the workflow's own ref) because it introduces no new attack
+surface for this specific repository: under `fully_autonomous_merge`,
+anyone who can open a PR already has direct push access to `main`, so
+a "forged check" actor is already a fully-trusted actor by this
+repository's own merge policy. Revisit if this repository ever accepts
+external contributions from untrusted authors.
+
 ## Credential Scope
 
 **Worker credentials**: repository write access for issue/PR/branch
