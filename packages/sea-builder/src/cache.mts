@@ -9,6 +9,6 @@ import { runIfMain } from './utils/runIfMain.mjs';
  * @returns A promise that resolves when the tasks are completed.
  */
 export const main = async (...targets: readonly string[]): Promise<void> =>
-  createListrCacheTasks({ targets }).run();
+  (await createListrCacheTasks({ targets })).run();
 
 runIfMain(import.meta.url, main);

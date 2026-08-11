@@ -12,6 +12,8 @@ project adheres to
 ### Added
 
 - `CHANGELOG.md` (#112).
+- Added the `node-releases` dependency, used to determine whether an
+  LTS line's support window has already ended (#59).
 
 ### Changed
 
@@ -39,11 +41,18 @@ project adheres to
 - Stopped `devPreinstall` from executing unpinned `pnpm dlx` packages
   (#76).
 - Made `--node`'s omitted default match its documentation: `sea-builder`
-  now actually resolves the latest patch of the oldest supported LTS
-  line when the option isn't passed, instead of silently embedding
-  whatever Node.js version happened to run the build, making SEA
-  builds reproducible across machines. The resolved version is now
-  also shown in the build output (#59).
+  now actually resolves the latest patch of the oldest **currently
+  supported** (not end-of-life) LTS line when the option isn't passed,
+  instead of silently embedding whatever Node.js version happened to
+  run the build, making SEA builds reproducible across machines. An
+  earlier version of this fix still picked the oldest LTS line in
+  `all-node-versions`' history regardless of whether it was still
+  supported, which resolved to Node.js 4 (end-of-life since 2018); the
+  `node-releases` support-window check above closes that gap. The
+  resolved version is now also shown in the build output.
+  `sea-cache`'s own omitted-version default now goes through the same
+  resolution as `sea-builder`'s, so the two commands agree on which
+  archive to fetch when neither specifies an explicit version (#59).
 
 ## [0.21.0] - 2025-10-03
 

@@ -11,5 +11,5 @@ export const createCacheTask = (opts: CacheOptions): Task => ({
   title: opts.nodeVersion
     ? `Download the Node.js archives (${opts.nodeVersion})`
     : 'Download the Node.js archives',
-  task: () => createListrCacheTasks(opts).run(),
+  task: async () => (await createListrCacheTasks(opts)).run(),
 });

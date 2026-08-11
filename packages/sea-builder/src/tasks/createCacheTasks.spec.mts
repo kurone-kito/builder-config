@@ -5,8 +5,8 @@ import { createCacheTasks } from './createCacheTasks.mjs';
 const nodeVersion = 'v18.0.0';
 
 describe('createCacheTasks', () => {
-  it('creates tasks for each target', () => {
-    const tasks = createCacheTasks({
+  it('creates tasks for each target', async () => {
+    const tasks = await createCacheTasks({
       download: vi.fn(),
       existsSync: () => false,
       mkdir: vi.fn(async () => undefined),
@@ -21,7 +21,7 @@ describe('createCacheTasks', () => {
 
   it('passes correct metadata to download', async () => {
     const downloads: Array<readonly [string, string]> = [];
-    const tasks = createCacheTasks({
+    const tasks = await createCacheTasks({
       download: async (url, dest) => {
         downloads.push([url, dest]);
       },

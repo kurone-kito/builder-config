@@ -7,5 +7,7 @@ import { createCacheTasks } from '../tasks/createCacheTasks.mjs';
  * @param options Options controlling the task generation.
  * @returns Configured {@link Listr} instance.
  */
-export const createListrCacheTasks = (options: CacheOptions = {}): Listr =>
-  new Listr(createCacheTasks(options), { concurrent: true });
+export const createListrCacheTasks = async (
+  options: CacheOptions = {},
+): Promise<Listr> =>
+  new Listr(await createCacheTasks(options), { concurrent: true });
