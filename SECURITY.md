@@ -14,12 +14,16 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability within this project, please report
-it by issuing a
-[pull request with a fix](https://github.com/kurone-kito/builder-config/pulls)
-or
-[opening an issue](https://github.com/kurone-kito/builder-config/issues)
-with the “security” label.
+If you discover a security vulnerability within this project, please
+report it privately using GitHub's
+[private vulnerability reporting](https://github.com/kurone-kito/builder-config/security/advisories/new)
+form, rather than a public issue or pull request. This gives us a
+private channel to confirm the issue and prepare a fix before any
+details become public.
+
+As noted above, we do not provide a security SLA for community users,
+so please don't expect a guaranteed response time — but your report
+will be reviewed.
 
 Your contributions to improving the security of this project are greatly
 appreciated.
