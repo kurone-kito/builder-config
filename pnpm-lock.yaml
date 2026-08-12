@@ -38,7 +38,7 @@ importers:
   .:
     devDependencies:
       '@biomejs/biome':
-        specifier: ^2.5.2
+        specifier: ^2.5.7
         version: 2.5.8
       '@commitlint/cli':
         specifier: ^21.2.0
@@ -50,14 +50,14 @@ importers:
         specifier: ^10.0.1
         version: 10.0.1
       '@kurone-kito/biome-config':
-        specifier: ^0.21.0
-        version: 0.21.0(@biomejs/biome@2.5.8)
+        specifier: ^0.22.0
+        version: 0.22.0(@biomejs/biome@2.5.8)
       '@kurone-kito/commitlint-config':
-        specifier: ^0.21.0
-        version: 0.21.0(@commitlint/config-conventional@21.2.0)
+        specifier: ^0.22.0
+        version: 0.22.0(@commitlint/config-conventional@21.2.0)
       '@kurone-kito/cspell-config':
-        specifier: ^0.21.0
-        version: 0.21.0(cspell@10.0.1)
+        specifier: ^0.22.0
+        version: 0.22.0(cspell@10.0.1)
       '@kurone-kito/example-cli':
         specifier: workspace:^
         version: link:packages/example-cli
@@ -65,13 +65,13 @@ importers:
         specifier: https://codeload.github.com/kurone-kito/idd-skill/tar.gz/0a9c90dc277e05e0d7d96f1b09d79ff668860cc6
         version: https://codeload.github.com/kurone-kito/idd-skill/tar.gz/0a9c90dc277e05e0d7d96f1b09d79ff668860cc6
       '@kurone-kito/lint-staged-config':
-        specifier: ^0.21.0
-        version: 0.21.0(cspell@10.0.1)(lint-staged@17.3.0)
+        specifier: ^0.22.0
+        version: 0.22.0(cspell@10.0.1)(lint-staged@17.3.0)
       '@kurone-kito/markdownlint-config':
         specifier: ^0.22.0
         version: 0.22.0
       '@types/semver':
-        specifier: ^7.7.1
+        specifier: ^7.8.0
         version: 7.8.0
       '@vitest/coverage-v8':
         specifier: ^4.1.0
@@ -80,7 +80,7 @@ importers:
         specifier: ^10.0.1
         version: 10.0.1
       lint-staged:
-        specifier: ^17.0.8
+        specifier: ^17.3.0
         version: 17.3.0
       markdownlint-cli2:
         specifier: ^0.23.0
@@ -165,7 +165,7 @@ importers:
   packages/sea-builder:
     dependencies:
       '@types/semver':
-        specifier: ^7.7.1
+        specifier: ^7.8.0
         version: 7.8.0
       all-node-versions:
         specifier: ^13.0.1
@@ -704,17 +704,17 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@kurone-kito/biome-config@0.21.0':
-    resolution: {integrity: sha512-ybkuyD/Yabxig8xj94w6PWFRfQGsJKCCLZmAl1G/FyHtreobPa0fEY3+e0B14B5EeLNHKrGA0rykN4YZSTaq4g==}
+  '@kurone-kito/biome-config@0.22.0':
+    resolution: {integrity: sha512-Brkpi0nJMTlT5JP7Gx29SrAc0ELC7x1FJ8hO/LRY4YPxEt8w/P68spYeVJ1+Dw9qAiWZRoThTgi09JWft2COsQ==}
     engines: {node: ^20.11 || ^22 || >=24}
     peerDependencies:
-      '@biomejs/biome': '>=2.x.x'
+      '@biomejs/biome': '>=2.3.x'
     peerDependenciesMeta:
       '@biomejs/biome':
         optional: true
 
-  '@kurone-kito/commitlint-config@0.21.0':
-    resolution: {integrity: sha512-mDgX8Le8O97gK8DowC1E9Y5kNHZzyV5mfAkbzAJDTjW/euO3NNHiEDJL2awgPz/VGi0odO5EmZzK4g+IKBJq1g==}
+  '@kurone-kito/commitlint-config@0.22.0':
+    resolution: {integrity: sha512-6BNN2BJUsLCgGxLncmjJG/ESA1tBvKDfKCqSsJbZjJpGLdtCYDoCOd9EzXYCUFvDP1Xu0VM9WI/MeSOa0JQ4Lw==}
     engines: {node: ^20.11 || ^22 || >=24}
     peerDependencies:
       '@commitlint/config-conventional': '>=19.x.x'
@@ -722,8 +722,8 @@ packages:
       '@commitlint/config-conventional':
         optional: true
 
-  '@kurone-kito/cspell-config@0.21.0':
-    resolution: {integrity: sha512-e5md1IDwmZm0YaDFKhfpjqiByMWY5xIEevfZayup9d6N2gUD2OJ+xMF9yeRxFYqHZFkJPcKXj7LXhBaA1TI+3A==}
+  '@kurone-kito/cspell-config@0.22.0':
+    resolution: {integrity: sha512-tA1Q/uw2aEd1oabQ5/mjCmHt/4BYcgFdt9nXbjaXRxiwj5MOhneR4MpuDx82qHVym7fkPovmiYR722anX9xzEQ==}
     engines: {node: ^20.11 || ^22 || >=24}
     peerDependencies:
       cspell: '*'
@@ -737,8 +737,8 @@ packages:
     engines: {node: ^22.22.2 || >=24.2.0}
     hasBin: true
 
-  '@kurone-kito/lint-staged-config@0.21.0':
-    resolution: {integrity: sha512-5Rh9JV+Q5mL3HrB6vEUHjTXQfLzL9dyAqGLd4ckaIFRnC6IlXVZUTSw/tnqLlu5vs1zRX5SStCFc9A00AowMzw==}
+  '@kurone-kito/lint-staged-config@0.22.0':
+    resolution: {integrity: sha512-bAxS/1fgXvf9Jl6wRPL3moVk5KI3Ivqk3qkUfnujhHR9O5EahqJEEUpNR3XwrdKdVH3MGkbGwS+ISv2wa6/5CA==}
     engines: {node: ^20.11 || ^22 || >=24}
     peerDependencies:
       cspell: '>=5.7.x'
@@ -3011,21 +3011,21 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@kurone-kito/biome-config@0.21.0(@biomejs/biome@2.5.8)':
+  '@kurone-kito/biome-config@0.22.0(@biomejs/biome@2.5.8)':
     optionalDependencies:
       '@biomejs/biome': 2.5.8
 
-  '@kurone-kito/commitlint-config@0.21.0(@commitlint/config-conventional@21.2.0)':
+  '@kurone-kito/commitlint-config@0.22.0(@commitlint/config-conventional@21.2.0)':
     optionalDependencies:
       '@commitlint/config-conventional': 21.2.0
 
-  '@kurone-kito/cspell-config@0.21.0(cspell@10.0.1)':
+  '@kurone-kito/cspell-config@0.22.0(cspell@10.0.1)':
     optionalDependencies:
       cspell: 10.0.1
 
   '@kurone-kito/idd-skill@https://codeload.github.com/kurone-kito/idd-skill/tar.gz/0a9c90dc277e05e0d7d96f1b09d79ff668860cc6': {}
 
-  '@kurone-kito/lint-staged-config@0.21.0(cspell@10.0.1)(lint-staged@17.3.0)':
+  '@kurone-kito/lint-staged-config@0.22.0(cspell@10.0.1)(lint-staged@17.3.0)':
     optionalDependencies:
       cspell: 10.0.1
       lint-staged: 17.3.0
