@@ -137,6 +137,25 @@ a "forged check" actor is already a fully-trusted actor by this
 repository's own merge policy. Revisit if this repository ever accepts
 external contributions from untrusted authors.
 
+**`ciGate.trustEmptyProtectionReads`**: `true`, enabled (2026-08-12).
+This repository enforces its merge gate through a Ruleset only
+(`main`, id `20674407`) and has no classic branch-protection record —
+`gh api repos/kurone-kito/builder-config/branches/main/protection`
+genuinely returns `404 Branch not protected`, not a masked `403`.
+Confirmed before enabling: the automation token carries the `repo`
+scope and resolves as an `admin` collaborator
+(`gh api repos/kurone-kito/builder-config/collaborators/kurone-kito/permission`),
+and the same token's Ruleset reads already succeed and correctly
+resolve `idd-advisory-convergence` as the sole required check — so the
+`404` cannot be this token lacking read access; it is a genuine "not
+configured" result. Without this flag, the required-check-discovery
+fail-closed default (`idd-ci.instructions.md`'s Required-check
+discovery step 4) treats every classic-protection `404` as unreadable
+and holds at F2/F3 regardless of Ruleset state, which blocked the
+merge of issue `#124` before this flag was set. Revisit if this
+repository ever adds classic branch protection alongside its Ruleset,
+or if the automation token's scope is ever narrowed below `repo`.
+
 ## Credential Scope
 
 **Worker credentials**: repository write access for issue/PR/branch
