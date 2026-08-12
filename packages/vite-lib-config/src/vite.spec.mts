@@ -155,8 +155,11 @@ describe('build configuration source', () => {
       fileURLToPath(new URL('./vite.mts', import.meta.url)),
       'utf8',
     );
-    expect(source).toContain('rolldownOptions');
-    expect(source).not.toContain('rollupOptions');
-    expect(source).not.toContain('importAttributesKey');
+    // Match property-key syntax (a trailing colon), not a bare substring,
+    // so a future prose comment mentioning the old key by name doesn't
+    // trip a false failure.
+    expect(source).toContain('rolldownOptions:');
+    expect(source).not.toContain('rollupOptions:');
+    expect(source).not.toContain('importAttributesKey:');
   });
 });

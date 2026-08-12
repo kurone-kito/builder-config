@@ -31,11 +31,13 @@ project adheres to
   `^8.0.0`, and `vite-plugin-dts` from `^4.5.4` to `^5.0.1`. Renamed
   `build.rollupOptions` to `build.rolldownOptions` in the shared
   `viteConfig`, matching Vite 8's Rolldown-based bundler, and removed
-  the `build.rollupOptions.output.importAttributesKey` option —
-  Rolldown's `OutputOptions` has no equivalent, so downstream
-  consumers of the published `viteConfig()` that relied on it to
-  control emitted import-attribute syntax (the `with { type: ... }` /
-  `assert { type: ... }` forms) must drop that reliance (#121).
+  the `output.importAttributesKey` option that used to live under the
+  old `build.rollupOptions` — Rolldown's `OutputOptions` has no
+  equivalent under the new `build.rolldownOptions` either, so
+  downstream consumers of the published `viteConfig()` that relied on
+  it to control emitted import-attribute syntax (the
+  `with { type: ... }` / `assert { type: ... }` forms) must drop that
+  reliance (#121).
 
 ### Fixed
 
