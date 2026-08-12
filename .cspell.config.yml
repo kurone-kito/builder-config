@@ -12,6 +12,7 @@ words:
   - desync
   - desynced
   - Esync
+  - GHSA
   - isort
   - onnx
   - pylint
@@ -28,4 +29,5 @@ words:
   - unstub
   - unwaived
   - waivable
+  - xcpc
   - xsea
