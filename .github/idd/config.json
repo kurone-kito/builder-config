@@ -36,7 +36,8 @@
     "chatgpt-codex-connector[bot]"
   ],
   "ciGate": {
-    "trustSourcePinnedRequiredChecks": true
+    "trustSourcePinnedRequiredChecks": true,
+    "trustEmptyProtectionReads": true
   },
   "autopilotSuitability": {
     "floor": 3
