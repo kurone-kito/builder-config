@@ -8,6 +8,16 @@ engineStrict: true
 gitChecks: false
 ignoreWorkspaceRootCheck: true
 linkWorkspacePackages: true
+overrides:
+  # Transitive-only pin: xsea's own adm-zip range (^0.5.16) predates the
+  # GHSA-xcpc-8h2w-3j85 fix. Drop once xsea widens its own adm-zip
+  # dependency to include >=0.6.0.
+  adm-zip: '^0.6.0'
+  # Transitive-only pin: a fresh resolve of postcss's nanoid: ^3.3.16
+  # range still picks the pre-fix 3.3.16 (GHSA-2v37-7h3g-55p8) as of
+  # this writing. Drop once a fresh `pnpm install` naturally resolves
+  # nanoid >=3.3.17 without this override.
+  nanoid: '^3.3.17'
 packageExtensions:
   undici-types:
     dependencies:
