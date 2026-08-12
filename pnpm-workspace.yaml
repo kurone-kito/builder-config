@@ -1,5 +1,5 @@
 allowBuilds:
-  '@kurone-kito/idd-skill@https://codeload.github.com/kurone-kito/idd-skill/tar.gz/0a9c90dc277e05e0d7d96f1b09d79ff668860cc6': true
+  '@kurone-kito/idd-skill@https://codeload.github.com/kurone-kito/idd-skill/tar.gz/83d5f2ae1e6502d95c3d675f807574c42742ef4d': true
   esbuild: true
 configDependencies:
   '@pnpm/plugin-types-fixer': 0.1.0+sha512-bLww63gRHi7siYTqFJb5qNdcXadU0jv20Et6z5AryMZ7FlLolbEJOrXLpg8+amQZNHHNW1dfFUBGVw/9ezQbFg==
