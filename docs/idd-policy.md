@@ -561,3 +561,5 @@ hook file invokes them changed.
 
   See the matching step in the release checklist in
   [`.github/copilot-instructions.md`](../.github/copilot-instructions.md#release-checklist).
+
+<!-- idd-51-waiver-refresh-throwaway-test: disposable marker, PR will be closed without merge -->
