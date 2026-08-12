@@ -175,10 +175,11 @@ the npm registry**; its default dependency spec is a moving
 to a reviewed commit archive for reproducibility:
 
 ```text
-https://codeload.github.com/kurone-kito/idd-skill/tar.gz/0a9c90dc277e05e0d7d96f1b09d79ff668860cc6
+https://codeload.github.com/kurone-kito/idd-skill/tar.gz/83d5f2ae1e6502d95c3d675f807574c42742ef4d
 ```
 
-(idd-skill commit `0a9c90d`, tag `v0.6.0`, `@kurone-kito/idd-skill@0.6.0`.)
+(idd-skill commit `83d5f2a`, an unreleased `main` snapshot past
+`v0.6.0` — no newer tag exists yet; `@kurone-kito/idd-skill@0.6.0`.)
 Bump this pin deliberately (re-run
 `idd-helper-bundle-manifest --profile package-manager --package-spec <new-pin>`
 from a newer idd-skill clone) rather than letting it drift to `main`.
