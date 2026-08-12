@@ -27,6 +27,15 @@ project adheres to
   emit syntax unsupported on Node.js 20, even when the build itself
   runs on a supported Node.js version (#88).
 - Bumped the `typescript` devDependency to `~6.0.3` (#113).
+- **Breaking:** bumped the `vite` dependency from `^7.1.9` to
+  `^8.0.0`, and `vite-plugin-dts` from `^4.5.4` to `^5.0.1`. Renamed
+  `build.rollupOptions` to `build.rolldownOptions` in the shared
+  `viteConfig`, matching Vite 8's Rolldown-based bundler, and removed
+  `build.rollupOptions.output.importAttributesKey` — Rolldown's
+  `OutputOptions` has no equivalent option, so downstream consumers of
+  the published `viteConfig()` that relied on it to control emitted
+  import-attribute syntax (`with { type: ... }` / `assert { type: ...
+  }`) must drop that reliance (#121).
 
 ### Fixed
 

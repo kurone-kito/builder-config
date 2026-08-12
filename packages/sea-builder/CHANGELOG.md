@@ -28,6 +28,7 @@ project adheres to
   dropping Node.js 20, Node.js 22 below 22.23.1, Node.js 24 below
   24.2.0, and every Node.js 25 release; bumped pnpm to v11 (#88).
 - Bumped the `typescript` devDependency to `~6.0.3` (#113).
+- Bumped the `vite` devDependency to `^8.0.0` (#121).
 
 ### Fixed
 
