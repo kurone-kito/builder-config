@@ -47,6 +47,12 @@ describe('viteConfig', () => {
 
     it('disables type definition generation', () =>
       expect(viteConfig({}, { cwd })).toHaveProperty('plugins', []));
+
+    it('sets build.rolldownOptions.input for the entry', () =>
+      expect(viteConfig({}, { cwd })).toHaveProperty(
+        'build.rolldownOptions.input',
+        [entry],
+      ));
   });
 
   describe('When does not detect shebang', () => {
