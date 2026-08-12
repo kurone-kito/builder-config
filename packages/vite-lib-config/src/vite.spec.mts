@@ -1,6 +1,7 @@
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { viteConfig } from './vite.mjs';
 
@@ -140,4 +141,27 @@ describe('viteConfig', () => {
 
 describe('srcDir', () => {
   it('exports srcDir constant', () => expect(srcDir).toBe('src'));
+});
+
+describe('build configuration source', () => {
+  // Vite's own `mergeConfig` bidirectionally aliases `build.rollupOptions`
+  // and `build.rolldownOptions` in its merged output (confirmed
+  // empirically), so a runtime-output assertion cannot distinguish which
+  // key this file declares -- both keys read back identically either way.
+  // Guard against reverting the rename by asserting on the source text
+  // itself instead.
+  it('declares build.rolldownOptions and drops importAttributesKey', async () => {
+    const source = await readFile(
+      fileURLToPath(new URL('./vite.mts', import.meta.url)),
+      'utf8',
+    );
+    // Match the actual declaration shapes (staticConfig's `output` nesting
+    // and innerCreateConfig's `input: entry` override), not a bare
+    // substring -- a substring or property-key-only match could still
+    // pass from an inert comment mentioning the key name.
+    expect(source).toMatch(/rolldownOptions:\s*\{\s*output:/);
+    expect(source).toMatch(/rolldownOptions:\s*\{\s*input:\s*entry\s*\}/);
+    expect(source).not.toContain('rollupOptions:');
+    expect(source).not.toContain('importAttributesKey:');
+  });
 });

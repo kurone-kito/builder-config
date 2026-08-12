@@ -37,12 +37,11 @@ const out = '[name].mjs';
 /** Static configuration for Vite builds. */
 const staticConfig = {
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       output: {
         chunkFileNames: out,
         entryFileNames: out,
         format: 'es',
-        importAttributesKey: 'with',
       },
     },
     sourcemap: true,
@@ -74,7 +73,7 @@ const innerCreateConfig = (entries: readonly string[]): UserConfig => {
   const bin = entry.every((f) => shebangRegex.test(readFileSync(f, 'utf8')));
   return mergeConfig<UserConfig, UserConfig>(staticConfig, {
     build: {
-      rollupOptions: { input: entry },
+      rolldownOptions: { input: entry },
       ...(bin ? {} : { lib: { entry, formats: ['es'] } }),
     },
     plugins: bin ? [] : [dts({ exclude: ['**/*.spec.mts'] })],

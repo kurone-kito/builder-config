@@ -38,8 +38,8 @@
     "lodash-es": "^4.17.21",
     "shebang-regex": "^4.0.0",
     "type-fest": "^5.0.1",
-    "vite": "^7.1.9",
-    "vite-plugin-dts": "^4.5.4"
+    "vite": "^8.0.0",
+    "vite-plugin-dts": "^5.0.1"
   },
   "devDependencies": {
     "@kurone-kito/typescript-config": "workspace:^",
