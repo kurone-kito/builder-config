@@ -155,10 +155,12 @@ describe('build configuration source', () => {
       fileURLToPath(new URL('./vite.mts', import.meta.url)),
       'utf8',
     );
-    // Match property-key syntax (a trailing colon), not a bare substring,
-    // so a future prose comment mentioning the old key by name doesn't
-    // trip a false failure.
-    expect(source).toContain('rolldownOptions:');
+    // Match the actual declaration shapes (staticConfig's `output` nesting
+    // and innerCreateConfig's `input: entry` override), not a bare
+    // substring -- a substring or property-key-only match could still
+    // pass from an inert comment mentioning the key name.
+    expect(source).toMatch(/rolldownOptions:\s*\{\s*output:/);
+    expect(source).toMatch(/rolldownOptions:\s*\{\s*input:\s*entry\s*\}/);
     expect(source).not.toContain('rollupOptions:');
     expect(source).not.toContain('importAttributesKey:');
   });
