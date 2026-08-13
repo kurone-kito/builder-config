@@ -552,8 +552,9 @@ hook file invokes them changed.
      round. Never rename or remove the `## [Unreleased]` heading
      itself — the file always keeps exactly one, or the next release
      has no heading left to batch entries under.
-  3. **Prerelease cuts** (`.github/workflows/release-next.yml`'s `next`
-     tag, versions like `0.22.0-alpha.0`) do **not** get their own
+  3. **Prerelease cuts** (`.github/workflows/release.yml`'s manual
+     `workflow_dispatch` path, `next` tag, versions like
+     `0.22.0-alpha.0`) do **not** get their own
      CHANGELOG heading — entries stay under `## [Unreleased]` through
      every prerelease cut and only move under a version heading when
      the corresponding **stable** release cuts, since a CHANGELOG
