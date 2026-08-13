@@ -599,6 +599,23 @@ retained. `instructions-only` uses neither. When an instruction shows a
 `node scripts/...` command, resolve it to your profile's authoritative surface
 rather than maintaining both.
 
+**pnpm `--`-passthrough footgun.** Under `package-manager`, `pnpm run
+idd:<name> -- <flag>...` forwards the literal `--` separator to the
+invoked script instead of stripping it (npm strips it; pnpm does not).
+`idd-skill`'s shared `cli-args.mts` parser strips one leading bare `--`,
+so most `idd:<name>` scripts tolerate either form — but four scripts
+route around that shared parser and reproduce the footgun:
+`idd:post-idd-marker` and `idd:emit-marker` fail with `missing value for
+argument: --`; `idd:discover-orphan-filter` and
+`idd:discover-roadmap-graph` fail with `unknown argument: --`. Invoke
+these four **without** a leading `--` separator —
+`pnpm run idd:post-idd-marker --type claim ...`, not
+`pnpm run idd:post-idd-marker -- --type claim ...` — every other
+`idd:<name>` script in this repository's `package.json` tolerates either
+form. This is a known upstream (`idd-skill`) gap, not a local
+misconfiguration; revisit this note whenever the `@kurone-kito/idd-skill`
+pin changes, since a future bump may narrow or remove the affected list.
+
 **Authoring rule for instructions/docs.** A mandatory helper step (one
 with no skip/fallback wording) must always name an `instructions-only`
 fallback, since that profile has no helper runtime at all. Every helper
