@@ -6,19 +6,23 @@ tag-template: v$NEXT_PATCH_VERSION
 # mark IDD workflow state, not a PR's actual change type.
 categories:
   - title: 🚀 Features
+    exclusive: true
     when:
       labels:
         - enhancement
   - title: 🐛 Bug Fixes
+    exclusive: true
     when:
       labels:
         - bug
   - title: 📝 Documentation
+    exclusive: true
     when:
       labels:
         - documentation
   - title: 🧰 Maintenance
     collapse-after: 5
+    exclusive: true
     when:
       labels:
         - chore
