@@ -6,9 +6,6 @@ on:
         default: false
         description: Publish the alpha version
         type: boolean
-    secrets:
-      NPM_TOKEN:
-        required: true
 permissions:
   contents: write
   packages: write
@@ -45,15 +42,6 @@ jobs:
         run: pnpm run is:release
       - name: Build the project explicitly. The workaround is provisional because the publish command does not perform topological sorting.
         run: pnpm run build
-      - env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        name: Setting the npmjs registry and the token
-        run: |
-          cat << EOF > "${HOME}/.npmrc"
-          registry=https://registry.npmjs.org/
-          @kurone-kito:registry=https://registry.npmjs.org/
-          //registry.npmjs.org/:_authToken=$NPM_TOKEN
-          EOF
       - if: ${{ inputs.next != true }}
         name: Publish the packages
         run: pnpm run publish
