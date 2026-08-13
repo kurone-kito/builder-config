@@ -543,8 +543,9 @@ hook file invokes them changed.
   1. For every package the release actually changed, add an entry
      under its `## [Unreleased]` heading for each user-facing change
      since the last release (source: the merged PRs in range, using
-     the same 🚀 Features / 🐛 Bug Fixes / 🧰 Maintenance categorization
-     `.github/release-drafter.yml` already applies).
+     the same 🚀 Features / 🐛 Bug Fixes / 📝 Documentation /
+     🧰 Maintenance categorization `.github/release-drafter.yml` already
+     applies).
   2. For every touched package that now has `[Unreleased]` entries,
      insert a new `## [<version>] - <YYYY-MM-DD>` heading directly
      below `## [Unreleased]` and move those entries under it, then
