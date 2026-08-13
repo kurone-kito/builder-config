@@ -1,6 +1,6 @@
 {
   "name": "@kurone-kito/vite-lib-config",
-  "version": "0.22.0-alpha.10",
+  "version": "0.22.0-alpha.11",
   "description": "The vite configuration package for the workspaces",
   "keywords": [
     "cli",

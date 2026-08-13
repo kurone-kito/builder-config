@@ -1,6 +1,6 @@
 {
   "name": "@kurone-kito/builder-config",
-  "version": "0.22.0-alpha.10",
+  "version": "0.22.0-alpha.11",
   "private": true,
   "description": "The boilerplate project of the Node.js",
   "keywords": [
