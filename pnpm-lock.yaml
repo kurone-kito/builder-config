@@ -64,15 +64,15 @@ importers:
       '@kurone-kito/idd-skill':
         specifier: https://codeload.github.com/kurone-kito/idd-skill/tar.gz/83d5f2ae1e6502d95c3d675f807574c42742ef4d
         version: https://codeload.github.com/kurone-kito/idd-skill/tar.gz/83d5f2ae1e6502d95c3d675f807574c42742ef4d
+      '@kurone-kito/is-prerelease':
+        specifier: ^0.1.0
+        version: 0.1.0
       '@kurone-kito/lint-staged-config':
         specifier: ^0.22.0
         version: 0.22.0(cspell@10.0.1)(lint-staged@17.3.0)
       '@kurone-kito/markdownlint-config':
         specifier: ^0.22.0
         version: 0.22.0
-      '@types/semver':
-        specifier: ^7.8.0
-        version: 7.8.0
       '@vitest/coverage-v8':
         specifier: ^4.1.0
         version: 4.1.10(vitest@4.1.10)
@@ -88,9 +88,6 @@ importers:
       rimraf:
         specifier: ^6.0.1
         version: 6.1.3
-      semver:
-        specifier: ^7.8.1
-        version: 7.8.5
       typescript:
         specifier: ~7.0.2
         version: 7.0.2
@@ -737,6 +734,11 @@ packages:
     engines: {node: ^22.22.2 || >=24.2.0}
     hasBin: true
 
+  '@kurone-kito/is-prerelease@0.1.0':
+    resolution: {integrity: sha512-+borQVaj0WocBjGrhGjFjqNlSLxvbyOJ808mtIRZa4K8fe9eVLU1YF43qUIzCi6WtyF4z5jtHaAXiwtgJ8tQfg==}
+    engines: {node: ^20.11 || ^22 || >=24}
+    hasBin: true
+
   '@kurone-kito/lint-staged-config@0.22.0':
     resolution: {integrity: sha512-bAxS/1fgXvf9Jl6wRPL3moVk5KI3Ivqk3qkUfnujhHR9O5EahqJEEUpNR3XwrdKdVH3MGkbGwS+ISv2wa6/5CA==}
     engines: {node: ^20.11 || ^22 || >=24}
@@ -751,6 +753,14 @@ packages:
 
   '@kurone-kito/markdownlint-config@0.22.0':
     resolution: {integrity: sha512-eldayG/vr7tXDfbQczUwRr6YsR6Zlm/PS85ix7BL3MQjUTi6dP79zY/bq4usZ+bWPBIHswTBRSwpUOTax8gKiA==}
+    engines: {node: ^20.11 || ^22 || >=24}
+
+  '@kurone-kito/web-toybox-node@0.1.0-alpha.11':
+    resolution: {integrity: sha512-YihUvTaHCLwgOFmH9Sa9XzhZKuE0ZlblK0l9RsJ5/tAY32jr5HzmFY1VaN8YLuFEFLrbkUXdOXXmVNaYikG4Ig==}
+    engines: {node: ^20.11 || ^22 || >=24}
+
+  '@kurone-kito/web-toybox@0.1.0-alpha.11':
+    resolution: {integrity: sha512-OV6sgclo8lZ2eGGHiCNHeFDL2XIMQYRzQcYEsdrL3yab2mjin4HuqKxpXWPxUQOc6zn1GIksU/8pcppvTMqosg==}
     engines: {node: ^20.11 || ^22 || >=24}
 
   '@nodelib/fs.scandir@2.1.5':
@@ -3025,12 +3035,26 @@ snapshots:
 
   '@kurone-kito/idd-skill@https://codeload.github.com/kurone-kito/idd-skill/tar.gz/83d5f2ae1e6502d95c3d675f807574c42742ef4d': {}
 
+  '@kurone-kito/is-prerelease@0.1.0':
+    dependencies:
+      '@kurone-kito/web-toybox-node': 0.1.0-alpha.11
+      '@types/semver': 7.8.0
+      semver: 7.8.5
+
   '@kurone-kito/lint-staged-config@0.22.0(cspell@10.0.1)(lint-staged@17.3.0)':
     optionalDependencies:
       cspell: 10.0.1
       lint-staged: 17.3.0
 
   '@kurone-kito/markdownlint-config@0.22.0': {}
+
+  '@kurone-kito/web-toybox-node@0.1.0-alpha.11':
+    dependencies:
+      '@kurone-kito/web-toybox': 0.1.0-alpha.11
+
+  '@kurone-kito/web-toybox@0.1.0-alpha.11':
+    dependencies:
+      type-fest: 5.8.0
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:

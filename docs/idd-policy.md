@@ -256,11 +256,11 @@ repository's baseline drops the `Bash(node scripts/*)` /
 idd-skill's own repository *is* the `vendored-node` source tree; under
 this repository's `package-manager` profile the `idd-*` helpers run
 through `pnpm exec`/`package.json` scripts instead, this repository has
-no `bin/` directory at all, and its own `scripts/` holds only small
-release utilities (`isPrerelease.mjs`, `createEntryStub.mjs`) — keeping
-the wildcard would widen the attack surface (any newly added or
-modified script under `scripts/` would run without a permission
-prompt) with no corresponding IDD-helper benefit here.
+no `bin/` directory at all, and its own `scripts/` holds only a single
+release utility (`createEntryStub.mjs`) — keeping the wildcard would
+widen the attack surface (any newly added or modified script under
+`scripts/` would run without a permission prompt) with no
+corresponding IDD-helper benefit here.
 
 Personal additions belong in `.claude/settings.local.json`, which
 layers on top of the committed baseline.
