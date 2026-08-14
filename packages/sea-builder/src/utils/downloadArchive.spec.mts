@@ -19,9 +19,9 @@ vi.mock('node:fs/promises', async (importOriginal) => {
 });
 
 const ARCHIVE_CONTENT = 'fake-archive-bytes';
-const ARCHIVE_NAME = 'node-v22.23.1-linux-x64.tar.gz';
+const ARCHIVE_NAME = 'node-v22.23.2-linux-x64.tar.gz';
 const ARCHIVE_HASH = createHash('sha256').update(ARCHIVE_CONTENT).digest('hex');
-const ARCHIVE_URL = `https://nodejs.org/dist/v22.23.1/${ARCHIVE_NAME}`;
+const ARCHIVE_URL = `https://nodejs.org/dist/v22.23.2/${ARCHIVE_NAME}`;
 
 const bodyStream = (content: string): ReadableStream<Uint8Array> =>
   new ReadableStream({
