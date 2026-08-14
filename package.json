@@ -79,7 +79,7 @@
     "postlint:fix": "pnpm run lint:cspell:check",
     "pnpm:devPreinstall": "pnpm --if-present --workspace-concurrency=0 -r run devPreinstall",
     "predev": "pnpm run build",
-    "prepare": "git rev-parse --git-dir > /dev/null 2>&1 || exit 0; git config core.hooksPath .githooks && chmod +x .githooks/pre-commit .githooks/pre-push .githooks/commit-msg",
+    "prepare": "git rev-parse --git-dir > /dev/null 2>&1 || exit 0; git config core.hooksPath .githooks",
     "pretest": "pnpm run build",
     "publish": "pnpm -r publish --no-git-checks",
     "publish:next": "pnpm -r publish --tag next --no-git-checks",

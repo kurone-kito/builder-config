@@ -484,25 +484,34 @@ rather than accepting the permanent false-positive warning:
   `pnpm install`.
 
   ```sh
-  git rev-parse --git-dir > /dev/null 2>&1 || exit 0; git config core.hooksPath .githooks && chmod +x .githooks/pre-commit .githooks/pre-push .githooks/commit-msg
+  git rev-parse --git-dir > /dev/null 2>&1 || exit 0; git config core.hooksPath .githooks
   ```
 
   The `git rev-parse --git-dir` guard keeps this a no-op (exit 0) when
   `pnpm install` runs outside a Git worktree — a "Download ZIP"
   checkout or a registry-tarball install has no `.git` to configure,
   and hooks are meaningless there anyway. Inside a Git worktree, a
-  genuine `git config`/`chmod` failure still propagates (fails the
-  install) rather than being silently swallowed — an earlier
-  `... || true` shape suppressed that class of failure too, which
-  would have left hooks silently unwired (worktree guard, lint-staged,
-  commitlint all inert) with no signal to the developer. This uses
-  `exit 0` plus `;`/`&&`/`||` chaining rather than `if`/`then`/`fi`:
-  this repository's `pnpm-workspace.yaml` sets `shellEmulator: true`
-  for cross-platform lifecycle scripts (Windows CI included), and that
-  emulator supports simple command chaining but not full POSIX
-  control-flow keywords — confirmed empirically (`if` fails with
-  `command not found: if` under the emulator, even though it works
-  under a real POSIX shell).
+  genuine `git config` failure still propagates (fails the install)
+  rather than being silently swallowed — an earlier `... || true`
+  shape suppressed that class of failure too, which would have left
+  hooks silently unwired (worktree guard, lint-staged, commitlint all
+  inert) with no signal to the developer. This uses `exit 0` plus
+  `;`/`||` chaining rather than `if`/`then`/`fi`: this repository's
+  `pnpm-workspace.yaml` sets `shellEmulator: true` for cross-platform
+  lifecycle scripts (Windows CI included), and that emulator supports
+  simple command chaining but not full POSIX control-flow keywords —
+  confirmed empirically (`if` fails with `command not found: if` under
+  the emulator, even though it works under a real POSIX shell).
+
+  The script intentionally does **not** `chmod +x` the hook files: `git
+  ls-files -s .githooks/` already reports mode `100755` for
+  `pre-commit`, `pre-push`, and `commit-msg`, and a normal `git
+  checkout` restores that index-recorded mode on its own, so a dynamic
+  `chmod` at install time never changed anything. Any *future*
+  `.githooks/*` file must be committed with its executable bit already
+  set — for example `git update-index --chmod=+x <path>` before
+  committing, or by copying an existing hook file's mode — since
+  `prepare` no longer fixes this up at install time.
 
 `lint-staged`'s and `commitlint`'s own configuration
 (`.lintstagedrc.mjs`, `.commitlintrc.yml`) are unchanged; only which
