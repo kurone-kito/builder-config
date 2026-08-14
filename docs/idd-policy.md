@@ -503,11 +503,11 @@ rather than accepting the permanent false-positive warning:
   confirmed empirically (`if` fails with `command not found: if` under
   the emulator, even though it works under a real POSIX shell).
 
-  The script intentionally does **not** `chmod +x` the hook files: `git
-  ls-files -s .githooks/` already reports mode `100755` for
-  `pre-commit`, `pre-push`, and `commit-msg`, and a normal `git
-  checkout` restores that index-recorded mode on its own, so a dynamic
-  `chmod` at install time never changed anything. Any *future*
+  The script intentionally does **not** `chmod +x` the hook files:
+  `git ls-files -s .githooks/` already reports mode `100755` for
+  `pre-commit`, `pre-push`, and `commit-msg`, and a normal
+  `git checkout` restores that index-recorded mode on its own, so a
+  dynamic `chmod` at install time never changed anything. Any *future*
   `.githooks/*` file must be committed with its executable bit already
   set — for example `git update-index --chmod=+x <path>` before
   committing, or by copying an existing hook file's mode — since
