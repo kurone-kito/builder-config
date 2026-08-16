@@ -32,6 +32,9 @@ project adheres to
 
 ### Fixed
 
+- Forwarded the resolved `--node` version to xsea as `-N` when linking
+  the SEA binary, so the emitted binary matches the version the cache
+  task downloaded instead of the Node.js running `sea-builder` (#155).
 - Restored CI signal on feature branches and pull requests, and
   aligned the `@vitest/coverage-v8` peer with `vitest` v4 (#68).
 - Fixed the `env` shebang with a multi-word argument on Linux by
