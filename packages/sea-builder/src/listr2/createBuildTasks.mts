@@ -29,6 +29,7 @@ export const createBuildTasks = async (
   const { arch, platform = process.platform, projectRoot } = options;
   const { basename, download, execa, existsSync, mkdir, targets } =
     await normalizeBuildOptions(options);
+  const nodeVersion = await resolveNodeVersion(options.nodeVersion);
   return new Listr([
     createBuildTask(execa),
     createCacheTask({
@@ -36,11 +37,11 @@ export const createBuildTasks = async (
       download,
       existsSync,
       mkdir,
-      nodeVersion: await resolveNodeVersion(options.nodeVersion),
+      nodeVersion,
       platform,
       projectRoot,
       targets,
     }),
-    createSeaTask(execa, targets, basename),
+    createSeaTask(execa, targets, basename, nodeVersion),
   ]);
 };
