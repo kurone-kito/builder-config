@@ -38,8 +38,8 @@ are used.
 ### Options
 
 Both commands accept target strings in the nodejs.org archive format
-`<platform>-<arch>` such as `linux-x64` or `win-x64`. When no target is
-given, the current Node.js platform and architecture are mapped onto that
+`<platform>-<arch>` such as `linux-x64` or `win-x64`. Omitted targets
+and caller-supplied Node platform/arch spellings are mapped onto that
 vocabulary (the Windows platform id becomes `win`, `ia32` becomes `x86`
 on Windows, and `arm` becomes `armv7l`). `sea-builder` automatically
 invokes `pnpm exec xsea` with the downloaded archives to create the
