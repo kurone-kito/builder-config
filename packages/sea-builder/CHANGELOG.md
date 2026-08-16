@@ -32,9 +32,6 @@ project adheres to
 
 ### Fixed
 
-- Mapped `win32`, Windows `ia32`, and `arm` target names onto nodejs.org
-  archive vocabulary so default Windows builds and caller-supplied
-  `win32` targets no longer 404 (#154).
 - Forwarded the resolved `--node` version to xsea as `-N` when linking
   the SEA binary, so the emitted binary matches the version the cache
   task downloaded instead of the Node.js running `sea-builder` (#155).
