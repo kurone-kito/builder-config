@@ -57,10 +57,17 @@ describe('createBuildTasks', () => {
     expect(mocks.resolveNodeVersion).toHaveBeenCalledWith('20');
   });
 
-  it('passes the resolved node version to createCacheTask', async () => {
+  it('resolves the node version once and forwards it to cache and sea tasks', async () => {
     await createBuildTasks({ basename: 'foo' });
+    expect(mocks.resolveNodeVersion).toHaveBeenCalledTimes(1);
     expect(mocks.createCacheTask).toHaveBeenCalledWith(
       expect.objectContaining({ nodeVersion: 'v22.23.2' }),
+    );
+    expect(mocks.createSeaTask).toHaveBeenCalledWith(
+      expect.anything(),
+      ['linux-x64'],
+      'foo',
+      'v22.23.2',
     );
   });
 });

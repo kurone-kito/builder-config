@@ -13,6 +13,7 @@ describe('createSeaTask', () => {
       runExeca as unknown as typeof execa,
       ['linux-x64', 'win32-x64'],
       'foo',
+      'v22.23.2',
     ).task();
     expect(calls[0]).toEqual([
       'pnpm',
@@ -22,6 +23,8 @@ describe('createSeaTask', () => {
         'dist/index.mjs',
         '-o',
         'sea/foo',
+        '-N',
+        'v22.23.2',
         '-t',
         'linux-x64',
         '-t',
@@ -31,7 +34,7 @@ describe('createSeaTask', () => {
   });
 
   it('sets title', () =>
-    expect(createSeaTask(vi.fn(), [], 'foo').title).toBe(
+    expect(createSeaTask(vi.fn(), [], 'foo', 'v22.23.2').title).toBe(
       'Linking the SEA binary',
     ));
 });
