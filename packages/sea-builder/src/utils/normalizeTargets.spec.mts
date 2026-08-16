@@ -32,13 +32,22 @@ describe('normalizeTargets', () => {
     ]);
   });
 
-  it('maps a derived arm default to armv7l', () => {
+  it('maps a derived linux arm default to armv7l', () => {
     expect(normalizeTargets([], 'linux', 'arm')).toEqual(['linux-armv7l']);
   });
 
-  it('maps a caller-supplied arm target to armv7l', () => {
+  it('maps a caller-supplied linux arm target to armv7l', () => {
     expect(normalizeTargets(['linux-arm'], 'darwin', 'x64')).toEqual([
       'linux-armv7l',
+    ]);
+  });
+
+  it('does not map arm to armv7l on non-linux targets', () => {
+    expect(normalizeTargets(['win32-arm'], 'linux', 'x64')).toEqual([
+      'win-arm',
+    ]);
+    expect(normalizeTargets(['darwin-arm'], 'linux', 'x64')).toEqual([
+      'darwin-arm',
     ]);
   });
 

@@ -5,7 +5,7 @@
  * `normalizeCacheOptions` re-entering through `createListrCacheTasks`)
  * does not rewrite them again.
  * @param target Target string such as `win32-x64` or `linux-arm`.
- * @returns The nodejs.org archive target, e.g. `win-x64`.
+ * @returns The nodejs.org archive target, e.g. `win-x64` or `linux-armv7l`.
  */
 const toNodeArchiveTarget = (target: string): string => {
   const separator = target.lastIndexOf('-');
@@ -19,7 +19,7 @@ const toNodeArchiveTarget = (target: string): string => {
   let mappedArch = arch;
   if (mappedPlatform === 'win' && arch === 'ia32') {
     mappedArch = 'x86';
-  } else if (arch === 'arm') {
+  } else if (mappedPlatform === 'linux' && arch === 'arm') {
     mappedArch = 'armv7l';
   }
   return `${mappedPlatform}-${mappedArch}`;
@@ -31,7 +31,7 @@ const toNodeArchiveTarget = (target: string): string => {
  * When {@link targets} is empty, this function falls back to the current
  * {@link platform} and {@link arch} to create a single target string.
  * Every returned token is then mapped onto nodejs.org archive vocabulary
- * (`win32` → `win`, Windows `ia32` → `x86`, `arm` → `armv7l`).
+ * (`win32` → `win`, Windows `ia32` → `x86`, Linux `arm` → `armv7l`).
  * @param targets Target strings such as `linux-x64`.
  * @param platform Host platform name.
  * @param arch Host architecture name.
