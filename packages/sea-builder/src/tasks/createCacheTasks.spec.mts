@@ -16,7 +16,7 @@ describe('createCacheTasks', () => {
     });
     expect(tasks).toHaveLength(2);
     expect(tasks[0]?.title).toBe('linux-x64');
-    expect(tasks[1]?.title).toBe('win32-x64');
+    expect(tasks[1]?.title).toBe('win-x64');
   });
 
   it('passes correct metadata to download', async () => {

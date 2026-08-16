@@ -18,7 +18,7 @@ and `sea-cache` for fetching Node.js archives used by the builder.
 
 ```sh
 sea-cache  # cache for current platform
-sea-cache linux-x64 win32-x64  # cache archives for multiple targets
+sea-cache linux-x64 win-x64  # cache archives for multiple targets
 ```
 
 Archives are downloaded to `node_modules/.cache/xsea` if not already
@@ -29,7 +29,7 @@ present.
 ```sh
 # <output> is the base name for the generated file under the `sea/` directory
 sea-builder my-cli                                # build for current platform
-sea-builder --targets=linux-x64,win32-x64 my-cli  # build for multiple targets
+sea-builder --targets=linux-x64,win-x64 my-cli  # build for multiple targets
 ```
 
 If no `--targets` option is given, the current platform and architecture
@@ -37,10 +37,13 @@ are used.
 
 ### Options
 
-Both commands accept target strings in the format `<platform>-<arch>` such
-as `linux-x64` or `win32-x64`. `sea-builder` automatically invokes
-`pnpm exec xsea` with the downloaded archives to create the binary under
-`sea/<output>`.
+Both commands accept target strings in the nodejs.org archive format
+`<platform>-<arch>` such as `linux-x64` or `win-x64`. When no target is
+given, the current Node.js platform and architecture are mapped onto that
+vocabulary (the Windows platform id becomes `win`, `ia32` becomes `x86`
+on Windows, and `arm` becomes `armv7l`). `sea-builder` automatically
+invokes `pnpm exec xsea` with the downloaded archives to create the
+binary under `sea/<output>`.
 
 `sea-builder` also accepts a `--node` option to choose the Node.js version.
 Omitting this option uses the latest patch of the oldest supported LTS line.

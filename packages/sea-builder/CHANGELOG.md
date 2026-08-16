@@ -32,6 +32,9 @@ project adheres to
 
 ### Fixed
 
+- Mapped `win32`, Windows `ia32`, and `arm` target names onto nodejs.org
+  archive vocabulary so default Windows builds and caller-supplied
+  `win32` targets no longer 404 (#154).
 - Restored CI signal on feature branches and pull requests, and
   aligned the `@vitest/coverage-v8` peer with `vitest` v4 (#68).
 - Fixed the `env` shebang with a multi-word argument on Linux by
