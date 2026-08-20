@@ -164,8 +164,9 @@ CI-polling shared helper file), never this one. Read
   comment's own run can evict an already-queued IDD-originated refresh
   before it runs, since the classify step judges only the triggering
   comment's own body. Accepted as a residual of that narrow per-event
-  design; self-heals on the next push, fresh bot review, or
-  maintainer manual rerun.
+  design; self-heals on the next push or maintainer manual rerun — a
+  fresh bot review is not reliable here either (same gated
+  `action_required` risk as above).
 
 ## Wake-up discipline
 
