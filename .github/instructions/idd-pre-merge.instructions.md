@@ -292,7 +292,10 @@ nonce was recorded for the active claim.
   profile-selected `idd-advisory-convergence` command). Non-zero exit is
   a hard merge block — route to E1/E4 (check **AW6** first when
   `sameHeadReroll.eligible`) using `reasons`; zero exit (`ready: true`)
-  satisfies this condition.
+  satisfies this condition. An `ack-suppressed` next-action from AW6
+  means Clause 1's `suppressedCount` term still needs coverage — see
+  `idd-review-triage.instructions.md`'s `review-ack:` paragraph (E6)
+  instead of rerolling.
   Separately, require `dispositionEvidence.route` to be `proceed`
   (`dispositionEvidence.blockingCount == 0` — both
   `missingRegularComments` (any outstanding non-thread regular PR
