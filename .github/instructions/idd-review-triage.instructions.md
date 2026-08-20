@@ -318,6 +318,16 @@ when helper runtime is unavailable:
 review-ack: {agent-id} {PR_HEAD_SHA} {ISO8601-acknowledged-at}
 ```
 
+Posting the marker does not by itself refresh a failed
+`idd-advisory-convergence` run — the marker is a regular PR comment,
+and neither that check's own workflow nor its comment-triggered
+companion listens for a regular (non-review-thread) comment event — so
+after the marker is verified, also rerun the existing PR-linked run for
+the current HEAD (`gh run rerun <run-id>`, or the profile-selected
+`idd-rerun-advisory-convergence` command; see
+[Rerun mechanics](idd-ci.instructions.md#rerun-mechanics)); the marker
+alone does not retrigger the check.
+
 _Worked example_: a review posts a regular-comment finding plus a
 suppressed one. Disposition the regular-comment finding normally
 (`**Rejected** — verified placeholders-only`), then also post
