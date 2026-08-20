@@ -48,6 +48,22 @@ gate-enable, actor-policy, approval-signal, and fail-closed rules as
 A bare organization `MEMBER` association never counts as approval;
 neither do issue body text, a generated plan, or operator attention.
 
+**Self-authorization fallback when the permission read is unavailable
+at claim time** (`kurone-kito/idd-skill#2148`): when the collaborator
+permission API read for this check is itself unavailable (a `503`, an
+empty response, or otherwise unreadable) — not merely a non-approving
+result — the issue-author self-authorization signal alone may
+substitute the issue's own live `author_association` instead of
+failing closed: `OWNER` always self-authorizes; `MEMBER`
+self-authorizes under both `owners-and-maintainers-only` and
+`all-write-permission-actors`. This narrower fallback covers only the
+issue-author signal at this A5(a) claim-time check — the
+approval-comment and ready-label signals still fail closed on an
+unreadable permission read. `idd-discover.instructions.md`'s own A3.5
+gate is unchanged by this fallback and keeps its unconditional
+fail-closed rule for the earlier discovery-time check; hardening A3.5
+to match is a recommended follow-up, not covered here.
+
 - If approval is missing for a roadmap/default discovery run, return to
   Discover using the same selection mode that produced this target so
   A3.5 can continue with the next eligible startable issue or the
@@ -451,6 +467,31 @@ confirm it still equals the carried nonce. A different winner (e.g. a
 later forced-handoff collision the orchestrator never saw) means the
 worker is no longer the winning activation — treat that the same as any
 other lost claim.
+
+**State the worker role explicitly when the delegate inherits full
+context.** Some delegation mechanisms give the worker the
+orchestrator's own complete conversation context instead of a clean
+slate limited to the brief. There, the worker can carry over the
+orchestrator's own framing — mistaking itself for the session that
+launched several workers and is waiting on their replies — instead of
+recognizing the brief reassigns it to a single-issue worker role. The
+delegation brief must state explicitly that the delegate is the sole
+worker for the named issue, that no peer workers exist for it to
+coordinate with or wait on, and that it must perform the implementation
+work itself rather than re-delegate or wait for a reply
+(`kurone-kito/idd-skill#2179`).
+
+**Restate the CI/advisory-wait topology-safety condition.** The
+delegation brief must also carry — verbatim or by direct reference —
+the CI/advisory-wait topology-safety condition from [idd-ci.instructions.md's
+Wake-up discipline](idd-ci.instructions.md#wake-up-discipline), the same
+requirement already stated for this delegation pattern in
+[docs/idd-workflow.md's Orchestrator fan-out
+variant](../../docs/idd-workflow.md#orchestrator-fan-out-variant). Without
+it, a worker can end its turn on a Monitor-style or backgrounded wait
+assuming an unconfirmed notification resumes it — under a
+supervisor/worker topology, only the supervisor is notified, so the
+worker's own turn stalls indefinitely (`kurone-kito/idd-skill#2210`).
 
 ### Hide displaced claim chain on takeover
 
