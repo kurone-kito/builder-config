@@ -63,8 +63,8 @@ importers:
         specifier: workspace:^
         version: link:packages/example-cli
       '@kurone-kito/idd-skill':
-        specifier: https://codeload.github.com/kurone-kito/idd-skill/tar.gz/83d5f2ae1e6502d95c3d675f807574c42742ef4d
-        version: https://codeload.github.com/kurone-kito/idd-skill/tar.gz/83d5f2ae1e6502d95c3d675f807574c42742ef4d
+        specifier: https://codeload.github.com/kurone-kito/idd-skill/tar.gz/f51a8bb73a47452eff5799e8a27251b660ba4ae0
+        version: https://codeload.github.com/kurone-kito/idd-skill/tar.gz/f51a8bb73a47452eff5799e8a27251b660ba4ae0
       '@kurone-kito/is-prerelease':
         specifier: ^0.1.0
         version: 0.1.0
@@ -729,10 +729,10 @@ packages:
       cspell:
         optional: true
 
-  '@kurone-kito/idd-skill@https://codeload.github.com/kurone-kito/idd-skill/tar.gz/83d5f2ae1e6502d95c3d675f807574c42742ef4d':
-    resolution: {gitHosted: true, integrity: sha512-gBKl9x5N2bYag0SPG0o9UEYtvVXsXnEwJJfgn7mr+OaJJluhACrwEFKK/+3za8NJl/WNSZG54NQhhlc7lYyWZQ==, tarball: https://codeload.github.com/kurone-kito/idd-skill/tar.gz/83d5f2ae1e6502d95c3d675f807574c42742ef4d}
-    version: 0.6.0
-    engines: {node: ^22.22.2 || >=24.2.0}
+  '@kurone-kito/idd-skill@https://codeload.github.com/kurone-kito/idd-skill/tar.gz/f51a8bb73a47452eff5799e8a27251b660ba4ae0':
+    resolution: {tarball: https://codeload.github.com/kurone-kito/idd-skill/tar.gz/f51a8bb73a47452eff5799e8a27251b660ba4ae0}
+    version: 0.7.0
+    engines: {node: ^22.23.2 || ^24.2.0 || >=26.0.0}
     hasBin: true
 
   '@kurone-kito/is-prerelease@0.1.0':
@@ -3036,7 +3036,7 @@ snapshots:
     optionalDependencies:
       cspell: 10.0.1
 
-  '@kurone-kito/idd-skill@https://codeload.github.com/kurone-kito/idd-skill/tar.gz/83d5f2ae1e6502d95c3d675f807574c42742ef4d': {}
+  '@kurone-kito/idd-skill@https://codeload.github.com/kurone-kito/idd-skill/tar.gz/f51a8bb73a47452eff5799e8a27251b660ba4ae0': {}
 
   '@kurone-kito/is-prerelease@0.1.0':
     dependencies:
