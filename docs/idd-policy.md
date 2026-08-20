@@ -218,6 +218,30 @@ reviews every PR in this repository.
 
 - **`issueAuthoring.maxClarificationRounds`**: `3`
 
+## Authoring Language
+
+**Policy**: `authoringLanguage` = `match-source` (decided at the roadmap
+authoring hearing on 2026-08-20, issue #165 — later than this file's
+original 2026-07-14/2026-08-01 policy batch above).
+
+This repository's IDD sessions run in whatever language the operator
+uses live at the time (frequently Japanese), while `CLAUDE.md` requires
+code comments and documentation to stay in English. A fixed language tag
+would conflict with that convention in one direction or the other: a
+fixed `ja` tag would fight any session actually run in English, and a
+fixed `en` tag would ignore the operator's live language choice. The
+literal `match-source` value avoids both failure modes by following
+whichever language a given session is actually conducted in — the live
+conversational language during an interactive/hearing session
+(issue-authoring, onboarding) and the implemented issue's own body
+language during unattended execution with no live operator (for example
+PR-submit), per
+[`idd-pr-submit.instructions.md`'s PR body language rule](../.github/instructions/idd-pr-submit.instructions.md#pr-body-language)
+(updated by issue #164 / PR #172 to describe how the field is read).
+This never changes a machine-parsed marker or an exact-regex-matched
+visible line, which always stays in its canonical English form
+regardless of this setting.
+
 ## IDD Labels
 
 Distributed defaults: `roadmap`, `status:blocked-by-human`,
