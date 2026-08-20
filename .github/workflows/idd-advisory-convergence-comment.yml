@@ -40,7 +40,13 @@ permissions:
   actions: write
 jobs:
   refresh-if-idd-originated:
-    runs-on: ubuntu-slim
+    # No `runner` workflow_dispatch input here (this workflow only
+    # triggers on pull_request_review_comment, never manually
+    # dispatched), but still honors the CI_RUNNER_LABEL escape hatch so
+    # a self-hosted-runner requirement (e.g. GHES) covers this job too,
+    # not only the required idd-advisory-convergence job (#163 C1
+    # follow-up).
+    runs-on: ${{ vars.CI_RUNNER_LABEL || 'ubuntu-slim' }}
     timeout-minutes: 10
     steps:
       # Trusted default-branch checkout, not the PR head -- same
