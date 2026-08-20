@@ -1,0 +1,113 @@
+# Non-required companion to idd-advisory-convergence.yml (#163, matching
+# kurone-kito/idd-skill#2136).
+#
+# Human review-thread chatter must not create or cancel the required
+# `idd-advisory-convergence` check-run. This workflow has a different
+# name, job id, and concurrency group so it structurally cannot
+# overwrite that SHA's verdict or cancel an in-flight required run:
+# `name:` below is a different string than "IDD advisory-convergence
+# gate", so `${{ github.workflow }}` differs, so the concurrency group
+# differs even for the same PR number; the job id
+# (`refresh-if-idd-originated`) is a different check-run context than
+# `idd-advisory-convergence`, so this job's own runs never appear on
+# the required check's rollup at all.
+#
+# When the comment is IDD-originated (reply-identity stamp, disposition
+# prefix, or an operational marker the required check already honors),
+# it reuses `idd-rerun-advisory-convergence --apply` to refresh the
+# existing pull_request-family required run for the current HEAD SHA.
+# It never asserts `ready` itself -- an ordinary human reply (e.g.
+# "LGTM") classifies as not IDD-originated and this workflow takes no
+# action on the required check at all.
+#
+# Job id is deliberately NOT `idd-advisory-convergence`.
+concurrency:
+  # Do not cancel: a later human LGTM must not abort an in-flight
+  # IDD-originated refresh before it reruns the required check (#163).
+  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+name: IDD advisory-convergence comment refresh
+on:
+  pull_request_review_comment:
+    types: [created, edited, deleted]
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  # Needed for the rerun step's Actions API call
+  # (idd-rerun-advisory-convergence --apply reruns an existing workflow
+  # run for the required job).
+  actions: write
+jobs:
+  refresh-if-idd-originated:
+    # No `runner` workflow_dispatch input here (this workflow only
+    # triggers on pull_request_review_comment, never manually
+    # dispatched), but still honors the CI_RUNNER_LABEL escape hatch so
+    # a self-hosted-runner requirement (e.g. GHES) covers this job too,
+    # not only the required idd-advisory-convergence job (#163 C1
+    # follow-up).
+    runs-on: ${{ vars.CI_RUNNER_LABEL || 'ubuntu-slim' }}
+    timeout-minutes: 10
+    steps:
+      # Trusted default-branch checkout, not the PR head -- same
+      # rationale as idd-advisory-convergence.yml's own checkout step:
+      # a PR must not be able to edit the classifier or its config
+      # (.github/idd/config.json) to force a false idd_originated
+      # verdict.
+      - name: Stages the main branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Setup the pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        with:
+          run_install: false
+      - name: Prepare the Node.js environment
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          cache: pnpm
+          check-latest: true
+          node-version-file: .node-version
+      - name: Install the dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+      - env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        name: Classify review comment
+        id: origin
+        # review-comment-origin.mjs ships in @kurone-kito/idd-skill@0.7.0
+        # as a plain vendored script only -- confirmed no
+        # `idd-review-comment-origin` bin/CLI facade exists at this pin
+        # (absent from both the package's own `bin` field and this
+        # repository's package.json `idd:*` script map), unlike
+        # idd-rerun-advisory-convergence below, which does have one. It
+        # is a workflow-embedded classifier (reads $COMMENT_BODY, writes
+        # $GITHUB_OUTPUT), never an agent-facing CLI helper, so there is
+        # no `pnpm exec idd-*` form to fall back to here -- this is the
+        # package-manager-profile equivalent of upstream's own
+        # `node scripts/review-comment-origin.mjs` invocation.
+        run: node node_modules/@kurone-kito/idd-skill/scripts/review-comment-origin.mjs
+      - if: github.event.action == 'edited' && steps.origin.outputs.idd_originated != 'true'
+        env:
+          COMMENT_BODY: ${{ github.event.changes.body.from }}
+        name: Classify previous comment body (edited events only)
+        id: origin_prev
+        # An edit that strips an IDD marker (reply stamp, disposition
+        # prefix, operational marker) from a comment that previously had
+        # one must still refresh the required check: the earlier
+        # created/edited trigger may have already made it pass based on
+        # state the edit just retracted (Copilot review #170 on this
+        # PR). github.event.changes.body.from carries the pre-edit text
+        # for a GitHub comment-edit webhook; only checked when the new
+        # body alone didn't already classify as IDD-originated, to avoid
+        # a redundant second classify call.
+        run: node node_modules/@kurone-kito/idd-skill/scripts/review-comment-origin.mjs
+      - if: steps.origin.outputs.idd_originated == 'true' || steps.origin_prev.outputs.idd_originated == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # Single github.com host only (this repository is not GHES),
+          # matching idd-advisory-convergence.yml's own required job,
+          # which also sets only GH_TOKEN.
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        name: Rerun required HEAD check
+        run: pnpm exec idd-rerun-advisory-convergence --pr "$PR_NUMBER" --apply

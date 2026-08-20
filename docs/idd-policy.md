@@ -328,6 +328,29 @@ its own SHA-pinned action conventions (matching `push-feature.yml`/
 `workflow_dispatch`. Registering it as a **required** status check is
 maintainer-only work tracked in #51, not part of this issue.
 
+**Trigger split (issue #163, matching `kurone-kito/idd-skill#2136`,
+shipped in `v0.7.0`)**: this workflow no longer triggers on
+`pull_request_review_comment`. That trigger now lives on a separate,
+non-required companion workflow,
+`.github/workflows/idd-advisory-convergence-comment.yml`, with its own
+job id, workflow `name:`, and concurrency group, so an ordinary human
+review-thread reply can no longer create or cancel this required
+check's rollup for the PR HEAD. The companion classifies the
+triggering comment and only reruns this workflow's existing run via
+`idd-rerun-advisory-convergence --apply` when the comment is
+IDD-originated; it never asserts `ready` itself. This workflow's CI
+runner is also overridable now, via a `runner` `workflow_dispatch`
+input defaulting to `ubuntu-slim` (falling back to the `CI_RUNNER_LABEL`
+repository variable), replacing the previously hardcoded
+`runs-on: ubuntu-latest` — adopted from
+`idd-template/.github/workflows/idd-advisory-convergence.yml`'s
+documented precedence rather than from `idd-skill`'s own dogfooded
+root copy, which hardcodes `ubuntu-slim` with no override input at
+all. This repository's copy is therefore a deliberate hybrid of the
+two upstream shapes (the split from the dogfooded copy, the runner
+override from the template copy), not a byte-for-byte mirror of
+either.
+
 The job intentionally carries no `name:` override, unlike this
 repository's other jobs — its id, `idd-advisory-convergence`, is also
 the check-run name the `idd-rerun-advisory-convergence` helper and the
@@ -342,12 +365,17 @@ confirmed empirically on this PR after the job briefly carried a
 **Waiver re-trigger procedure**: posting a maintainer waiver comment
 does **not** by itself turn this check green — a PR conversation
 comment fires GitHub's `issue_comment` event, which this workflow does
-not listen for (only `pull_request_review_comment`, scoped to comments
-on the diff), and a completed run's conclusion never changes on its
+not listen for (only `pull_request`, `pull_request_review`, and a
+manually dispatched `workflow_dispatch`, since issue #163), and a
+completed run's conclusion never changes on its
 own. After posting a waiver, also trigger a new
 run: a push, a fresh Copilot review, the Actions UI "Re-run jobs"
 button on the *existing* PR-linked run for the *current HEAD SHA*, or
-`gh run rerun <run-id>` on that same run. **`workflow_dispatch` does
+`gh run rerun <run-id>` on that same run. An IDD-originated
+review-thread comment refreshes that same HEAD run via the companion
+`idd-advisory-convergence-comment.yml` workflow instead — an ordinary
+human waiver-adjacent reply (e.g. "waived, see above") does not, by
+design. **`workflow_dispatch` does
 NOT reliably do this**: a dispatched run has no `pull_request` context
 of its own, so GitHub associates it with the dispatch ref rather than
 the PR's HEAD SHA, and the resulting run's conclusion can be invisible

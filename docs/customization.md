@@ -386,12 +386,15 @@ once `ciGate.externalCheckWaivers.mode` is `maintainer-authorized`
 external check never silently makes this one waivable too. **Posting a
 waiver comment does not by itself turn the check green**: a waiver is a
 regular PR comment, which is not one of the workflow's triggers
-(`pull_request` push, `pull_request_review` submission, or
-`pull_request_review_comment` created/edited/deleted on a review
-thread), so after posting a waiver a maintainer must also **re-run the
+(`pull_request` push, `pull_request_review` submission, or a manually
+dispatched `workflow_dispatch`), so after
+posting a waiver a maintainer must also **re-run the
 existing** PR-linked check run **for the current HEAD SHA** — the
 Actions UI "Re-run jobs" button, or `gh run rerun <run-id>` — for the
-required check to actually reflect it. `workflow_dispatch` does
+required check to actually reflect it. An IDD-originated review-thread
+comment refreshes that same HEAD run via the companion
+`idd-advisory-convergence-comment.yml` workflow instead (issue #163,
+matching `kurone-kito/idd-skill#2136`). `workflow_dispatch` does
 **not** reliably do this:
 a dispatched run has no `pull_request` context of its own, so GitHub
 associates it with the dispatch ref rather than the PR's HEAD SHA, and
