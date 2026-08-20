@@ -206,6 +206,33 @@ reviewers that are not auto-assigned by GitHub, request them explicitly:
 gh pr edit {pr-number} --add-reviewer {reviewer-login}
 ```
 
+**Do not create follow-up issues directly.** An executing IDD session
+must never call `gh issue create` (or the REST issues API) itself.
+Recommended follow-ups stay in the PR body's own prose above. If a
+follow-up is important enough to file in-repo now, invoke the
+`issue-authoring` skill (its Stage 1 hold) instead of improvising a
+body. Do not add a parallel "worker-lite authoring" contract.
+
+### PR body language
+
+The PR body's prose sections above (summary, background/rationale,
+follow-up notes) follow the resolved `authoringLanguage` value from
+`.github/idd/config.json`: a fixed BCP-47-shaped language tag (for
+example `en`, `ja`, `fr`) when configured, the claimed issue's own body
+language when the value is the literal `match-source` (this file's
+unattended-execution case, with no live operator to match a live
+conversational language against), or English when the field is absent
+(fail-safe default, matching today's emergent behavior).
+
+This never changes a machine-parsed marker or an exact-regex-matched
+visible line, which always stays in its canonical form regardless of
+`authoringLanguage`. Concretely here, the closing keyword line below
+(`Closes #N` and its variants) must keep its exact English keyword
+form: GitHub's own closing-keyword parser and this file's D3.5
+verification regex both match only the English keyword forms
+(`close[sd]?`/`fix(e[sd])?`/`resolve[sd]?`), so translating that line
+would silently break auto-close detection.
+
 ### D3.5 — Verify closing keyword detection
 
 After PR creation and before D4, confirm GitHub recognized the

@@ -301,7 +301,11 @@ implementation is correct, whether the issue's requirements are
 satisfied, whether adequate test coverage exists, and whether any other
 problems exist. See `idd-overview-appendix.instructions.md` for per-agent
 implementation. The distributed defaults for the C-phase skip and loop
-guards are listed in `docs/policy-constants.md`.
+guards are listed in `docs/policy-constants.md`. A repository may
+optionally configure `critiqueLoop.delegate` — a `command` run against
+the branch's current diff — to point this step at a different reviewer
+instead of the per-agent mechanism described here; absent, invalid, or
+failing, C1 runs the per-agent mechanism unchanged.
 
 **Objective diff validation floor**: neither C2 nor C4 below may skip to
 `idd-pr-submit.instructions.md` unless **fix-validate** — the same
