@@ -87,7 +87,22 @@ jobs:
         # package-manager-profile equivalent of upstream's own
         # `node scripts/review-comment-origin.mjs` invocation.
         run: node node_modules/@kurone-kito/idd-skill/scripts/review-comment-origin.mjs
-      - if: steps.origin.outputs.idd_originated == 'true'
+      - if: github.event.action == 'edited' && steps.origin.outputs.idd_originated != 'true'
+        env:
+          COMMENT_BODY: ${{ github.event.changes.body.from }}
+        name: Classify previous comment body (edited events only)
+        id: origin_prev
+        # An edit that strips an IDD marker (reply stamp, disposition
+        # prefix, operational marker) from a comment that previously had
+        # one must still refresh the required check: the earlier
+        # created/edited trigger may have already made it pass based on
+        # state the edit just retracted (Copilot review #170 on this
+        # PR). github.event.changes.body.from carries the pre-edit text
+        # for a GitHub comment-edit webhook; only checked when the new
+        # body alone didn't already classify as IDD-originated, to avoid
+        # a redundant second classify call.
+        run: node node_modules/@kurone-kito/idd-skill/scripts/review-comment-origin.mjs
+      - if: steps.origin.outputs.idd_originated == 'true' || steps.origin_prev.outputs.idd_originated == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           # Single github.com host only (this repository is not GHES),
