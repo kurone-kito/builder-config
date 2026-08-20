@@ -277,10 +277,17 @@ This is accepted, intentional, bounded-recovery-by-design behavior, not
 a bug — it mirrors `ciWait.rerunPolicy`'s own escalate-after-one-rerun
 philosophy rather than letting reruns multiply across trigger sources.
 **Self-healing recovery**: if a same-HEAD comment-triggered refresh is
-withheld this way, the next push, a fresh bot review, or a maintainer's
-manual rerun creates a new run instance (its own fresh `run_attempt`)
-with its own budget, clearing the stale-red state with no further
-action needed.
+withheld this way, the next push creates a new run instance (its own
+fresh `run_attempt`) with its own budget, clearing the stale-red state
+with no further action needed. A maintainer's manual rerun (`gh run
+rerun <run-id>` or the Actions UI) also clears it directly, since a
+human isn't bound by this automation's own once-only budget — but it
+reruns the same run and increments that run's `run_attempt`, so this
+tooling's own automated rerun still treats that instance as
+budget-exhausted afterward. A fresh bot review is not a reliable
+recovery path on its own: its own bot-triggered run can re-enter
+`action_required` (see the bot-gated cause above) instead of clearing
+the rollup.
 
 ## Interpretation
 
