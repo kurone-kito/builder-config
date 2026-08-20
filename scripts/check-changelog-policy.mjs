@@ -62,7 +62,21 @@ function ensureOriginMain() {
 /** @returns {string | undefined} */
 function resolveBase() {
   const override = process.env.MERGE_BASE?.trim();
-  if (override) return override;
+  if (override) {
+    // Resolve (and normalize to a full SHA) through `rev-parse --verify`
+    // rather than passing the raw override straight to `git diff`: an
+    // override that happens to match a real `git diff` flag (e.g.
+    // `--stat`) would otherwise be parsed as an option instead of a
+    // revision, silently retargeting the diff and risking a false pass.
+    // `--end-of-options` keeps a flag-shaped override from being
+    // interpreted as a `rev-parse` option too.
+    return tryGit([
+      'rev-parse',
+      '--verify',
+      '--end-of-options',
+      `${override}^{commit}`,
+    ]);
+  }
   if (!ensureOriginMain()) return undefined;
   return tryGit(['merge-base', 'HEAD', 'origin/main']);
 }
