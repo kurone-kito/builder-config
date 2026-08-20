@@ -1912,7 +1912,7 @@ gate pass on anything but the primary bot's own real signal.
 
 | Field               | Meaning                                                                                                                                                                                                                                                                                                                                                                                       |
 | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `eligible`          | `matchesHead: true`, `itemCount` known AND (`itemCount > 0` OR `suppressedCount > 0`, #1880), every Copilot-authored thread resolved or validly dispositioned, AND no outstanding regular-comment disposition evidence (`dispositionEvidence.missingRegularCommentCount === 0`) -- the static count is the ONLY thing keeping `converged` false, with no other triage work still outstanding. |
+| `eligible`          | `matchesHead: true`, `itemCount` known AND (`itemCount > 0` OR `suppressedCount > 0`, #1880), every Copilot-authored thread resolved or validly dispositioned, no outstanding regular-comment disposition evidence (`dispositionEvidence.missingRegularCommentCount === 0`), AND not already satisfied via a valid review-ack (`!(reviewSatisfied && hasValidReviewAck)`, `kurone-kito/idd-skill#2056`) -- the static count is the ONLY thing keeping `converged` false, with no other triage work still outstanding and no `review-ack:` marker already covering it. |
 | `ineligibleReasons` | `#1719`: one stable, machine-readable token per failing term of the `eligible` conjunction above (empty exactly when `eligible` is `true`), so a caller can self-diagnose a stuck reroll without re-deriving the rule by hand. See below for the token list and the report-mode example.                                                                                                      |
 | `count`             | Trusted `advisory-reroll:` marker count matching the current HEAD (resets on a new push, since a new HEAD's markers start over).                                                                                                                                                                                                                                                              |
 | `cap`               | Configured bounded budget, `advisoryWait.sameHeadRerollCap` (default 2, deliberately conservative but > 1: same-SHA re-review is not a guaranteed one-shot off-ramp).                                                                                                                                                                                                                         |
@@ -1923,7 +1923,7 @@ gate pass on anything but the primary bot's own real signal.
 
 **`ineligibleReasons` tokens (`#1719`)**: one entry per failing term, in
 the same order the `eligible` conjunction is written in
-`advisory-convergence.mts`. Computed from the exact same six terms
+`advisory-convergence.mts`. Computed from the exact same seven terms
 `eligible` itself reduces from -- the array and the boolean are
 structurally unable to disagree.
 
@@ -1936,6 +1936,7 @@ structurally unable to disagree.
 | `missing-regular-comment-disposition`     | `dispositionEvidence.missingRegularCommentCount` is non-zero -- an outstanding regular (non-thread) PR comment still lacks a fresh disposition marker.  |
 | `review-item-count-unknown`               | The latest review's comment count is unavailable -- either the review is off-HEAD (co-firing with `review-pending` above, since `resolveLatestCopilotReviewClause` reports `itemCount: null` for any non-matching-HEAD review), or it is on current HEAD but the count itself is unavailable (a GraphQL nullable-field edge case). |
 | `review-item-count-not-positive`          | The latest review's `itemCount` is a known `0` AND `suppressedCount` (#1880) is also `0` -- already fully converged, nothing (posted or suppressed) to reroll for.                        |
+| `already-satisfied-via-review-ack`        | `kurone-kito/idd-skill#2056`: fires when `reviewSatisfied && hasValidReviewAck` is `true` -- a valid `review-ack:` marker already covers a `suppressedCount > 0` review that Clause 1 would otherwise still consider unsatisfied, so a same-HEAD reroll would be redundant. Distinct from `#2050` (the on-thread `itemCountClauseSatisfied` override and the `review-ack:` marker type itself) and `#1880` (`suppressedCount` detection) -- both already covered elsewhere in this section. |
 <!-- dprint-ignore-end -->
 
 When `review-item-count-not-positive` is absent but `converged` is still
