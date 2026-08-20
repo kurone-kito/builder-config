@@ -335,7 +335,14 @@ the current HEAD (`gh run rerun <run-id>`, or the profile-selected
 `idd-rerun-advisory-convergence --pr <pr-number> --apply` command,
 which is read-only diagnosis without `--apply`; see
 [Rerun mechanics](idd-ci.instructions.md#rerun-mechanics)); the marker
-alone does not retrigger the check.
+alone does not retrigger the check. If the helper reports
+`rerunPolicyHoldNotice` (the shared `ciWait.rerunPolicy` budget for
+this HEAD is already exhausted, even with `--apply`), a trusted
+maintainer's plain `gh run rerun <run-id>` on each remaining
+non-passing instance is not bound by that automation-only budget (see
+[Rerun mechanics](idd-ci.instructions.md#rerun-mechanics)'s
+self-healing-recovery note); absent that, post a hold and stop rather
+than leaving the check permanently red.
 
 _Worked example_: a review posts a regular-comment finding plus a
 suppressed one. Disposition the regular-comment finding normally
