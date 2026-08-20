@@ -2069,6 +2069,56 @@ Fail closed the same way mid-poll or if the verdict JSON is missing or
 unusable: treat the carve-out as not applicable / stop and post a hold,
 same as `AW4`/`AW5`.
 
+#### Next-action catalog (`nextActions`, `kurone-kito/idd-skill#2143`)
+
+- The verdict's top-level `nextActions` field is an array of structured
+  next-action entries naming what to do next when the check is not yet
+  `ready`. Each entry has the shape `{ token, summary, pointer }`:
+  `token` is a stable, machine-readable value from a fixed 12-member
+  catalog (`ADVISORY_CONVERGENCE_NEXT_ACTION_TOKEN`, also hand-maintained
+  as the schema's `token` enum and kept in sync by a pin test),
+  `summary` is a one-line English description of the recovery step, and
+  `pointer` is the concrete command or phase reference to run next
+  (multi-command pointers are newline-separated).
+- Computed strictly **after** `ready` is resolved, purely from the
+  already-computed verdict fields (`applicability`, `review`, `threads`,
+  `deadline`, `waiver` -- the `{ mode, checkSelector, activeClaimId,
+  validCount }` external-check-waiver evidence discussed above --
+  `terminal`, `sameHeadReroll`) -- never by parsing `reasons[]`.
+  `nextActions` is `[]` exactly when `ready` is `true`, and it never
+  feeds back into the `ready` computation itself.
+- Shared source of truth with the `--assert` stderr failure block: the
+  same `collectAssertNextActions` catalog backs both `verdict.nextActions`
+  (stdout JSON) and `formatAssertNextActions`'s human-readable stderr
+  guidance, so the two channels cannot disagree.
+- Entries are not all mutually exclusive: several independent conditions
+  can hold at once (for example `disposition-posted-items` and
+  `ack-suppressed` can both appear when a review carries both posted
+  comments and a separate suppressed finding), though other pairs are
+  structurally exclusive -- some via `if`/`else if` branching, others
+  because they share an underlying evidence field (noted per-token
+  below).
+
+**Token catalog** (12 tokens, in the order `collectAssertNextActions`
+evaluates them):
+
+<!-- dprint-ignore-start -->
+| Token | Fires when... |
+| --- | --- |
+| `indeterminate-applicability` | `applicability.status` is `indeterminate` -- the PR carries IDD claim-activity evidence but its claim linkage cannot be resolved cleanly (see the `convergenceScope` discussion above). |
+| `request-review` | The primary advisory bot has not reviewed this PR at all (`review.found` is `false`). |
+| `request-re-review` | The bot has reviewed the PR, but its latest review does not cover current HEAD (`review.found` is `true` and `review.matchesHead` is `false`) -- mutually exclusive with `request-review` (`if`/`else if`). |
+| `disposition-posted-items` | The latest review covers current HEAD and carries a positive item count (`review.matchesHead` is `true` and `review.itemCount > 0`) -- posted items still need E6/E13 disposition. |
+| `disposition-threads` | `threads.satisfied` is `false` -- at least one Copilot-authored review thread is unresolved and lacks a valid disposition marker. |
+| `ack-suppressed` | The latest review reports a positive `review.suppressedCount` -- a finding folded into a "Suppressed comments" block instead of a postable comment -- needing a `review-ack:` marker once handled. |
+| `waiver-terminal` | Copilot is terminally unavailable (`terminal.state` is `COPILOT_UNAVAILABLE`) and waiver mode is `maintainer-authorized` -- a maintainer external-check waiver can clear it. |
+| `hold-terminal` | Copilot is terminally unavailable and waiver mode is **not** `maintainer-authorized` -- mutually exclusive with `waiver-terminal` (`if`/`else`); hold for a maintainer instead. |
+| `waiver-deadline` | Copilot is not terminally unavailable, the convergence deadline has passed (`deadline.passed` is `true`), and waiver mode is `maintainer-authorized` -- mutually exclusive with `waiver-terminal`/`hold-terminal` (`else if` on the terminal check). |
+| `hold-deadline` | The convergence deadline has passed and waiver mode is **not** `maintainer-authorized` -- mutually exclusive with `waiver-deadline` (`if`/`else`), and with `waiver-terminal`/`hold-terminal` as above. |
+| `same-head-reroll` | A bounded same-HEAD reroll is currently requestable (`sameHeadReroll.requestable` is `true`; see AW6 above) -- its own eligibility conjunction (`sameHeadRerollTerms`) reuses `threads.satisfied` as one term, so it is mutually exclusive with `disposition-threads` specifically (both read the same thread-resolution signal); it can still co-occur with tokens whose conditions do not depend on that term, such as `disposition-posted-items`. |
+| `reread-verdict` | Fallback only: none of the eleven checks above pushed an entry even though `ready` is `false` -- re-read the JSON verdict and follow `idd-advisory-wait.instructions.md` / `idd-pre-merge.instructions.md` F2 by hand. |
+<!-- dprint-ignore-end -->
+
 ### E7 disposition verification
 
 - Preferred command when helper runtime is enabled:
