@@ -301,10 +301,18 @@ of a comment, so it has no thread or comment ID of its own to reply
 to — see `docs/idd-helper-scripts.md`), Clause 1's `suppressedCount`
 term needs its own coverage
 (`suppressedCount === 0 || hasValidReviewAck`) regardless of any
-Clause 2 disposition elsewhere in the same review. After reading the
-review body and confirming the suppressed finding(s) are handled
-(fixed, or judged as needing no action), post `review-ack:` for the
-current HEAD SHA. Posting performs no author gating on its own —
+Clause 2 disposition elsewhere in the same review. `hasValidReviewAck`
+is purely temporal (the marker's own `created_at` postdating the
+inspected review's `submittedAt`, never an embedded review ID), so a
+newer same-HEAD review landing between reading the review body and
+posting the marker is not detected by HEAD SHA alone — immediately
+before posting, re-fetch the latest Copilot review and confirm it is
+still the one whose suppressed finding(s) you inspected; if a newer
+same-HEAD review has landed instead, read that one first. After
+reading the review body and confirming the suppressed finding(s) are
+handled (fixed, or judged as needing no action), post `review-ack:`
+for the current HEAD SHA. Posting performs no author gating on its
+own —
 anyone with `gh` credentials can post the comment — but
 `idd-advisory-convergence` only honors a marker whose GitHub author is
 a `trustedMarkerActors` login; an untrusted poster's marker is ignored,
@@ -324,7 +332,8 @@ and neither that check's own workflow nor its comment-triggered
 companion listens for a regular (non-review-thread) comment event — so
 after the marker is verified, also rerun the existing PR-linked run for
 the current HEAD (`gh run rerun <run-id>`, or the profile-selected
-`idd-rerun-advisory-convergence` command; see
+`idd-rerun-advisory-convergence --pr <pr-number> --apply` command,
+which is read-only diagnosis without `--apply`; see
 [Rerun mechanics](idd-ci.instructions.md#rerun-mechanics)); the marker
 alone does not retrigger the check.
 
