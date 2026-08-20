@@ -1,25 +1,33 @@
 name: IDD advisory-convergence gate
 concurrency:
   cancel-in-progress: true
-  # Grouped by PR number, not github.ref: pull_request_review and
-  # pull_request_review_comment are not pull_request-family events, so
-  # github.ref does not resolve the same way for them as it does for a
-  # pull_request-only workflow. workflow_dispatch has no pull_request
-  # context either, so it falls back to its own input.
+  # Grouped by PR number, not github.ref: pull_request_review is not a
+  # pull_request-family event, so github.ref does not resolve the same
+  # way for it as it does for a pull_request-only workflow.
+  # Review-thread comments used to share this trigger set too, but they
+  # now live in the separate idd-advisory-convergence-comment.yml
+  # companion workflow (#163, matching kurone-kito/idd-skill#2136): its
+  # own distinct `name:` gives it a distinct ${{ github.workflow }},
+  # hence a distinct concurrency group here, so it can never cancel or
+  # queue against this required job's own runs. workflow_dispatch has
+  # no pull_request context either, so it falls back to its own input.
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || inputs.pr_number }}
 on:
   pull_request:
     types: [opened, reopened, synchronize]
   pull_request_review:
     types: [submitted]
-  pull_request_review_comment:
-    types: [created, edited, deleted]
   workflow_dispatch:
     inputs:
       pr_number:
         description: PR number to re-check (e.g. after posting a maintainer waiver)
         required: true
         type: number
+      runner:
+        description: Runner label (default ubuntu-slim)
+        required: false
+        type: string
+        default: ubuntu-slim
 permissions:
   contents: read
   issues: read
@@ -34,7 +42,14 @@ jobs:
   # give this job an explicit `name:` override, or those lookups silently
   # find zero check-run instances.
   idd-advisory-convergence:
-    runs-on: ubuntu-latest
+    # Overridable via the workflow_dispatch `runner` input, falling
+    # back to the CI_RUNNER_LABEL repository variable, then the
+    # ubuntu-slim default -- same precedence idd-skill's own
+    # idd-template/.github/workflows/idd-advisory-convergence.yml
+    # documents (#163). pull_request / pull_request_review triggers
+    # carry no `inputs` context, so `inputs.runner` is empty for them
+    # and this falls straight through to the variable/default.
+    runs-on: ${{ inputs.runner || vars.CI_RUNNER_LABEL || 'ubuntu-slim' }}
     timeout-minutes: 10
     steps:
       # Trusted default-branch checkout, not the PR head, for any trigger
