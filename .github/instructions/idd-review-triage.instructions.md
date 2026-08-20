@@ -292,6 +292,67 @@ PATH B — Advisory items (completed review of the current HEAD):
 - Do not send PATH B items to review-fix. Their work is complete once
   the marker is posted and any thread resolution is done.
 
+**`review-ack:` marker — Clause 1 vs Clause 2.** Posting `**Accepted**`
+/ `**Rejected**` above satisfies advisory-convergence's Clause 2
+(thread / comment disposition) only. When the latest Copilot review on
+current HEAD also reports `suppressedCount > 0` (a finding folded into
+a `<details><summary>Suppressed comments (N)</summary>` block instead
+of a comment, so it has no thread or comment ID of its own to reply
+to — see `docs/idd-helper-scripts.md`), Clause 1's `suppressedCount`
+term needs its own coverage
+(`suppressedCount === 0 || hasValidReviewAck`) regardless of any
+Clause 2 disposition elsewhere in the same review. `hasValidReviewAck`
+is purely temporal (the marker's own `created_at` postdating the
+inspected review's `submittedAt`, never an embedded review ID), so a
+newer same-HEAD review landing between reading the review body and
+posting the marker is not detected by HEAD SHA alone — immediately
+before posting, re-fetch the latest Copilot review and confirm it is
+still the one whose suppressed finding(s) you inspected; if a newer
+same-HEAD review has landed instead, read that one first. After
+reading the review body and confirming the suppressed finding(s) are
+handled (fixed, or judged as needing no action), post `review-ack:`
+for the current HEAD SHA. Posting performs no author gating on its
+own —
+anyone with `gh` credentials can post the comment — but
+`idd-advisory-convergence` only honors a marker whose GitHub author is
+a `trustedMarkerActors` login; an untrusted poster's marker is ignored,
+not rejected at post time. Helper-first: the profile-selected
+post-idd-marker command (`--type review-ack --from-pr <pr-number>
+--agent-id <id> --timestamp <ISO8601> --apply`; see
+`docs/idd-helper-scripts.md`); the manual JSON `POST` is the fallback
+when helper runtime is unavailable:
+
+```text
+review-ack: {agent-id} {PR_HEAD_SHA} {ISO8601-acknowledged-at}
+```
+
+Posting the marker does not by itself refresh a failed
+`idd-advisory-convergence` run — the marker is a regular PR comment,
+and neither that check's own workflow nor its comment-triggered
+companion listens for a regular (non-review-thread) comment event — so
+after the marker is verified, also rerun the existing PR-linked run for
+the current HEAD (`gh run rerun <run-id>`, or the profile-selected
+`idd-rerun-advisory-convergence --pr <pr-number> --apply` command,
+which is read-only diagnosis without `--apply`; see
+[Rerun mechanics](idd-ci.instructions.md#rerun-mechanics)); the marker
+alone does not retrigger the check. If the helper reports
+`rerunPolicyHoldNotice` (the shared `ciWait.rerunPolicy` budget for
+this HEAD is already exhausted, even with `--apply`), a trusted
+maintainer's plain `gh run rerun <run-id>` on each remaining
+non-passing instance is not bound by that automation-only budget (see
+[Rerun mechanics](idd-ci.instructions.md#rerun-mechanics)'s
+self-healing-recovery note); absent that, post a hold and stop rather
+than leaving the check permanently red.
+
+_Worked example_: a review posts a regular-comment finding plus a
+suppressed one. Disposition the regular-comment finding normally
+(`**Rejected** — verified placeholders-only`), then also post
+`review-ack: claude-code-1a2b3c4d 4b825dc642cb6eb9a060e54bf8d69288fbee4904 2026-08-19T00:10:00Z`
+(plain text, no HTML comment) to cover the suppressed one — the
+regular-comment rejection alone never sets `converged`, and this is
+not a license to skip **AW6** or the fix flow when the suppressed
+finding needs a code change.
+
 PATH B — Advisory non-review notice (rate-limit / quota / queued / bare
 ack / error, as defined in E4):
 

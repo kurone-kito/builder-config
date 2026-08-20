@@ -334,6 +334,11 @@ post-idd-marker command (`--type advisory-reroll --target pr
 be posted or verified, fail closed to AW4's **Recovery failed** hold
 (mirrors AW3-R's routing on the same failure).
 
+**Already-handled escape hatch**: when the blocking suppressed
+finding(s) have already been read and handled, a reroll is
+unnecessary — post a trusted `review-ack:` marker instead; see
+`idd-review-triage.instructions.md`'s `review-ack:` paragraph (E6).
+
 ## Terminal Copilot stall-recovery contract (state, policy, markers, clock)
 
 `#1572` defines the state/policy/marker contract for a terminal
