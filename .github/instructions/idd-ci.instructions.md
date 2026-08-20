@@ -280,14 +280,15 @@ philosophy rather than letting reruns multiply across trigger sources.
 withheld this way, the next push creates a new run instance (its own
 fresh `run_attempt`) with its own budget, clearing the stale-red state
 with no further action needed. A maintainer's manual rerun (`gh run
-rerun <run-id>` or the Actions UI) also clears it directly, since a
-human isn't bound by this automation's own once-only budget — but it
-reruns the same run and increments that run's `run_attempt`, so this
-tooling's own automated rerun still treats that instance as
-budget-exhausted afterward. A fresh bot review is not a reliable
-recovery path on its own: its own bot-triggered run can re-enter
-`action_required` (see the bot-gated cause above) instead of clearing
-the rollup.
+rerun <run-id>` or the Actions UI) can also force that same run to
+execute again — a human isn't bound by this automation's own
+once-only budget, though this only forces a fresh execution, not a
+guaranteed pass. It reruns the same run and increments that run's
+`run_attempt`, so this tooling's own automated rerun still treats
+that instance as budget-exhausted afterward. A fresh bot review is
+not a reliable recovery path on its own: its own bot-triggered run
+can re-enter `action_required` (see the bot-gated cause above)
+instead of clearing the rollup.
 
 ## Interpretation
 
