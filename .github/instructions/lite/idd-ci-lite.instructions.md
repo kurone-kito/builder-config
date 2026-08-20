@@ -158,6 +158,18 @@ CI-polling shared helper file), never this one. Read
   manual rerun (forces the same run to execute again, not a guaranteed
   pass, without granting a fresh budget). A fresh bot review is not
   reliable here — it can itself re-enter `action_required`.
+- Queue-eviction of a queued comment-triggered refresh (`#177`): the
+  companion workflow's `cancel-in-progress: false` concurrency group
+  queues at most one pending run per PR; a later ordinary (non-IDD)
+  comment's own run can evict an already-queued IDD-originated refresh
+  before it runs, since the classify step judges only the triggering
+  comment's body (current, plus the pre-edit body on an edit). Accepted
+  as a residual of that narrow per-event design; self-heals on the next
+  push (a fresh run instance), or a maintainer forcing the required
+  workflow's own existing run to execute again (not the companion
+  workflow's evicting run, which just no-ops again) — a fresh bot
+  review is not reliable here either (same
+  gated `action_required` risk as above).
 
 ## Wake-up discipline
 
