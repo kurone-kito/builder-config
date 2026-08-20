@@ -74,9 +74,9 @@ In the idd-skill source repository, the following optional helpers were adopted:
   [kurone-kito/idd-skill#900](https://github.com/kurone-kito/idd-skill/issues/900))
 - `scripts/post-idd-marker.mjs` for rendering and POSTing any operational
   marker (`claim` / `unclaim` / `activation-nonce` / `watermark` /
-  `baseline` / `advisory` / `advisory-recovery` / `advisory-reroll`) via
-  the reliable JSON path that HTML-comment-first bodies require
-  (referenced in
+  `baseline` / `advisory` / `advisory-recovery` / `advisory-reroll` /
+  `review-ack` / `copilot-unavailable`) via the reliable JSON path that
+  HTML-comment-first bodies require (referenced in
   [kurone-kito/idd-skill#1047](https://github.com/kurone-kito/idd-skill/issues/1047))
 - `scripts/resume-claim-routing.mjs` for Resume Step 1 claim-state
   evaluation and takeover routing (referenced in
@@ -1202,18 +1202,23 @@ Interpretation rules:
 - Write-side companion to `emit-marker`: it renders the canonical body for
   each operational marker `<type>` (`claim`, `unclaim`, `activation-nonce`,
   `watermark`, `baseline`, `advisory`, `advisory-recovery`,
-  `advisory-reroll`) by reusing the single-sourced `protocol-helpers`
-  renderers, then POSTs it as a JSON document (`{"body": …}`) via
-  `gh api --method POST .../comments --input -`. The JSON path is
-  mandatory because `gh issue comment` / `gh api -f body=` silently
-  reject the HTML-comment-first claim-family bodies. `-f` also treats a
-  leading `@` as a literal character — only `-F` reads `@file` contents.
+  `advisory-reroll`, `review-ack`, `copilot-unavailable`) by reusing the
+  single-sourced `protocol-helpers` renderers, then POSTs it as a JSON
+  document (`{"body": …}`) via `gh api --method POST .../comments --input
+  -`. The JSON path is mandatory because `gh issue comment` / `gh api -f
+  body=` silently reject the HTML-comment-first claim-family bodies. `-f`
+  also treats a leading `@` as a literal character — only `-F` reads
+  `@file` contents.
 - The `claim` / `unclaim` / `activation-nonce` / `watermark` / `baseline`
   bodies are HTML-comment-first with a visible "Do not edit" note;
-  `advisory` / `advisory-recovery` / `advisory-reroll` are the
-  **plain-text** `advisory-wait:` / `advisory-wait-recovery:` /
-  `advisory-reroll:` forms (no visible note) so the AW2 / shell-fallback
-  recognizers still match.
+  `advisory` / `advisory-recovery` / `advisory-reroll` / `review-ack` /
+  `copilot-unavailable` are the **plain-text** `advisory-wait:` /
+  `advisory-wait-recovery:` / `advisory-reroll:` / `review-ack:` /
+  `copilot-unavailable:` forms (no visible note) so the AW2 /
+  shell-fallback recognizers still match. `review-ack:`'s own recognizer
+  is `advisory-convergence.mjs`'s `hasValidReviewAck` (see the AW6 section
+  below); `copilot-unavailable:` has no defined trigger yet (see the
+  Terminal stall-recovery marker contract below).
 - Fields per type: `claim` takes `--agent-id --claim-id --supersedes
   --timestamp --branch`; `unclaim` takes `--agent-id --claim-id --timestamp`;
   `activation-nonce` takes `--agent-id --claim-id --nonce --timestamp` (see
@@ -1222,7 +1227,10 @@ Interpretation rules:
   `watermark` takes `--agent-id --claim-id --head-sha --max-activity-at
   --total-item-count --ci-completed-at`; `baseline` takes `--agent-id
   --claim-id --sha`; `advisory` / `advisory-recovery` / `advisory-reroll`
-  take `--agent-id --head-sha --timestamp`.
+  / `review-ack` take `--agent-id --head-sha --timestamp`;
+  `copilot-unavailable` takes `--agent-id --claim-id --head-sha --attempt
+  --timestamp` — a brand-new terminal marker with no legacy form, so all
+  five fields are required.
 - One-command watermark (`watermark` only): `--from-pr <n>` derives
   `--head-sha` / `--max-activity-at` / `--total-item-count` /
   `--ci-completed-at` from a fresh `review-activity-snapshot` of PR `<n>` and
@@ -1235,17 +1243,34 @@ Interpretation rules:
   child so its counts match the manual path, and rejects the four manual
   snapshot fields as ambiguous. Unlike the manual dry-run it reads from GitHub
   (it spawns the snapshot), but still posts nothing without `--apply`.
-- `--from-pr` HEAD pin (`--expected-head-sha <sha>`): optional, `--from-pr`
-  only. Pass the E1 Step 1 stored `{head-SHA}` here to guard against the
-  branch moving between Step 1 and the Step 2 post: if the fresh snapshot's
+- `--from-pr` also works for the advisory-family types (`advisory`,
+  `advisory-recovery`, `advisory-reroll`, `review-ack`, per
+  `FROM_PR_MARKER_TYPES`) — despite the "one-command watermark" framing
+  above, `--from-pr` is not `watermark`-only. Unlike `watermark`'s full
+  four-field snapshot composition, these derive only `--head-sha`, via a
+  single lightweight `gh pr view` call
+  (`headShaFromPr`) rather than the full `review-activity-snapshot`, since
+  their renderers accept no other snapshot-shaped field. Same targeting
+  rules apply (always posts to PR `<n>`; an explicit non-pr `--target` is
+  rejected; the derived `--head-sha` may not also be passed manually).
+- `--from-pr` HEAD pin (`--expected-head-sha <sha>`): optional, `--from-pr
+  --type watermark` only — it has no meaning for the advisory-family
+  `--from-pr` types (they have no E1 Step 1/Step 2 pinning concept), and
+  the CLI rejects the combination rather than silently ignoring it. Pass
+  the E1 Step 1 stored `{head-SHA}` here to guard against the branch
+  moving between Step 1 and the Step 2 post: if the fresh snapshot's
   live HEAD no longer matches (case-insensitive compare), the CLI fails
   closed — it writes a `refusing to post watermark` message to stderr and
   exits non-zero **before** any POST, rather than silently posting a
   watermark keyed to a HEAD newer than Step 1 actually snapshotted. Rejected
   (exits non-zero, no `gh` call) when passed without `--from-pr`, since manual
   mode already supplies `--head-sha` directly with nothing to compare it
-  against.
-- `--from-pr` unaddressed-activity warning (`warnings`, kurone-kito/idd-skill#1833):
+  against; likewise rejected when passed with `--from-pr` for a
+  non-`watermark` type.
+- `--from-pr` unaddressed-activity warning (`warnings`,
+  kurone-kito/idd-skill#1833; `--type watermark` only — the advisory-family
+  `--from-pr` derivation computes no warnings, since it derives only
+  `--head-sha` and never spawns the snapshot):
   the JSON envelope (dry-run and `--apply` alike) carries an optional
   `warnings` string array, present only when the fresh snapshot's
   `dispositionEvidence.missingRegularCommentCount` /
@@ -1866,17 +1891,19 @@ to post it is the consuming track's job.
 
 #### Bounded same-HEAD advisory reroll (AW6, #1511)
 
-`converged`'s Clause 1 reads a **static** snapshot of the primary bot's
-review item count, taken once at submission. When that review already
-covers current HEAD but carried N>0 items that triage then legitimately
-**Rejected** and resolved, `converged` stays false permanently for that
-HEAD: rejecting the items and resolving their threads never changes the
-stored count, and nothing else refreshes it without a new push. This is
-exactly the residual AW1's own `SATISFIED` short-circuit cannot escape
-(`commit_id == HEAD` never changes across a same-HEAD reroll), and the
-reason the Zero-Accepted-PATH-A advisory re-review gate
-(`idd-review-triage.instructions.md`) deliberately does not re-request
-in this state.
+Before `kurone-kito/idd-skill#2050` (see the disposition-aware override
+note below), `converged`'s Clause 1 read a **static** snapshot of the
+primary bot's review item count, taken once at submission. When that
+review already covered current HEAD but carried N>0 items that triage
+then legitimately **Rejected** and resolved, `converged` stayed false
+permanently for that HEAD: rejecting the items and resolving their
+threads never changed the stored count, and nothing else refreshed it
+without a new push. This was exactly the residual AW1's own `SATISFIED`
+short-circuit cannot escape (`commit_id == HEAD` never changes across a
+same-HEAD reroll), and the reason the Zero-Accepted-PATH-A advisory
+re-review gate (`idd-review-triage.instructions.md`) deliberately does
+not re-request in this state. `#2050` narrowed, but did not eliminate,
+this residual — see the note below for what it still covers.
 
 The verdict's `sameHeadReroll` field group surfaces this residual as
 evidence, purely additively: `converged` / `waived` / `ready` are
@@ -1937,6 +1964,32 @@ blocking convergence with a dedicated top-level reason, and keeping the
 same-HEAD reroll recovery path available for it, since `suppressedCount`
 is read from the same static per-submission review snapshot `itemCount`
 is.
+
+**`itemCount` Clause 1 disposition-aware override
+(`kurone-kito/idd-skill#2050`).** Since `#2050`, Clause 1's `itemCount`
+term (`itemCountClauseSatisfied` in `advisory-convergence.mts`) is no
+longer purely the static `itemCount === 0` check described in the
+opening paragraph above. It is now also satisfied when `itemCount` is a
+known positive integer AND every thread **that specific latest review
+opened** is resolved or validly dispositioned —
+`latestReviewThreadIds.size >= review.itemCount` with none of those
+review-scoped threads left in `dispositionEvidence.missingThreads`.
+This is bound to the latest review's own `reviewId`
+(`classifyThreadIdsForReview`), deliberately **not** Clause 2's PR-wide,
+review-agnostic `threadClause` — a resolved-but-stale thread from an
+OLDER, already-dispositioned review must never stand in for the
+CURRENT review's own coverage. In practice this narrows the same-HEAD
+reroll residual to what the override cannot resolve on its own: an item
+Copilot never surfaced as a review thread at all (the `#1719`
+body-embedded shape above, where `latestReviewThreadIds.size <
+review.itemCount`), or a positive `suppressedCount` still lacking a
+valid `review-ack` (the paragraph above). Note that `sameHeadReroll`'s
+own `eligible` field is unaffected by this override — it still reads
+Clause 2's PR-wide `threadClause.satisfied`, not
+`itemCountClauseSatisfied` — so the override changes when top-level
+`converged` itself resolves (letting F2 skip AW6 entirely for the
+on-thread case it now handles), without changing how `sameHeadReroll`'s
+own fields are computed.
 
 **AW6 procedure** (`idd-advisory-wait.instructions.md`), invoked only
 from F2 on a non-zero `--assert` exit:
