@@ -2082,9 +2082,11 @@ same as `AW4`/`AW5`.
   (multi-command pointers are newline-separated).
 - Computed strictly **after** `ready` is resolved, purely from the
   already-computed verdict fields (`applicability`, `review`, `threads`,
-  `deadline`, `waiver`, `terminal`, `sameHeadReroll`) -- never by parsing
-  `reasons[]`. `nextActions` is `[]` exactly when `ready` is `true`, and
-  it never feeds back into the `ready` computation itself.
+  `deadline`, `waiver` -- the `{ mode, checkSelector, activeClaimId,
+  validCount }` external-check-waiver evidence discussed above --
+  `terminal`, `sameHeadReroll`) -- never by parsing `reasons[]`.
+  `nextActions` is `[]` exactly when `ready` is `true`, and it never
+  feeds back into the `ready` computation itself.
 - Shared source of truth with the `--assert` stderr failure block: the
   same `collectAssertNextActions` catalog backs both `verdict.nextActions`
   (stdout JSON) and `formatAssertNextActions`'s human-readable stderr
