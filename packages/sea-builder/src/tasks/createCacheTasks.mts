@@ -25,9 +25,6 @@ export interface CacheOptions {
   /** Platform identifier. */
   readonly platform?: NodeJS.Platform | undefined;
 
-  /** Project root directory path. If not provided, will be auto-detected. */
-  readonly projectRoot?: string | undefined;
-
   /** Target strings such as `linux-x64`. */
   readonly targets?: readonly string[] | undefined;
 }
