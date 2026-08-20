@@ -294,8 +294,9 @@ instead of clearing the rollup.
 `idd-advisory-convergence-comment.yml`'s own concurrency group uses
 `cancel-in-progress: false`, grouped by PR number, which queues at
 most one pending run per PR — distinct from the required
-`idd-advisory-convergence.yml` workflow's own `cancel-in-progress:
-true` group, which cancels rather than queues. If an IDD-originated
+`idd-advisory-convergence.yml` workflow's own group, which sets
+`cancel-in-progress: true` and cancels rather than queues. If an
+IDD-originated
 comment's triggered run is queued behind an already-executing run, and
 a later ORDINARY (non-IDD) comment arrives before the first finishes,
 GitHub Actions' own queue-depth-1 behavior evicts the queued
