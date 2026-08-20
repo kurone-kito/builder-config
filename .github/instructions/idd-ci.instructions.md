@@ -293,30 +293,38 @@ instead of clearing the rollup.
 **Queue-eviction of a queued comment-triggered refresh (`#177`)**:
 `idd-advisory-convergence-comment.yml`'s own concurrency group uses
 `cancel-in-progress: false`, grouped by PR number, which queues at
-most one pending run per PR — distinct from the required
-`idd-advisory-convergence.yml` workflow's own group, which sets
-`cancel-in-progress: true` and cancels rather than queues. If an
-IDD-originated
-comment's triggered run is queued behind an already-executing run, and
-a later ORDINARY (non-IDD) comment arrives before the first finishes,
-GitHub Actions' own queue-depth-1 behavior evicts the queued
-IDD-originated run in favor of the newer one. The classify step
-(`review-comment-origin.mjs`) only inspects the current triggering
-comment's own body, not full PR state, so the evicting run correctly —
-from its own narrow per-event view — classifies itself
-non-IDD-originated and takes no action; the evicted refresh is lost
-until another trigger fires.
+most one pending run per PR. The required `idd-advisory-convergence.yml`
+workflow's own group queues at most one pending run the same way — GitHub
+always evicts an older pending run in a concurrency group on a new
+trigger, regardless of `cancel-in-progress` — but that required group
+additionally sets `cancel-in-progress: true`, which also cancels its own
+currently-running instance; the companion workflow leaves an
+already-running instance alone. If an IDD-originated comment's triggered
+run is queued behind an already-executing run, and a later ORDINARY
+(non-IDD) comment arrives before the first finishes, this pending-run
+eviction replaces the queued IDD-originated run with the newer one. The
+classify step (`review-comment-origin.mjs`) only inspects the triggering
+event's own comment body — the current body, plus the pre-edit body on an
+`edited` event — never full PR state, so the evicting run correctly —
+from its own narrow per-event view — classifies itself non-IDD-originated
+and takes no action; the evicted refresh is lost until another trigger
+fires.
 This is accepted as a residual of the workflow's own narrow, per-event
-classify-step design, not a defect to silently patch — no fix was
-found that doesn't trade away that design principle (evaluating full
-current PR state instead of just the triggering comment would be a
-real architectural change with its own tradeoffs, not an
-obviously-better alternative). **Self-healing recovery**: a subsequent
-push or a maintainer's manual rerun (`gh run rerun <run-id>` or the
-Actions UI) creates a fresh trigger and clears the stale state. A
-fresh bot review is not a reliable recovery path here either — the
-same bot-gated `action_required` risk noted above (a
-`pull_request_review`-triggered run for the required workflow can
+classify-step design, not a defect to silently patch — no fix was found
+that clearly improves on this without its own tradeoffs: evaluating full
+current PR state instead of just the triggering comment would be a real
+architectural change, and even a narrower per-event alternative — keying
+the concurrency group by comment id instead of PR number — would trade
+away the shared per-PR serialization that prevents concurrent reruns of
+the same required-check run; neither is an obviously-better alternative.
+**Self-healing recovery**: a subsequent push, or a maintainer's manual
+rerun of the required workflow's own existing run for current HEAD
+(`gh run rerun <run-id>` targeting that run, or the Actions UI —
+rerunning the companion workflow's evicting run instead just reclassifies
+the same ordinary comment and no-ops again), creates a fresh trigger and
+clears the stale state. A fresh bot review is not a reliable recovery
+path here either — the same bot-gated `action_required` risk noted above
+(a `pull_request_review`-triggered run for the required workflow can
 re-enter `action_required` instead of completing) applies to this
 residual too.
 

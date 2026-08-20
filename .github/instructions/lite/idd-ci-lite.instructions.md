@@ -163,10 +163,12 @@ CI-polling shared helper file), never this one. Read
   queues at most one pending run per PR; a later ordinary (non-IDD)
   comment's own run can evict an already-queued IDD-originated refresh
   before it runs, since the classify step judges only the triggering
-  comment's own body. Accepted as a residual of that narrow per-event
-  design; self-heals on the next push or maintainer manual rerun — a
-  fresh bot review is not reliable here either (same gated
-  `action_required` risk as above).
+  comment's body (current, plus the pre-edit body on an edit). Accepted
+  as a residual of that narrow per-event design; self-heals on the next
+  push or a maintainer's manual rerun of the required workflow's own
+  existing run (not the companion workflow's evicting run, which just
+  no-ops again) — a fresh bot review is not reliable here either (same
+  gated `action_required` risk as above).
 
 ## Wake-up discipline
 
