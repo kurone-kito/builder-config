@@ -150,6 +150,14 @@ CI-polling shared helper file), never this one. Read
 - Helper-first diagnosis (read-only): `node
   scripts/rerun-advisory-convergence.mjs --pr <n>`. Resolve the
   package-manager equivalent from `docs/idd-helper-scripts.md`.
+- Shared rerun-once budget (`#171`): a check instance's `ciWait.rerunPolicy`
+  budget is shared between this section's own rerun and a
+  comment-triggered refresh from `idd-advisory-convergence-comment.yml`
+  — intentional, not a bug; a withheld refresh self-heals on the next
+  push (a fresh run instance with its own budget) or a maintainer's
+  manual rerun (forces the same run to execute again, not a guaranteed
+  pass, without granting a fresh budget). A fresh bot review is not
+  reliable here — it can itself re-enter `action_required`.
 
 ## Wake-up discipline
 

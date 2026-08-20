@@ -261,6 +261,35 @@ before the next.
 rerun this SAME existing run via the mechanic above — never
 `workflow_dispatch`.
 
+**Shared rerun-once budget with comment-triggered refreshes (`#171`)**:
+`rerun-advisory-convergence.mjs`'s per-instance rerun eligibility (keyed
+by GitHub's own `run_attempt` on that check-run instance) is the SAME
+`ciWait.rerunPolicy` budget this section's own CI-wait infra-retry uses
+— it is also spent by the `idd-advisory-convergence-comment.yml`
+companion workflow (added by issue `#163`; see `docs/idd-policy.md`'s
+`idd-advisory-convergence` workflow section) when it reruns a check
+instance in response to an IDD-originated review-thread comment. If one
+caller has already rerun a given instance once, a later IDD-originated
+comment wanting to refresh that same still-stuck instance is silently
+withheld as `rerun-budget-exhausted` rather than granted an independent
+budget.
+This is accepted, intentional, bounded-recovery-by-design behavior, not
+a bug — it mirrors `ciWait.rerunPolicy`'s own escalate-after-one-rerun
+philosophy rather than letting reruns multiply across trigger sources.
+**Self-healing recovery**: if a same-HEAD comment-triggered refresh is
+withheld this way, the next push creates a new run instance (its own
+fresh `run_attempt`) with its own budget, clearing the stale-red state
+with no further action needed. A maintainer's manual rerun (`gh run
+rerun <run-id>` or the Actions UI) can also force that same run to
+execute again — a human isn't bound by this automation's own
+once-only budget, though this only forces a fresh execution, not a
+guaranteed pass. It reruns the same run and increments that run's
+`run_attempt`, so this tooling's own automated rerun still treats
+that instance as budget-exhausted afterward. A fresh bot review is
+not a reliable recovery path on its own: its own bot-triggered run
+can re-enter `action_required` (see the bot-gated cause above)
+instead of clearing the rollup.
+
 ## Interpretation
 
 <!-- dprint-ignore-start -->
