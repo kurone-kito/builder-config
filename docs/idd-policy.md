@@ -256,11 +256,12 @@ repository's baseline drops the `Bash(node scripts/*)` /
 idd-skill's own repository *is* the `vendored-node` source tree; under
 this repository's `package-manager` profile the `idd-*` helpers run
 through `pnpm exec`/`package.json` scripts instead, this repository has
-no `bin/` directory at all, and its own `scripts/` holds only a single
-release utility (`createEntryStub.mjs`) — keeping the wildcard would
-widen the attack surface (any newly added or modified script under
-`scripts/` would run without a permission prompt) with no
-corresponding IDD-helper benefit here.
+no `bin/` directory at all, and its own `scripts/` holds only narrowly
+scoped repo-local utilities (the release stub `createEntryStub.mjs` and
+the CHANGELOG-policy lint check `check-changelog-policy.mjs`, added by
+issue #160) — keeping the wildcard would widen the attack surface (any
+newly added or modified script under `scripts/` would run without a
+permission prompt) with no corresponding IDD-helper benefit here.
 
 Personal additions belong in `.claude/settings.local.json`, which
 layers on top of the committed baseline.
@@ -573,3 +574,13 @@ hook file invokes them changed.
 
   See the matching step in the release checklist in
   [`.github/copilot-instructions.md`](../.github/copilot-instructions.md#release-checklist).
+- **Enforcement** (issue #160): `pnpm run lint:changelog:check`
+  (`scripts/check-changelog-policy.mjs`) is part of the `lint:*:check`
+  family `pnpm run lint` runs, and also runs via `pnpm run lint:fix`'s
+  `postlint:fix` hook — so every IDD **fix-validate** / **pre-push-validate**
+  run sees it too. It fails when the diff against `origin/main` (or an
+  explicit `MERGE_BASE` override) touches any `packages/*/CHANGELOG.md`
+  path, citing this section, and fails closed if that base cannot be
+  resolved. The release-cut change above is the one legitimate
+  exception: set `IDD_CHANGELOG_RELEASE=1` when running lint for that
+  change only, to let it edit these files.
