@@ -268,7 +268,7 @@ by GitHub's own `run_attempt` on that check-run instance) is the SAME
 — it is also spent by the `idd-advisory-convergence-comment.yml`
 companion workflow (added by issue `#163`; see `docs/idd-policy.md`'s
 `idd-advisory-convergence` workflow section) when it reruns a check
-instance in response to an IDD-originated PR comment. If one caller
+instance in response to an IDD-originated PR comment. If one caller has
 already rerun a given instance once, a later IDD-originated comment
 wanting to refresh that same still-stuck instance is silently withheld
 as `rerun-budget-exhausted` rather than granted an independent budget.
