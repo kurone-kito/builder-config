@@ -386,7 +386,8 @@ once `ciGate.externalCheckWaivers.mode` is `maintainer-authorized`
 external check never silently makes this one waivable too. **Posting a
 waiver comment does not by itself turn the check green**: a waiver is a
 regular PR comment, which is not one of the workflow's triggers
-(`pull_request` push or `pull_request_review` submission), so after
+(`pull_request` push, `pull_request_review` submission, or a manually
+dispatched `workflow_dispatch`), so after
 posting a waiver a maintainer must also **re-run the
 existing** PR-linked check run **for the current HEAD SHA** — the
 Actions UI "Re-run jobs" button, or `gh run rerun <run-id>` — for the

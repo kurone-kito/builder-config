@@ -42,13 +42,17 @@ jobs:
   # give this job an explicit `name:` override, or those lookups silently
   # find zero check-run instances.
   idd-advisory-convergence:
-    # Overridable via the workflow_dispatch `runner` input, falling
-    # back to the CI_RUNNER_LABEL repository variable, then the
-    # ubuntu-slim default -- same precedence idd-skill's own
+    # Overridable via the workflow_dispatch `runner` input, or via the
+    # CI_RUNNER_LABEL repository variable for the pull_request /
+    # pull_request_review triggers (which carry no `inputs` context,
+    # so `inputs.runner` is empty and this falls through to the
+    # variable/default there). Note: CI_RUNNER_LABEL has no effect on
+    # a manual workflow_dispatch run specifically, since `runner`'s
+    # own `default: ubuntu-slim` means `inputs.runner` is never empty
+    # there -- pass the desired label directly to the `runner` input
+    # on a manual dispatch instead. Same precedence idd-skill's own
     # idd-template/.github/workflows/idd-advisory-convergence.yml
-    # documents (#163). pull_request / pull_request_review triggers
-    # carry no `inputs` context, so `inputs.runner` is empty for them
-    # and this falls straight through to the variable/default.
+    # documents (#163).
     runs-on: ${{ inputs.runner || vars.CI_RUNNER_LABEL || 'ubuntu-slim' }}
     timeout-minutes: 10
     steps:

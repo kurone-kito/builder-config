@@ -365,8 +365,9 @@ confirmed empirically on this PR after the job briefly carried a
 **Waiver re-trigger procedure**: posting a maintainer waiver comment
 does **not** by itself turn this check green — a PR conversation
 comment fires GitHub's `issue_comment` event, which this workflow does
-not listen for (only `pull_request` and `pull_request_review`, since
-issue #163), and a completed run's conclusion never changes on its
+not listen for (only `pull_request`, `pull_request_review`, and a
+manually dispatched `workflow_dispatch`, since issue #163), and a
+completed run's conclusion never changes on its
 own. After posting a waiver, also trigger a new
 run: a push, a fresh Copilot review, the Actions UI "Re-run jobs"
 button on the *existing* PR-linked run for the *current HEAD SHA*, or
