@@ -9,6 +9,16 @@ gitChecks: false
 ignoreWorkspaceRootCheck: true
 linkWorkspacePackages: true
 overrides:
+  # Pin @types/jsdom's own @types/node dependency: @types/jsdom
+  # declares it as an unconstrained '*' dependency (not a peer), so a
+  # fresh pnpm resolve can flip which @types/node flavor satisfies it
+  # workspace-wide whenever the dependency graph changes elsewhere
+  # (e.g. an unrelated devDependency bump) -- silently producing
+  # duplicate-identifier TypeScript errors. Matches vite-lib-config's
+  # own @types/node range so the pin stays consistent with an
+  # existing intentional flavor rather than introducing a third
+  # value.
+  '@types/jsdom>@types/node': '^24.6.2'
   # Transitive-only pin: xsea's own adm-zip range (^0.5.16) predates the
   # GHSA-xcpc-8h2w-3j85 fix. Drop once xsea widens its own adm-zip
   # dependency to include >=0.6.0.
