@@ -294,6 +294,7 @@ nonce was recorded for the active claim.
   `sameHeadReroll.eligible`) using `reasons`; zero exit (`ready: true`)
   satisfies this condition. An `ack-suppressed` next-action from AW6
   means Clause 1's `suppressedCount` term still needs coverage — see
+  AW6's "Already-handled escape hatch" and
   `idd-review-triage.instructions.md`'s `review-ack:` paragraph (E6)
   instead of rerolling.
   Separately, require `dispositionEvidence.route` to be `proceed`
