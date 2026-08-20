@@ -217,12 +217,12 @@ body. Do not add a parallel "worker-lite authoring" contract.
 
 The PR body's prose sections above (summary, background/rationale,
 follow-up notes) follow the resolved `authoringLanguage` value from
-`.github/idd/config.json`: a fixed language tag when configured, the
-claimed issue's own body language when the value is `match-source`
-(this file's unattended-execution case, with no live operator), or
-English when the field is absent. See the
-[Authoring Language](../../docs/customization.md#authoring-language)
-section for the full field definition.
+`.github/idd/config.json`: a fixed BCP-47-shaped language tag (for
+example `en`, `ja`, `fr`) when configured, the claimed issue's own body
+language when the value is the literal `match-source` (this file's
+unattended-execution case, with no live operator to match a live
+conversational language against), or English when the field is absent
+(fail-safe default, matching today's emergent behavior).
 
 This never changes a machine-parsed marker or an exact-regex-matched
 visible line, which always stays in its canonical form regardless of

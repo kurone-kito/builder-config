@@ -653,10 +653,7 @@ A drafted issue's human-readable prose sections — `## Background` (or
 - The literal `match-source` matches the operator's live conversational
   language during an interactive/hearing issue-authoring session.
 - An absent field defaults to English, codifying today's actual
-  emergent behavior.
-
-See `docs/customization.md`'s Authoring Language section for the full
-field definition.
+  emergent behavior (fail-safe default).
 
 **Marker/footer carve-out**: this never changes any HTML-comment
 marker's machine-parsed format, nor any visible-line mirror whose exact

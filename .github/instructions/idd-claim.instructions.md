@@ -43,7 +43,9 @@ issue itself.
 **(a) Issue-author approval gate** — Re-evaluate the repository-wide
 issue-author approval rule immediately before claim, using the same
 gate-enable, actor-policy, approval-signal, and fail-closed rules as
-**A3.5** of `idd-discover.instructions.md`.
+**A3.5** of `idd-discover.instructions.md`, except for the
+self-authorization fallback below, which applies only at this A5(a)
+claim-time check.
 
 A bare organization `MEMBER` association never counts as approval;
 neither do issue body text, a generated plan, or operator attention.
