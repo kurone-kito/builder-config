@@ -2110,7 +2110,7 @@ evaluates them):
 | `request-re-review` | The bot has reviewed the PR, but its latest review does not cover current HEAD (`review.found` is `true` and `review.matchesHead` is `false`) -- mutually exclusive with `request-review` (`if`/`else if`). |
 | `disposition-posted-items` | The latest review covers current HEAD and carries a positive item count (`review.matchesHead` is `true` and `review.itemCount > 0`) -- posted items still need E6/E13 disposition. |
 | `disposition-threads` | `threads.satisfied` is `false` -- at least one Copilot-authored review thread is unresolved and lacks a valid disposition marker. |
-| `ack-suppressed` | The latest review reports a positive `suppressedCount` -- a finding folded into a "Suppressed comments" block instead of a postable comment -- needing a `review-ack:` marker once handled. |
+| `ack-suppressed` | The latest review reports a positive `review.suppressedCount` -- a finding folded into a "Suppressed comments" block instead of a postable comment -- needing a `review-ack:` marker once handled. |
 | `waiver-terminal` | Copilot is terminally unavailable (`terminal.state` is `COPILOT_UNAVAILABLE`) and waiver mode is `maintainer-authorized` -- a maintainer external-check waiver can clear it. |
 | `hold-terminal` | Copilot is terminally unavailable and waiver mode is **not** `maintainer-authorized` -- mutually exclusive with `waiver-terminal` (`if`/`else`); hold for a maintainer instead. |
 | `waiver-deadline` | Copilot is not terminally unavailable, the convergence deadline has passed (`deadline.passed` is `true`), and waiver mode is `maintainer-authorized` -- mutually exclusive with `waiver-terminal`/`hold-terminal` (`else if` on the terminal check). |
