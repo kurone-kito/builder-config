@@ -38,6 +38,9 @@ profile.
 **Profile**: distributed defaults from `docs/policy-constants.md` — no
 repository override.
 
+See [Critique-Loop Delegate](#critique-loop-delegate) below for the
+separate `critiqueLoop.delegate` decline decision.
+
 ## Claim Timing
 
 - **claim-stale-age**: 24 h (distributed default)
@@ -241,6 +244,29 @@ PR-submit), per
 This never changes a machine-parsed marker or an exact-regex-matched
 visible line, which always stays in its canonical English form
 regardless of this setting.
+
+## Critique-Loop Delegate
+
+**Decision**: the optional `critiqueLoop.delegate` policy field was
+considered and **declined**, at the same roadmap-authoring hearing on
+2026-08-20 that decided `authoringLanguage` above — both decisions are
+recorded together in roadmap #162's own issue body, though
+`authoringLanguage` was implemented via its own tracked child issue
+(#165), while this decline was never assigned an execution issue until
+now (#174):
+
+> `critiqueLoop.delegate`: declined. It only has effect once a concrete
+> external reviewer command exists to delegate to, which this
+> repository does not have; revisit as a fresh issue if/when one is
+> adopted.
+
+As a direct result, `.github/idd/config.json` intentionally carries no
+`critiqueLoop.delegate` entry — a decline means no config entry to add,
+not an explicit disabled value, so this file's own "keep both in sync"
+rule at the top has nothing to mirror here.
+`.github/instructions/idd-work.instructions.md` C1 already documents
+the fallback behavior for this field: absent, invalid, or a failing
+delegate leaves C1 running the per-agent critique mechanism unchanged.
 
 ## IDD Labels
 
