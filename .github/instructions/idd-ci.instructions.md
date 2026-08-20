@@ -293,12 +293,14 @@ instead of clearing the rollup.
 **Queue-eviction of a queued comment-triggered refresh (`#177`)**:
 `idd-advisory-convergence-comment.yml`'s own concurrency group uses
 `cancel-in-progress: false`, grouped by PR number, which queues at
-most one pending run per PR. The required `idd-advisory-convergence.yml`
-workflow's own group queues at most one pending run the same way — GitHub
-always evicts an older pending run in a concurrency group on a new
-trigger, regardless of `cancel-in-progress` — but that required group
-additionally sets `cancel-in-progress: true`, which also cancels its own
-currently-running instance; the companion workflow leaves an
+most one pending run per PR (GitHub's default `queue: single` behavior
+— neither workflow sets `queue: max`, the newer opt-in that allows up
+to 100 pending runs). The required `idd-advisory-convergence.yml`
+workflow's own group queues the same single-pending way — under this
+default, GitHub evicts an older pending run in a concurrency group on
+a new trigger regardless of `cancel-in-progress` — but that required
+group additionally sets `cancel-in-progress: true`, which also cancels
+its own currently-running instance; the companion workflow leaves an
 already-running instance alone. If an IDD-originated comment's triggered
 run is queued behind an already-executing run, and a later ORDINARY
 (non-IDD) comment arrives before the first finishes, this pending-run
@@ -318,14 +320,14 @@ the concurrency group by comment id instead of PR number — would trade
 away the shared per-PR serialization that prevents concurrent reruns of
 the same required-check run; neither is an obviously-better alternative.
 **Self-healing recovery**: a subsequent push creates a fresh run
-instance and clears the stale state. A maintainer's manual rerun of the
-required workflow's own existing run for current HEAD (`gh run rerun
-<run-id>` targeting that run, or the Actions UI — rerunning the
-companion workflow's evicting run instead just reclassifies the same
-ordinary comment and no-ops again) forces that same existing run to
-execute again rather than creating a new instance, which can also clear
-the stale state. A fresh bot review is not a reliable recovery path
-here either — the same bot-gated `action_required` risk noted above (a
+instance and clears the stale state. A maintainer can also clear it by
+forcing the required workflow's own existing run for current HEAD to
+execute again — `gh run rerun <run-id>` targeting that run, or the
+Actions UI — which reuses the existing run rather than creating a new
+instance; never rerun the companion workflow's evicting run instead,
+which just reclassifies the same ordinary comment and no-ops again. A
+fresh bot review is not a reliable recovery path here either — the
+same bot-gated `action_required` risk noted above (a
 `pull_request_review`-triggered run for the required workflow can
 re-enter `action_required` instead of completing) applies to this
 residual too.
