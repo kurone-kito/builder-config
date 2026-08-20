@@ -317,14 +317,16 @@ architectural change, and even a narrower per-event alternative — keying
 the concurrency group by comment id instead of PR number — would trade
 away the shared per-PR serialization that prevents concurrent reruns of
 the same required-check run; neither is an obviously-better alternative.
-**Self-healing recovery**: a subsequent push, or a maintainer's manual
-rerun of the required workflow's own existing run for current HEAD
-(`gh run rerun <run-id>` targeting that run, or the Actions UI —
-rerunning the companion workflow's evicting run instead just reclassifies
-the same ordinary comment and no-ops again), creates a fresh trigger and
-clears the stale state. A fresh bot review is not a reliable recovery
-path here either — the same bot-gated `action_required` risk noted above
-(a `pull_request_review`-triggered run for the required workflow can
+**Self-healing recovery**: a subsequent push creates a fresh run
+instance and clears the stale state. A maintainer's manual rerun of the
+required workflow's own existing run for current HEAD (`gh run rerun
+<run-id>` targeting that run, or the Actions UI — rerunning the
+companion workflow's evicting run instead just reclassifies the same
+ordinary comment and no-ops again) forces that same existing run to
+execute again rather than creating a new instance, which can also clear
+the stale state. A fresh bot review is not a reliable recovery path
+here either — the same bot-gated `action_required` risk noted above (a
+`pull_request_review`-triggered run for the required workflow can
 re-enter `action_required` instead of completing) applies to this
 residual too.
 
