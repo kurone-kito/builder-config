@@ -21,7 +21,8 @@ sea-cache  # cache for current platform
 sea-cache linux-x64 win-x64  # cache archives for multiple targets
 ```
 
-Archives are downloaded to `~/.cache/xsea` if not already present.
+Archives are downloaded to a `.cache/xsea` folder inside your home
+directory (`os.homedir()`) if not already present.
 
 ### 2. **Build the SEA binary**
 
@@ -52,8 +53,9 @@ the build output.
 
 ### Cache directory
 
-All downloaded archives are stored in `~/.cache/xsea` — the same
-directory `xsea` itself reads them from. When `sea-cache`/`sea-builder`
+All downloaded archives are stored in your home directory's
+`.cache/xsea` folder — the same location `xsea` itself reads them from.
+When `sea-cache`/`sea-builder`
 populate an entry, the archive is downloaded and SHA-256-verified before
 `xsea` ever sees it, so `xsea` links exactly the bytes that passed
 verification. This is a fixed location outside any project directory:
