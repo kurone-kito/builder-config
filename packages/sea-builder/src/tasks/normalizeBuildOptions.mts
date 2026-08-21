@@ -31,6 +31,7 @@ export const normalizeBuildOptions = async (
     nodeVersion: cacheOpts.nodeVersion,
     platform: cacheOpts.platform,
     targets: cacheOpts.targets,
+    verifyCachedArchive: cacheOpts.verifyCachedArchive,
   });
   return { ...normalized, basename, execa };
 };

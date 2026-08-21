@@ -12,3 +12,12 @@ export type ExistsSync = typeof existsSync;
 
 /** Type definition for a function that creates directories. */
 export type Mkdir = typeof mkdir | typeof mkdirSync;
+
+/**
+ * Type definition for a function that re-verifies an existing cached
+ * archive file against its published checksum.
+ */
+export type VerifyCachedArchiveFunction = (
+  url: string,
+  archivePath: string,
+) => Promise<boolean>;

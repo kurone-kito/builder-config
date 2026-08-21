@@ -5,6 +5,11 @@ const opts = {
   download: vi.fn(),
   existsSync: vi.fn(() => true),
   mkdir: vi.fn(async () => undefined),
+  // Without an explicit override, a cache "hit" (existsSync -> true)
+  // would fall through to the real checksum re-verification and its
+  // live SHASUMS256.txt fetch -- mock it so this stays a pure unit
+  // test, mirroring the other injected fs/network functions above.
+  verifyCachedArchive: vi.fn(async () => true),
 };
 
 describe('createCacheTask', () => {
