@@ -1,5 +1,10 @@
 import { resolveNodeVersion } from '../utils/resolveNodeVersion.mjs';
-import type { DownloadFunction, ExistsSync, Mkdir } from '../utils/types.mjs';
+import type {
+  DownloadFunction,
+  ExistsSync,
+  Mkdir,
+  VerifyCachedArchiveFunction,
+} from '../utils/types.mjs';
 import { createMetaFactory } from './createMetaFactory.mjs';
 import type { Task } from './createTaskFactory.mjs';
 import { createTaskFactory } from './createTaskFactory.mjs';
@@ -27,6 +32,12 @@ export interface CacheOptions {
 
   /** Target strings such as `linux-x64`. */
   readonly targets?: readonly string[] | undefined;
+
+  /**
+   * Function that re-verifies an existing cache-hit archive against its
+   * published checksum.
+   */
+  readonly verifyCachedArchive?: VerifyCachedArchiveFunction | undefined;
 }
 
 /**
@@ -41,12 +52,25 @@ export interface CacheOptions {
 export const createCacheTasks = async (
   options: CacheOptions = {},
 ): Promise<Task[]> => {
-  const { cacheDir, download, existsSync, mkdir, nodeVersion, targets } =
-    normalizeCacheOptions({
-      ...options,
-      nodeVersion: await resolveNodeVersion(options.nodeVersion),
-    });
+  const {
+    cacheDir,
+    download,
+    existsSync,
+    mkdir,
+    nodeVersion,
+    targets,
+    verifyCachedArchive,
+  } = normalizeCacheOptions({
+    ...options,
+    nodeVersion: await resolveNodeVersion(options.nodeVersion),
+  });
   const metaFor = createMetaFactory(cacheDir, nodeVersion);
-  const toTask = createTaskFactory(download, existsSync, mkdir, cacheDir);
+  const toTask = createTaskFactory(
+    download,
+    verifyCachedArchive,
+    existsSync,
+    mkdir,
+    cacheDir,
+  );
   return targets.map((t) => toTask(metaFor(t)));
 };

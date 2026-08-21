@@ -4,6 +4,7 @@ import type { SetNonNullable } from 'type-fest';
 import { CACHE_DIR } from '../constants.mjs';
 import { downloadArchive } from '../utils/downloadArchive.mjs';
 import { normalizeTargets } from '../utils/normalizeTargets.mjs';
+import { verifyCachedArchive as concretedVerifyCachedArchive } from '../utils/verifyCachedArchive.mjs';
 import type { CacheOptions } from './createCacheTasks.mjs';
 
 /** Type definition for options accepted by {@link normalizeCacheOptions}. */
@@ -29,6 +30,7 @@ export const normalizeCacheOptions = (
     nodeVersion = `v${process.versions.node}`,
     platform = process.platform,
     targets = [],
+    verifyCachedArchive = concretedVerifyCachedArchive,
   } = options;
   return {
     cacheDir: CACHE_DIR,
@@ -39,5 +41,6 @@ export const normalizeCacheOptions = (
     download,
     existsSync,
     mkdir,
+    verifyCachedArchive,
   };
 };
