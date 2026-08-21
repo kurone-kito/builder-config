@@ -5,10 +5,8 @@ import { basename } from 'node:path/posix';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import type { ReadableStream as NodeWebReadableStream } from 'node:stream/web';
+import { fetchExpectedChecksum } from './fetchExpectedChecksum.mjs';
 import type { DownloadFunction } from './types.mjs';
-
-/** Matches a 64-character lowercase or uppercase hex SHA-256 digest. */
-const SHA256_HEX = /^[0-9a-fA-F]{64}$/;
 
 /**
  * Convert a Fetch API {@link Response.body} into a Node.js
@@ -25,29 +23,6 @@ const SHA256_HEX = /^[0-9a-fA-F]{64}$/;
  */
 const toNodeReadable = (body: ReadableStream<Uint8Array>): Readable =>
   Readable.fromWeb(body as unknown as NodeWebReadableStream<Uint8Array>);
-
-/**
- * Find the published SHA-256 checksum for a file in a `SHASUMS256.txt`
- * listing.
- * @param shasums Contents of the `SHASUMS256.txt` file.
- * @param filename Archive file name to look up.
- * @returns The expected lowercase hex SHA-256 digest.
- * @throws {Error} If no parseable checksum line names `filename`, or the
- *   token found is not a 64-character hex digest.
- */
-const findExpectedChecksum = (shasums: string, filename: string): string => {
-  const line = shasums
-    .split('\n')
-    .find((l) => l.trim().split(/\s+/).at(-1) === filename);
-  const checksum = line?.trim().split(/\s+/).at(0);
-  if (!checksum) {
-    throw new Error(`No checksum entry found for ${filename}`);
-  }
-  if (!SHA256_HEX.test(checksum)) {
-    throw new Error(`Malformed checksum entry for ${filename}: ${checksum}`);
-  }
-  return checksum.toLowerCase();
-};
 
 /**
  * Move a verified temporary download onto its final destination.
@@ -92,17 +67,7 @@ export const downloadArchive: DownloadFunction = async (url, dest) => {
     throw new Error('Response body is empty');
   }
   const filename = basename(new URL(url).pathname);
-  const shasumsUrl = new URL('SHASUMS256.txt', url);
-  const shasumsResponse = await fetch(shasumsUrl);
-  if (!shasumsResponse.ok) {
-    throw new Error(
-      `Failed to download ${shasumsUrl.toString()}: HTTP ${shasumsResponse.status}`,
-    );
-  }
-  const expectedChecksum = findExpectedChecksum(
-    await shasumsResponse.text(),
-    filename,
-  );
+  const expectedChecksum = await fetchExpectedChecksum(url);
 
   const tempPath = `${dest}.download-${process.pid}-${randomUUID()}`;
   try {
