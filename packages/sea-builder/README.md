@@ -55,10 +55,11 @@ the build output.
 
 All downloaded archives are stored in your home directory's
 `.cache/xsea` folder — the same location `xsea` itself reads them from.
-When `sea-cache`/`sea-builder`
-populate an entry, the archive is downloaded and SHA-256-verified before
-`xsea` ever sees it, so `xsea` links exactly the bytes that passed
-verification. This is a fixed location outside any project directory:
+Every archive `sea-cache`/`sea-builder` uses is SHA-256-verified against
+the published `SHASUMS256.txt` before `xsea` ever sees it, so `xsea`
+links exactly the bytes that passed verification — including an archive
+that was already present in the cache directory, not just a fresh
+download. This is a fixed location outside any project directory:
 
 - Each package's `clean` script no longer clears this cache (it only
   removes project-local build artifacts). Run
@@ -69,8 +70,9 @@ verification. This is a fixed location outside any project directory:
   do not collide.
 - An archive already present in this directory — for example, from
   running `xsea` directly instead of through `sea-cache`/`sea-builder` —
-  is treated as a cache hit like any pre-populated cache entry and is not
-  re-verified.
+  is re-verified against the published checksum before being trusted,
+  the same as a fresh download. A stale or foreign file that fails
+  verification is removed and re-downloaded automatically.
 
 ## LICENSE
 
