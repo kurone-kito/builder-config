@@ -26,7 +26,7 @@ export interface BuildTasksOptions extends CacheOptions {
 export const createBuildTasks = async (
   options: BuildTasksOptions,
 ): Promise<Listr> => {
-  const { arch, platform = process.platform, projectRoot } = options;
+  const { arch, platform = process.platform } = options;
   const { basename, download, execa, existsSync, mkdir, targets } =
     await normalizeBuildOptions(options);
   const nodeVersion = await resolveNodeVersion(options.nodeVersion);
@@ -39,7 +39,6 @@ export const createBuildTasks = async (
       mkdir,
       nodeVersion,
       platform,
-      projectRoot,
       targets,
     }),
     createSeaTask(execa, targets, basename, nodeVersion),

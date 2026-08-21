@@ -30,7 +30,6 @@ export const normalizeBuildOptions = async (
     mkdir: cacheOpts.mkdir ?? concretedMkdir,
     nodeVersion: cacheOpts.nodeVersion,
     platform: cacheOpts.platform,
-    projectRoot: cacheOpts.projectRoot,
     targets: cacheOpts.targets,
   });
   return { ...normalized, basename, execa };

@@ -21,8 +21,8 @@ sea-cache  # cache for current platform
 sea-cache linux-x64 win-x64  # cache archives for multiple targets
 ```
 
-Archives are downloaded to `node_modules/.cache/xsea` if not already
-present.
+Archives are downloaded to a `.cache/xsea` folder inside your home
+directory (`os.homedir()`) if not already present.
 
 ### 2. **Build the SEA binary**
 
@@ -53,8 +53,24 @@ the build output.
 
 ### Cache directory
 
-All downloaded archives are stored in `node_modules/.cache/xsea`. You can
-delete this folder to clear the cache at any time.
+All downloaded archives are stored in your home directory's
+`.cache/xsea` folder — the same location `xsea` itself reads them from.
+When `sea-cache`/`sea-builder`
+populate an entry, the archive is downloaded and SHA-256-verified before
+`xsea` ever sees it, so `xsea` links exactly the bytes that passed
+verification. This is a fixed location outside any project directory:
+
+- Each package's `clean` script no longer clears this cache (it only
+  removes project-local build artifacts). Run
+  `pnpm exec xsea --clean` to clear it, or delete the folder directly.
+- The cache is shared across every project on the machine rather than
+  being per-project. This is safe because entries are keyed by Node.js
+  version and target, so different projects pinning different versions
+  do not collide.
+- An archive already present in this directory — for example, from
+  running `xsea` directly instead of through `sea-cache`/`sea-builder` —
+  is treated as a cache hit like any pre-populated cache entry and is not
+  re-verified.
 
 ## LICENSE
 
