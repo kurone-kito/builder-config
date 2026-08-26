@@ -1,5 +1,5 @@
-name-template: v$NEXT_PATCH_VERSION 🌈
-tag-template: v$NEXT_PATCH_VERSION
+name-template: v$RESOLVED_VERSION 🌈
+tag-template: v$RESOLVED_VERSION
 # Do not use IDD's reserved labels (`roadmap`, `status:blocked-by-human`,
 # `status:needs-decision`, `status:authoring`; see docs/idd-policy.md
 # § IDD Labels) as a release-drafter category label below — those labels
@@ -7,6 +7,7 @@ tag-template: v$NEXT_PATCH_VERSION
 categories:
   - title: 🚀 Features
     exclusive: true
+    semver-increment: minor
     when:
       labels:
         - enhancement
@@ -27,6 +28,13 @@ categories:
       labels:
         - chore
         - dependencies
+  - type: version-resolver
+    semver-increment: major
+    when:
+      conventional:
+        breaking: true
+  - type: version-resolver
+    semver-increment: patch
 autolabeler:
   - label: enhancement
     title:
