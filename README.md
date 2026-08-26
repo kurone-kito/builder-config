@@ -23,10 +23,9 @@ And the example library:
 ## Related projects
 
 builder-config is a sister project of
-[lints-config](https://github.com/kurone-kito/lints-config). The
-build-related packages in this repository (`sea-builder`,
-`typescript-config`, `vite-lib-config`) were originally part of
-lints-config and were later moved and consolidated here. lints-config
+[lints-config](https://github.com/kurone-kito/lints-config). This
+repository's `typescript-config` package was originally part of
+lints-config and was later moved and consolidated here. lints-config
 still hosts the lint/format tooling this repository's own workflow
 depends on: the `@kurone-kito/biome-config`,
 `@kurone-kito/commitlint-config`, `@kurone-kito/cspell-config`,
