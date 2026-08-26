@@ -2,6 +2,10 @@
 
 My TypeScript configuration for general Node.js projects.
 
+This package was moved here from
+[lints-config](https://github.com/kurone-kito/lints-config), this
+repository's sister project.
+
 ## System Requirements
 
 - Node.js: Any of the following versions
