@@ -20,6 +20,18 @@ And the example library:
 - [`packages/example-lib`](packages/example-lib/README.md):
   Example library for Node.js apps.
 
+## Related projects
+
+builder-config is a sister project of
+[lints-config](https://github.com/kurone-kito/lints-config). This
+repository's `typescript-config` package was originally part of
+lints-config and was later moved and consolidated here. lints-config
+still hosts the lint/format tooling this repository's own workflow
+depends on: the `@kurone-kito/biome-config`,
+`@kurone-kito/commitlint-config`, `@kurone-kito/cspell-config`,
+`@kurone-kito/lint-staged-config`, and `@kurone-kito/markdownlint-config`
+devDependencies are all published from lints-config.
+
 ## System Requirements
 
 - Node.js: Any of the following versions
