@@ -133,7 +133,11 @@ Wrap body lines at **72 characters**.
 
 The body must also be written in **lowercase** (commitlint's
 `body-case` rule); wrap file names, identifiers, and other proper
-nouns in backticks or quotes to exempt them from the check.
+nouns in backticks or quotes to exempt them from the check. Keep the
+wrapped span on a single line — if it opens on one line and closes on
+the next (a natural side effect of wrapping the body at 72
+characters), commitlint does not recognize it as exempt and still
+fires the warning.
 
 ### Breaking changes
 
