@@ -10,7 +10,7 @@
 #
 # ──────────────────────────────────────────────────
 # Subject: lowercase, imperative mood, max 72 chars, no period
-# Body: wrap at 72 chars
+# Body: lowercase (backtick/quote exempts identifiers), wrap at 72 chars
 # Types: feat fix docs style refactor test chore ci build perf
 # Scope: optional, e.g. feat(ci): ...
 # Breaking: append ! to type, add BREAKING CHANGE trailer
