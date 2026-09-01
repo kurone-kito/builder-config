@@ -58,6 +58,9 @@ This project follows
 A `.gitmessage` template is available at the repository root.
 Write user-facing, lowercase subjects, keep them under 72 characters,
 and split unrelated changes into separate atomic commits.
+The commit **body** must also be written in lowercase (commitlint's
+`body-case` rule); wrap file names, identifiers, and other proper
+nouns in backticks or quotes to exempt them from the check.
 
 ## Monorepo guidance
 
