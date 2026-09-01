@@ -131,6 +131,10 @@ entirely. **Breaking changes must always include a body.**
 
 Wrap body lines at **72 characters**.
 
+The body must also be written in **lowercase** (commitlint's
+`body-case` rule); wrap file names, identifiers, and other proper
+nouns in backticks or quotes to exempt them from the check.
+
 ### Breaking changes
 
 - Append `!` after the type/scope: `feat!: remove deprecated endpoint`
