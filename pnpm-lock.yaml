@@ -72,8 +72,8 @@ importers:
         specifier: ^0.22.0
         version: 0.22.0(cspell@10.0.1)(lint-staged@17.3.0)
       '@kurone-kito/markdownlint-config':
-        specifier: ^0.22.0
-        version: 0.22.0
+        specifier: ^0.23.0
+        version: 0.23.0(markdownlint-cli2@0.23.2(supports-color@7.2.0))
       '@vitest/coverage-v8':
         specifier: ^4.1.0
         version: 4.1.10(vitest@4.1.10)
@@ -752,9 +752,14 @@ packages:
       lint-staged:
         optional: true
 
-  '@kurone-kito/markdownlint-config@0.22.0':
-    resolution: {integrity: sha512-eldayG/vr7tXDfbQczUwRr6YsR6Zlm/PS85ix7BL3MQjUTi6dP79zY/bq4usZ+bWPBIHswTBRSwpUOTax8gKiA==}
-    engines: {node: ^20.11 || ^22 || >=24}
+  '@kurone-kito/markdownlint-config@0.23.0':
+    resolution: {integrity: sha512-Nidb4GT3M6N/p97Ux4zUpbyhi2AtmG7IbtZjMNwvyKjQhuLOWzD42NZKwe5Oh8iasW32Wwe6lQu6yFMJg0gM/w==}
+    engines: {node: ^22.23.2 || ^24.2.0 || >=26.0.0}
+    peerDependencies:
+      markdownlint-cli2: '>=0.23.x'
+    peerDependenciesMeta:
+      markdownlint-cli2:
+        optional: true
 
   '@kurone-kito/web-toybox-node@0.1.0-alpha.11':
     resolution: {integrity: sha512-YihUvTaHCLwgOFmH9Sa9XzhZKuE0ZlblK0l9RsJ5/tAY32jr5HzmFY1VaN8YLuFEFLrbkUXdOXXmVNaYikG4Ig==}
@@ -3049,7 +3054,9 @@ snapshots:
       cspell: 10.0.1
       lint-staged: 17.3.0
 
-  '@kurone-kito/markdownlint-config@0.22.0': {}
+  '@kurone-kito/markdownlint-config@0.23.0(markdownlint-cli2@0.23.2(supports-color@7.2.0))':
+    optionalDependencies:
+      markdownlint-cli2: 0.23.2(supports-color@7.2.0)
 
   '@kurone-kito/web-toybox-node@0.1.0-alpha.11':
     dependencies:
