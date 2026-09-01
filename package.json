@@ -100,7 +100,7 @@
     "@kurone-kito/idd-skill": "https://codeload.github.com/kurone-kito/idd-skill/tar.gz/f51a8bb73a47452eff5799e8a27251b660ba4ae0",
     "@kurone-kito/is-prerelease": "^0.1.0",
     "@kurone-kito/lint-staged-config": "^0.22.0",
-    "@kurone-kito/markdownlint-config": "^0.22.0",
+    "@kurone-kito/markdownlint-config": "^0.23.0",
     "@vitest/coverage-v8": "^4.1.0",
     "cspell": "^10.0.1",
     "lint-staged": "^17.3.0",
