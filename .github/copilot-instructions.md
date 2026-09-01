@@ -131,6 +131,10 @@ entirely. **Breaking changes must always include a body.**
 
 Wrap body lines at **72 characters**.
 
+The body must also be written in **lowercase** (commitlint's
+`body-case` rule); wrap file names, identifiers, and other proper
+nouns in backticks or quotes to exempt them from the check.
+
 ### Breaking changes
 
 - Append `!` after the type/scope: `feat!: remove deprecated endpoint`
@@ -168,8 +172,8 @@ fix: correct typo in feature request template
 ```txt
 feat(ci): add concurrency settings to lint workflow
 
-Parallel lint runs on the same branch waste resources and
-cause race conditions in status checks. GitHub Actions
+parallel lint runs on the same branch waste resources and
+cause race conditions in status checks. `GitHub Actions`
 supports concurrency groups that automatically cancel
 redundant runs, so add a concurrency group keyed on branch
 name with cancel-in-progress enabled.
@@ -182,8 +186,8 @@ Refs #42
 ```txt
 feat!: raise the minimum supported node.js version
 
-The pinned Node.js LTS line reached end of life and the
-next LTS raises the engines floor. All CI matrix rows and
+the pinned `Node.js` lts line reached end of life and the
+next lts raises the engines floor. all ci matrix rows and
 downstream consumers must upgrade accordingly.
 
 BREAKING CHANGE: drop support for the previous Node.js LTS
