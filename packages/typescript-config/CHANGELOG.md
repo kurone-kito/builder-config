@@ -9,6 +9,8 @@ project adheres to
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-09-06
+
 ### Added
 
 - `CHANGELOG.md` (#112).
@@ -21,6 +23,16 @@ project adheres to
   dropping Node.js 20, Node.js 22 below 22.23.2, Node.js 24 below
   24.2.0, and every Node.js 25 release; bumped pnpm to v11 (#88).
 - Bumped the `typescript` devDependency to `~6.0.3` (#113).
+- **Breaking:** removed `strict` and `esModuleInterop` from
+  `tsconfig.json` — both became mandatory, non-overridable TypeScript
+  defaults from 6.0 onward, so this changes nothing observable for a
+  consumer already on `typescript ~6.0.3` or newer. Bumped `target`
+  and `lib` from `ES2023` to `ES2024`, since the workspace's
+  `engines.node` floor already ships every ES2024 runtime feature
+  TypeScript 7's `lib.es2024.*.d.ts` exposes. Bumped the
+  `peerDependencies.typescript` floor from `>=5.7.x` to `>=7.0.0`, and
+  the `typescript` devDependency to `~7.0.2` (#111).
+- Bumped the `rimraf` devDependency to `^6.1.3` (#207).
 
 ## [0.21.0] - 2025-10-03
 

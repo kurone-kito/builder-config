@@ -9,6 +9,8 @@ project adheres to
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-09-06
+
 ### Added
 
 - `CHANGELOG.md` (#112).
@@ -29,6 +31,18 @@ project adheres to
   24.2.0, and every Node.js 25 release; bumped pnpm to v11 (#88).
 - Bumped the `typescript` devDependency to `~6.0.3` (#113).
 - Bumped the `vite` devDependency to `^8.0.0` (#121).
+- Moved the `@types/semver` dependency from `devDependencies` to
+  `dependencies`, and bumped it to `^7.8.0` (#131).
+- Bumped the `execa` dependency to `^10.0.0` (#123).
+- Bumped the `listr2` dependency to v11 and the `@types/node`
+  devDependency to `^26.2.0` (#153).
+- Bumped the `typescript` devDependency to `~7.0.2` (#119).
+- Bumped the `node-releases` dependency to `2.0.54` (#201).
+- Bumped several devDependencies as part of a routine dependency
+  refresh: `execa` to `^10.0.1`, `listr2` to `^11.1.0`, `semver` to
+  `^7.8.5`, `@types/node` to `^26.4.1`, `@vitest/coverage-v8` to
+  `^4.1.11`, `rimraf` to `^6.1.3`, `type-fest` to `^5.9.0`, `vite` to
+  `^8.2.2`, and `vitest` to `^4.1.11` (#207).
 
 ### Fixed
 
@@ -57,6 +71,18 @@ project adheres to
   `sea-cache`'s own omitted-version default now goes through the same
   resolution as `sea-builder`'s, so the two commands agree on which
   archive to fetch when neither specifies an explicit version (#59).
+- Moved the Node.js archive cache directory from
+  `<projectRoot>/node_modules/.cache/xsea` to `~/.cache/xsea`, matching
+  `xsea`'s own hard-coded cache lookup — the previous location meant
+  `xsea` always re-fetched the archive itself, unverified, so the
+  SHA-256 verification above never reached the bytes actually linked
+  into the emitted SEA binary. The cache is now shared by Node.js
+  version and target across projects, and `clean` no longer clears it
+  (#156).
+- Re-verified cache-hit archives against `SHASUMS256.txt` instead of
+  trusting a cache hit unconditionally (#188).
+- Normalized Windows target names to nodejs.org's naming convention,
+  and mapped `arm` to `armv7l` on Linux (#154).
 
 ## [0.21.0] - 2025-10-03
 
