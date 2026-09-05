@@ -7,9 +7,11 @@
  * versions, never by an individual feature/fix pull request.
  *
  * Fails when the diff against the resolved base (an explicit `MERGE_BASE`
- * env var, or otherwise `git merge-base HEAD origin/main`) touches any
- * `packages/<name>/CHANGELOG.md` path. Fails closed - a nonzero exit code -
- * whenever that base cannot be resolved, rather than silently passing.
+ * env var, or otherwise `git merge-base HEAD <remote main SHA>`, querying
+ * `origin` directly rather than any locally-cached tracking ref) touches
+ * any `packages/<name>/CHANGELOG.md` path. Fails closed - a nonzero exit
+ * code - whenever that base cannot be resolved, rather than silently
+ * passing.
  *
  * A genuine release cut is detected automatically: the root `package.json`
  * and every `packages/<name>/package.json` must all bump their `version`
@@ -51,25 +53,45 @@ function tryGit(args) {
 }
 
 /**
- * Best-effort: make `origin/main` resolvable locally, fetching (and
- * unshallowing first, when needed) it if it isn't already known. A CI
- * checkout defaults to a single-branch shallow clone, so `origin/main` is
- * usually absent until this runs; a normal development worktree already
- * has it from `git fetch origin main`, so this is then a cheap no-op.
+ * Ask the remote directly for `main`'s current commit SHA, rather than
+ * trusting any locally-cached `origin/main` tracking ref. A long-lived
+ * local clone (or a worktree sibling of one) can have a stale ref that
+ * predates the last real release, which would otherwise make an
+ * already-merged version bump look like part of the current diff and
+ * defeat `isLockstepVersionBump()` below.
+ * @returns {string | undefined}
+ */
+function remoteMainSha() {
+  const line = tryGit(['ls-remote', '--exit-code', 'origin', 'main']);
+  return line?.split(/\s+/)[0] || undefined;
+}
+
+/**
+ * Make a commit's objects available locally, fetching (and unshallowing
+ * first, when needed) only if they aren't already. Every workspace
+ * worktree shares one set of objects and refs, but this fetches `main` by
+ * name rather than writing to the shared `refs/remotes/origin/main`
+ * tracking ref directly: several worktrees of this same clone can run
+ * this script around the same time (each on its own branch), and writing
+ * that shared ref concurrently is a real, observed race - reading it back
+ * immediately after can transiently see it deleted mid-update by a
+ * sibling worktree's own fetch. Depending only on `sha`, already resolved
+ * independently via `remoteMainSha()`, sidesteps that race entirely.
+ * @param {string} sha
  * @returns {boolean}
  */
-function ensureOriginMain() {
-  if (tryGit(['rev-parse', '--verify', 'origin/main']) !== undefined)
-    return true;
+function ensureCommitAvailable(sha) {
+  const commitRef = `${sha}^{commit}`;
+  if (tryGit(['cat-file', '-e', commitRef]) !== undefined) return true;
   const isShallow = tryGit(['rev-parse', '--is-shallow-repository']) === 'true';
   const fetchArgs = [
     'fetch',
     ...(isShallow ? ['--unshallow'] : []),
     'origin',
-    'main:refs/remotes/origin/main',
+    'main',
   ];
-  if (tryGit(fetchArgs) === undefined) return false;
-  return tryGit(['rev-parse', '--verify', 'origin/main']) !== undefined;
+  tryGit(fetchArgs);
+  return tryGit(['cat-file', '-e', commitRef]) !== undefined;
 }
 
 /** @returns {string | undefined} */
@@ -90,8 +112,9 @@ function resolveBase() {
       `${override}^{commit}`,
     ]);
   }
-  if (!ensureOriginMain()) return undefined;
-  return tryGit(['merge-base', 'HEAD', 'origin/main']);
+  const sha = remoteMainSha();
+  if (!sha || !ensureCommitAvailable(sha)) return undefined;
+  return tryGit(['merge-base', 'HEAD', sha]);
 }
 
 /**
