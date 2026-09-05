@@ -213,11 +213,24 @@ function isLockstepVersionBump(base) {
 }
 
 function main() {
+  // Checked first, before any base resolution: a human explicitly asserting
+  // this is a legitimate CHANGELOG.md edit shouldn't also need git/origin
+  // connectivity to succeed - an offline clone or a checkout with no
+  // `origin` remote must still be able to honor this override.
+  if (process.env.IDD_CHANGELOG_RELEASE === '1') {
+    console.log(
+      '[lint:changelog] IDD_CHANGELOG_RELEASE is set - skipping the package CHANGELOG.md guard ' +
+        'entirely for this manually-confirmed change.',
+    );
+    return;
+  }
+
   const base = resolveBase();
   if (!base) {
     console.error(
-      '[lint:changelog] Could not resolve origin/main (or MERGE_BASE) to diff against. ' +
-        `Failing closed per ${POLICY_DOC}. Ensure origin/main is fetchable, or set MERGE_BASE explicitly, then retry.`,
+      "[lint:changelog] Could not resolve main's current commit (or MERGE_BASE) to diff against. " +
+        `Failing closed per ${POLICY_DOC}. Ensure origin is reachable, or set MERGE_BASE or ` +
+        'IDD_CHANGELOG_RELEASE=1 explicitly, then retry.',
     );
     process.exitCode = 1;
     return;
@@ -240,14 +253,6 @@ function main() {
       "[lint:changelog] root and every workspace package's version bumped in lockstep against " +
         'the resolved base - treating this as the release-cut change and allowing the package ' +
         'CHANGELOG.md edit(s).',
-    );
-    return;
-  }
-
-  if (process.env.IDD_CHANGELOG_RELEASE === '1') {
-    console.log(
-      '[lint:changelog] IDD_CHANGELOG_RELEASE is set - skipping the package CHANGELOG.md guard ' +
-        'for this manually-confirmed CHANGELOG edit (no lockstep version bump was detected).',
     );
     return;
   }
