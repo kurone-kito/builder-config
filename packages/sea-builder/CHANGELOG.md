@@ -41,11 +41,12 @@ project adheres to
   devDependency to `^26.2.0` (#153).
 - Bumped the `typescript` devDependency to `~7.0.2` (#119).
 - Bumped the `node-releases` dependency to `2.0.54` (#201).
-- Bumped several devDependencies as part of a routine dependency
-  refresh: `execa` to `^10.0.1`, `listr2` to `^11.1.0`, `semver` to
-  `^7.8.5`, `@types/node` to `^26.4.1`, `@vitest/coverage-v8` to
-  `^4.1.11`, `rimraf` to `^6.1.3`, `type-fest` to `^5.9.0`, `vite` to
-  `^8.2.2`, and `vitest` to `^4.1.11` (#207).
+- Bumped several dependencies and devDependencies as part of a routine
+  refresh: dependencies `execa` to `^10.0.1`, `listr2` to `^11.1.0`,
+  and `semver` to `^7.8.5`; devDependencies `@types/node` to
+  `^26.4.1`, `@vitest/coverage-v8` to `^4.1.11`, `rimraf` to `^6.1.3`,
+  `type-fest` to `^5.9.0`, `vite` to `^8.2.2`, and `vitest` to
+  `^4.1.11` (#207).
 
 ### Fixed
 
