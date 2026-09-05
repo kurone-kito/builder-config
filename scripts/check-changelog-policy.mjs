@@ -222,7 +222,8 @@ function main() {
 
   if (process.env.IDD_CHANGELOG_RELEASE === '1') {
     console.log(
-      '[lint:changelog] IDD_CHANGELOG_RELEASE is set - skipping the package CHANGELOG.md guard for this release-cut change.',
+      '[lint:changelog] IDD_CHANGELOG_RELEASE is set - skipping the package CHANGELOG.md guard ' +
+        'for this manually-confirmed CHANGELOG edit (no lockstep version bump was detected).',
     );
     return;
   }
