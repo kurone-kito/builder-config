@@ -655,9 +655,18 @@ hook file invokes them changed.
   (`scripts/check-changelog-policy.mjs`) is part of the `lint:*:check`
   family `pnpm run lint` runs, and also runs via `pnpm run lint:fix`'s
   `postlint:fix` hook — so every IDD **fix-validate** / **pre-push-validate**
-  run sees it too. It fails when the diff against `origin/main` (or an
-  explicit `MERGE_BASE` override) touches any `packages/*/CHANGELOG.md`
-  path, citing this section, and fails closed if that base cannot be
+  run sees it too. It fails when the diff against `main`'s current
+  commit (queried directly from `origin` rather than any locally-cached
+  tracking ref, to avoid trusting a stale clone; or an explicit
+  `MERGE_BASE` override) touches any `packages/*/CHANGELOG.md` path,
+  citing this section, and fails closed if that base cannot be
   resolved. The release-cut change above is the one legitimate
-  exception: set `IDD_CHANGELOG_RELEASE=1` when running lint for that
-  change only, to let it edit these files.
+  exception, and it is detected automatically (no configuration
+  needed, locally or in hosted CI): the guard is skipped when root
+  `package.json` and every `packages/<name>/package.json` bump their
+  `version` field, from the resolved base, to the same new value in
+  lockstep — this repository's actual release-cut contract, and a
+  diff shape an ordinary feature/fix PR can't casually reproduce.
+  `IDD_CHANGELOG_RELEASE=1` remains as a fallback for the rarer case
+  of a legitimate CHANGELOG.md edit with no version bump (historical
+  backfill work, for example).
