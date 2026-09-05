@@ -9,9 +9,14 @@ project adheres to
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-09-06
+
 ### Added
 
 - `CHANGELOG.md` (#112).
+- Noted in the README that this package migrated from
+  [lints-config](https://github.com/kurone-kito/lints-config), with a
+  link to that project (#192).
 
 ### Changed
 
@@ -21,6 +26,21 @@ project adheres to
   dropping Node.js 20, Node.js 22 below 22.23.2, Node.js 24 below
   24.2.0, and every Node.js 25 release; bumped pnpm to v11 (#88).
 - Bumped the `typescript` devDependency to `~6.0.3` (#113).
+- **Breaking:** removed `strict` and `esModuleInterop` from
+  `tsconfig.json`. `esModuleInterop` became a mandatory,
+  non-overridable TypeScript 6.0+ behavior (explicitly setting it to
+  `false` is now a hard compiler error, `TS5108`); `strict` remains an
+  ordinary default of `true` from 6.0 onward but stays explicitly
+  overridable, so removing it here only drops the redundant
+  declaration and changes nothing for a consumer already on
+  `typescript ~6.0.3` or newer who hasn't overridden it. Bumped
+  `target` and `lib` from `ES2023` to `ES2024`, since the workspace's
+  `engines.node` floor already ships every ES2024 runtime feature
+  TypeScript 7's `lib.es2024.*.d.ts` exposes. Bumped the
+  `peerDependencies.typescript` floor from `>=5.7.x` to `>=7.0.0`, and
+  the `typescript` devDependency from `~6.0.3` (#113) to `~7.0.2`
+  (#111) — `~7.0.2` is the final shipped floor.
+- Bumped the `rimraf` devDependency to `^6.1.3` (#207).
 
 ## [0.21.0] - 2025-10-03
 

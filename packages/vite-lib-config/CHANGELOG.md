@@ -9,6 +9,8 @@ project adheres to
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-09-06
+
 ### Added
 
 - `CHANGELOG.md` (#112).
@@ -38,6 +40,15 @@ project adheres to
   it to control emitted import-attribute syntax (the
   `with { type: ... }` / `assert { type: ... }` forms) must drop that
   reliance (#121).
+- Bumped the `typedoc-plugin-markdown` devDependency to `^4.13.0`
+  (#202).
+- Bumped several dependencies as part of a routine dependency
+  refresh: `lodash-es` to `^4.18.1`, `type-fest` to `^5.9.0`,
+  `vite-plugin-dts` to `^5.1.0`, `@types/node` to `^24.13.3`,
+  `@vitest/coverage-v8` to `^4.1.11`, `rimraf` to `^6.1.3`, `typedoc`
+  to `^0.28.20`, and `vitest` to `^4.1.11`; further bumped `vite`
+  (already raised to `^8.0.0` above by #121) to `^8.2.2` (#207) — the
+  final shipped `vite` range for this release is `^8.2.2`.
 
 ### Fixed
 
