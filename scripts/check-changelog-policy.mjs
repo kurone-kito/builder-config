@@ -300,7 +300,20 @@ function comparePrereleaseIdentifiers(a, b) {
  */
 function compareVersions(a, b) {
   const parse = (v) => {
-    const [core, prerelease] = v.split('-', 2);
+    // `v.split('-', 2)` looks like "split at the first hyphen" but isn't:
+    // `String#split`'s limit truncates the *result array* after splitting
+    // on every occurrence, not the number of splits performed, so
+    // `'1.0.0-alpha-a'.split('-', 2)` silently discards everything after
+    // the *second* hyphen instead of keeping it as part of the
+    // prerelease (verified directly - it returns `['1.0.0', 'alpha']`,
+    // dropping `-a`). A hyphen is a valid character inside a SemVer
+    // prerelease identifier, so splitting only at the first one via
+    // `indexOf`/`slice` is required to preserve the rest intact.
+    const dashIndex = v.indexOf('-');
+    const [core, prerelease] =
+      dashIndex === -1
+        ? [v, undefined]
+        : [v.slice(0, dashIndex), v.slice(dashIndex + 1)];
     return { parts: core.split('.').map(Number), prerelease };
   };
   const pa = parse(a);
