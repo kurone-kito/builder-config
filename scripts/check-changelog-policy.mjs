@@ -108,6 +108,13 @@ function remoteMainSha() {
  * history for `merge-base` against a differently-shallow-fetched HEAD to
  * mean anything (reproduced directly against two independent depth-1
  * fetches) - object presence alone doesn't prove ancestry is present too.
+ * A shallow repository's `--unshallow` fetch must also actually succeed:
+ * if it fails (a transient network or auth error), the commit object can
+ * still happen to already resolve from the original shallow fetch, which
+ * would otherwise let this return `true` while the repository is still
+ * shallow and any subsequent `merge-base` result stays meaningless -
+ * treat a failed unshallow as unavailable outright rather than falling
+ * through to that stale check.
  * @param {string} sha
  * @returns {boolean}
  */
@@ -123,7 +130,8 @@ function ensureCommitAvailable(sha) {
     'origin',
     'refs/heads/main',
   ];
-  tryGit(fetchArgs);
+  const fetchSucceeded = tryGit(fetchArgs) !== undefined;
+  if (isShallow && !fetchSucceeded) return false;
   return tryGit(['cat-file', '-e', commitRef]) !== undefined;
 }
 
@@ -238,14 +246,52 @@ function listPackageManifests() {
 }
 
 /**
+ * Compare two dot-separated SemVer prerelease identifier strings (the part
+ * after the first `-`) using SemVer's actual precedence rule: identifiers
+ * compare pairwise, numeric identifiers compare numerically, alphanumeric
+ * identifiers compare lexically, a numeric identifier always has lower
+ * precedence than an alphanumeric one, and a shorter identifier list has
+ * lower precedence than a longer one that agrees on every shared field (so
+ * this repository's own real `0.22.0-alpha.10` → `0.22.0-alpha.11` bump
+ * compares as a genuine increase, not a tie).
+ * @param {string} a
+ * @param {string} b
+ * @returns {number} negative if `a` < `b`, positive if `a` > `b`, `0` if
+ *   equal.
+ */
+function comparePrereleaseIdentifiers(a, b) {
+  const partsA = a.split('.');
+  const partsB = b.split('.');
+  const length = Math.max(partsA.length, partsB.length);
+  for (let i = 0; i < length; i += 1) {
+    if (i >= partsA.length) return -1;
+    if (i >= partsB.length) return 1;
+    const [ia, ib] = [partsA[i], partsB[i]];
+    const [na, nb] = [ia, ib].map((identifier) =>
+      /^\d+$/.test(identifier) ? Number(identifier) : undefined,
+    );
+    if (na !== undefined && nb !== undefined) {
+      if (na !== nb) return na - nb;
+      continue;
+    }
+    if (na !== undefined) return -1;
+    if (nb !== undefined) return 1;
+    if (ia !== ib) return ia < ib ? -1 : 1;
+  }
+  return 0;
+}
+
+/**
  * Minimal, good-enough SemVer-style comparator for `isLockstepVersionBump()`
  * below: parses each `major.minor.patch(-prerelease)?` string and compares
- * numeric components in order, falling back to prerelease-vs-release
- * precedence (a release outranks the same core version with a prerelease
- * suffix) when every numeric component ties. Not a full SemVer
- * implementation (no build-metadata handling, no multi-field prerelease
- * precedence) - just enough to reliably reject a downgrade or a same-value
- * "bump" for the version strings this repository actually uses.
+ * numeric components in order, falling back to prerelease precedence (via
+ * `comparePrereleaseIdentifiers()`, or "a release outranks the same core
+ * version with a prerelease suffix" when only one side has one) when every
+ * numeric component ties. Not a full SemVer implementation (no
+ * build-metadata handling) - just enough to reliably reject a downgrade or
+ * a same-value "bump" for the version strings this repository actually
+ * uses, while still recognizing a genuine prerelease-to-prerelease bump
+ * (this repository has cut real `X.Y.Z-alpha.N` releases before).
  * @param {string} a
  * @param {string} b
  * @returns {number} negative if `a` < `b`, positive if `a` > `b`, `0` if
@@ -268,7 +314,7 @@ function compareVersions(a, b) {
   if (pa.prerelease === pb.prerelease) return 0;
   if (pa.prerelease === undefined) return 1;
   if (pb.prerelease === undefined) return -1;
-  return 0;
+  return comparePrereleaseIdentifiers(pa.prerelease, pb.prerelease);
 }
 
 /**
