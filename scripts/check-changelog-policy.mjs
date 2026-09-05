@@ -53,17 +53,37 @@ function tryGit(args) {
 }
 
 /**
- * Ask the remote directly for `main`'s current commit SHA, rather than
- * trusting any locally-cached `origin/main` tracking ref. A long-lived
- * local clone (or a worktree sibling of one) can have a stale ref that
- * predates the last real release, which would otherwise make an
+ * Ask the remote directly for `refs/heads/main`'s current commit SHA,
+ * rather than trusting any locally-cached `origin/main` tracking ref. A
+ * long-lived local clone (or a worktree sibling of one) can have a stale
+ * ref that predates the last real release, which would otherwise make an
  * already-merged version bump look like part of the current diff and
- * defeat `isLockstepVersionBump()` below.
- * @returns {string | undefined}
+ * defeat `isLockstepVersionBump()` below. The fully-qualified
+ * `refs/heads/main` (not the bare `main` short name) matters here: `git
+ * ls-remote` resolves a bare short name against every ref namespace, so it
+ * would also match a same-named tag (verified directly - pushing a
+ * `refs/tags/main` tag to a bare remote with no `main` branch still makes
+ * `ls-remote origin main` resolve successfully), silently comparing
+ * against the wrong ref entirely.
+ * @returns {{ status: 'resolved', sha: string } | { status: 'branch-absent' } | { status: 'unreachable' }}
  */
 function remoteMainSha() {
-  const line = tryGit(['ls-remote', '--exit-code', 'origin', 'main']);
-  return line?.split(/\s+/)[0] || undefined;
+  try {
+    const out = execFileSync(
+      'git',
+      ['ls-remote', '--exit-code', 'origin', 'refs/heads/main'],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
+    ).trim();
+    const sha = out.split(/\s+/)[0];
+    return sha ? { status: 'resolved', sha } : { status: 'unreachable' };
+  } catch (error) {
+    // `--exit-code` reserves exit code 2 specifically for "the remote was
+    // reached, but no ref matched" - every other nonzero exit (including a
+    // transport failure) falls through as a genuine connectivity problem.
+    return error?.status === 2
+      ? { status: 'branch-absent' }
+      : { status: 'unreachable' };
+  }
 }
 
 /**
@@ -101,7 +121,7 @@ function ensureCommitAvailable(sha) {
     'fetch',
     ...(isShallow ? ['--unshallow'] : []),
     'origin',
-    'main',
+    'refs/heads/main',
   ];
   tryGit(fetchArgs);
   return tryGit(['cat-file', '-e', commitRef]) !== undefined;
@@ -125,18 +145,31 @@ function resolveBase() {
       `${override}^{commit}`,
     ]);
   }
-  const sha = remoteMainSha();
-  if (sha) {
-    return ensureCommitAvailable(sha)
-      ? tryGit(['merge-base', 'HEAD', sha])
+  const remote = remoteMainSha();
+  if (remote.status === 'resolved') {
+    return ensureCommitAvailable(remote.sha)
+      ? tryGit(['merge-base', 'HEAD', remote.sha])
       : undefined;
   }
-  // The live remote query itself failed (for example, no network) rather
-  // than returning a genuine "no such ref" - fall back to whatever
-  // origin/main already resolves to locally instead of blocking a
-  // disconnected developer outright, only when a fresh answer was never
-  // reachable in the first place.
-  const cachedSha = tryGit(['rev-parse', '--verify', 'origin/main']);
+  if (remote.status === 'branch-absent') {
+    // The remote was reached, but it genuinely has no refs/heads/main -
+    // never fall back to a locally-cached ref here, unlike the
+    // `unreachable` case below: an unexpectedly branch-less remote is a
+    // hard failure signal (wrong repository, renamed default branch),
+    // not the kind of transient offline degradation the cached fallback
+    // exists for.
+    return undefined;
+  }
+  // The live remote query itself failed to connect (for example, no
+  // network) rather than reaching the remote and finding no match - fall
+  // back to whatever origin/main already resolves to locally instead of
+  // blocking a disconnected developer outright, only when a fresh answer
+  // was never reachable in the first place.
+  const cachedSha = tryGit([
+    'rev-parse',
+    '--verify',
+    'refs/remotes/origin/main',
+  ]);
   return cachedSha && ensureCommitAvailable(cachedSha)
     ? tryGit(['merge-base', 'HEAD', cachedSha])
     : undefined;
@@ -205,9 +238,44 @@ function listPackageManifests() {
 }
 
 /**
+ * Minimal, good-enough SemVer-style comparator for `isLockstepVersionBump()`
+ * below: parses each `major.minor.patch(-prerelease)?` string and compares
+ * numeric components in order, falling back to prerelease-vs-release
+ * precedence (a release outranks the same core version with a prerelease
+ * suffix) when every numeric component ties. Not a full SemVer
+ * implementation (no build-metadata handling, no multi-field prerelease
+ * precedence) - just enough to reliably reject a downgrade or a same-value
+ * "bump" for the version strings this repository actually uses.
+ * @param {string} a
+ * @param {string} b
+ * @returns {number} negative if `a` < `b`, positive if `a` > `b`, `0` if
+ *   equal or unparseable (an unparseable pair is never treated as a
+ *   genuine bump).
+ */
+function compareVersions(a, b) {
+  const parse = (v) => {
+    const [core, prerelease] = v.split('-', 2);
+    return { parts: core.split('.').map(Number), prerelease };
+  };
+  const pa = parse(a);
+  const pb = parse(b);
+  if ([...pa.parts, ...pb.parts].some(Number.isNaN)) return 0;
+  const length = Math.max(pa.parts.length, pb.parts.length);
+  for (let i = 0; i < length; i += 1) {
+    const diff = (pa.parts[i] ?? 0) - (pb.parts[i] ?? 0);
+    if (diff !== 0) return diff;
+  }
+  if (pa.prerelease === pb.prerelease) return 0;
+  if (pa.prerelease === undefined) return 1;
+  if (pb.prerelease === undefined) return -1;
+  return 0;
+}
+
+/**
  * @param {string} base
  * @returns {boolean} whether root `package.json` bumped its `version` from
- *   `base`, and every current `packages/<name>/package.json` shares that
+ *   `base` to a genuinely newer version (never a downgrade or a same-value
+ *   edit), and every current `packages/<name>/package.json` shares that
  *   same new version - this repository's actual lockstep release-cut
  *   contract, not merely "some version somewhere changed". Comparing only
  *   current versions (not each package's own version at `base`) means a
@@ -221,7 +289,7 @@ function isLockstepVersionBump(base) {
   if (
     rootBase === undefined ||
     rootCurrent === undefined ||
-    rootBase === rootCurrent
+    compareVersions(rootCurrent, rootBase) <= 0
   ) {
     return false;
   }
