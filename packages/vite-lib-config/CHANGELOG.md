@@ -40,7 +40,8 @@ project adheres to
   it to control emitted import-attribute syntax (the
   `with { type: ... }` / `assert { type: ... }` forms) must drop that
   reliance (#121).
-- Bumped `typedoc-plugin-markdown` to `4.13.0` (#202).
+- Bumped the `typedoc-plugin-markdown` devDependency to `^4.13.0`
+  (#202).
 - Bumped several dependencies as part of a routine dependency
   refresh: `lodash-es` to `^4.18.1`, `type-fest` to `^5.9.0`, `vite`
   to `^8.2.2`, `vite-plugin-dts` to `^5.1.0`, `@types/node` to

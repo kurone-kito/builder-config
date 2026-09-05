@@ -31,8 +31,11 @@ project adheres to
   24.2.0, and every Node.js 25 release; bumped pnpm to v11 (#88).
 - Bumped the `typescript` devDependency to `~6.0.3` (#113).
 - Bumped the `vite` devDependency to `^8.0.0` (#121).
+- Bumped the `@types/semver` devDependency to `^7.8.0` as part of a
+  routine dependency refresh (#124).
 - Moved the `@types/semver` dependency from `devDependencies` to
-  `dependencies`, and bumped it to `^7.8.0` (#131).
+  `dependencies`, matching what `pnpm-lock.yaml` already computed for
+  this bin-only package's runtime `semver` dependency (#131).
 - Bumped the `execa` dependency to `^10.0.0` (#123).
 - Bumped the `listr2` dependency to v11 and the `@types/node`
   devDependency to `^26.2.0` (#153).
