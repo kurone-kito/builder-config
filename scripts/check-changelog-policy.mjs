@@ -67,26 +67,36 @@ function remoteMainSha() {
 }
 
 /**
- * Make a commit's objects available locally, fetching (and unshallowing
- * first, when needed) only if they aren't already. This plain
- * `fetch origin main` still updates the shared `refs/remotes/origin/main`
- * tracking ref as a side effect (every workspace worktree shares one set of
- * refs and objects) - the safety property here is narrower than "never
- * touches that ref": this function never *reads* `origin/main` back
- * afterward, depending only on the caller's already-resolved `sha`
- * (from `remoteMainSha()`) instead. That matters because several worktrees
- * of this same clone can run this script around the same time (each on its
- * own branch); reading the shared ref back immediately after a fetch can
- * transiently see it deleted mid-update by a sibling worktree's own
- * concurrent fetch (reproduced directly), even though the fetch that
- * caused it succeeds. Never reading it back sidesteps that race entirely.
+ * Make a commit's full ancestry available locally, fetching (and
+ * unshallowing first, when needed) unless it's already available in a
+ * non-shallow repository. This plain `fetch origin main` still updates the
+ * shared `refs/remotes/origin/main` tracking ref as a side effect (every
+ * workspace worktree shares one set of refs and objects) - the safety
+ * property here is narrower than "never touches that ref": this function
+ * never *reads* `origin/main` back afterward, depending only on the
+ * caller's already-resolved `sha` (from `remoteMainSha()`) instead. That
+ * matters because several worktrees of this same clone can run this script
+ * around the same time (each on its own branch); reading the shared ref
+ * back immediately after a fetch can transiently see it deleted mid-update
+ * by a sibling worktree's own concurrent fetch (reproduced directly), even
+ * though the fetch that caused it succeeds. Never reading it back
+ * sidesteps that race entirely.
+ *
+ * A shallow repository always re-fetches (via `--unshallow`) even when
+ * `sha`'s own commit object already resolves: a CI checkout's default
+ * shallow depth can already hold main's tip object without holding enough
+ * history for `merge-base` against a differently-shallow-fetched HEAD to
+ * mean anything (reproduced directly against two independent depth-1
+ * fetches) - object presence alone doesn't prove ancestry is present too.
  * @param {string} sha
  * @returns {boolean}
  */
 function ensureCommitAvailable(sha) {
   const commitRef = `${sha}^{commit}`;
-  if (tryGit(['cat-file', '-e', commitRef]) !== undefined) return true;
   const isShallow = tryGit(['rev-parse', '--is-shallow-repository']) === 'true';
+  if (!isShallow && tryGit(['cat-file', '-e', commitRef]) !== undefined) {
+    return true;
+  }
   const fetchArgs = [
     'fetch',
     ...(isShallow ? ['--unshallow'] : []),
@@ -116,8 +126,20 @@ function resolveBase() {
     ]);
   }
   const sha = remoteMainSha();
-  if (!sha || !ensureCommitAvailable(sha)) return undefined;
-  return tryGit(['merge-base', 'HEAD', sha]);
+  if (sha) {
+    return ensureCommitAvailable(sha)
+      ? tryGit(['merge-base', 'HEAD', sha])
+      : undefined;
+  }
+  // The live remote query itself failed (for example, no network) rather
+  // than returning a genuine "no such ref" - fall back to whatever
+  // origin/main already resolves to locally instead of blocking a
+  // disconnected developer outright, only when a fresh answer was never
+  // reachable in the first place.
+  const cachedSha = tryGit(['rev-parse', '--verify', 'origin/main']);
+  return cachedSha && ensureCommitAvailable(cachedSha)
+    ? tryGit(['merge-base', 'HEAD', cachedSha])
+    : undefined;
 }
 
 /**
