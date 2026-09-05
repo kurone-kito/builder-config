@@ -30,23 +30,6 @@ jobs:
           git config --global core.eol lf
       - name: Stages the pushed branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - name: Detect a release-cut change
-        shell: bash
-        env:
-          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-          EVENT_NAME: ${{ github.event_name }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-        run: |
-          if [ "$EVENT_NAME" = 'pull_request' ]; then
-            subject=$PR_TITLE
-          else
-            subject=$COMMIT_MESSAGE
-          fi
-          case $subject in
-            'chore(release):'*)
-              echo 'IDD_CHANGELOG_RELEASE=1' >> "$GITHUB_ENV"
-              ;;
-          esac
       - name: Setup the pnpm
         uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
