@@ -68,15 +68,18 @@ function remoteMainSha() {
 
 /**
  * Make a commit's objects available locally, fetching (and unshallowing
- * first, when needed) only if they aren't already. Every workspace
- * worktree shares one set of objects and refs, but this fetches `main` by
- * name rather than writing to the shared `refs/remotes/origin/main`
- * tracking ref directly: several worktrees of this same clone can run
- * this script around the same time (each on its own branch), and writing
- * that shared ref concurrently is a real, observed race - reading it back
- * immediately after can transiently see it deleted mid-update by a
- * sibling worktree's own fetch. Depending only on `sha`, already resolved
- * independently via `remoteMainSha()`, sidesteps that race entirely.
+ * first, when needed) only if they aren't already. This plain
+ * `fetch origin main` still updates the shared `refs/remotes/origin/main`
+ * tracking ref as a side effect (every workspace worktree shares one set of
+ * refs and objects) - the safety property here is narrower than "never
+ * touches that ref": this function never *reads* `origin/main` back
+ * afterward, depending only on the caller's already-resolved `sha`
+ * (from `remoteMainSha()`) instead. That matters because several worktrees
+ * of this same clone can run this script around the same time (each on its
+ * own branch); reading the shared ref back immediately after a fetch can
+ * transiently see it deleted mid-update by a sibling worktree's own
+ * concurrent fetch (reproduced directly), even though the fetch that
+ * caused it succeeds. Never reading it back sidesteps that race entirely.
  * @param {string} sha
  * @returns {boolean}
  */
@@ -181,10 +184,14 @@ function listPackageManifests() {
 
 /**
  * @param {string} base
- * @returns {boolean} whether root `package.json` and every
- *   `packages/<name>/package.json` all bump their `version`, from `base`,
- *   to root's current version in lockstep - this repository's actual
- *   release-cut contract, not merely "some version somewhere changed".
+ * @returns {boolean} whether root `package.json` bumped its `version` from
+ *   `base`, and every current `packages/<name>/package.json` shares that
+ *   same new version - this repository's actual lockstep release-cut
+ *   contract, not merely "some version somewhere changed". Comparing only
+ *   current versions (not each package's own version at `base`) means a
+ *   package newly added in this same diff - with no prior version to
+ *   compare against - is handled the same way as an existing one: it only
+ *   needs to already be at the release version, not show its own bump.
  */
 function isLockstepVersionBump(base) {
   const rootBase = readVersionAt(base, 'package.json');
@@ -200,15 +207,9 @@ function isLockstepVersionBump(base) {
   const manifests = listPackageManifests();
   if (manifests.length === 0) return false;
 
-  return manifests.every((manifestPath) => {
-    const baseVersion = readVersionAt(base, manifestPath);
-    const currentVersion = readCurrentVersion(manifestPath);
-    return (
-      baseVersion !== undefined &&
-      baseVersion !== currentVersion &&
-      currentVersion === rootCurrent
-    );
-  });
+  return manifests.every(
+    (manifestPath) => readCurrentVersion(manifestPath) === rootCurrent,
+  );
 }
 
 function main() {
