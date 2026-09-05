@@ -11,16 +11,16 @@
  * `packages/<name>/CHANGELOG.md` path. Fails closed - a nonzero exit code -
  * whenever that base cannot be resolved, rather than silently passing.
  *
- * A genuine release cut is detected automatically: if the root
- * `package.json`'s `version` field differs between the resolved base and
- * the current working tree, the change is allowed through with no
- * configuration needed. This is deliberately tied to an actual version
- * bump rather than a PR title or commit message - either of those is
- * freely chosen by the PR author and would let an ordinary feature/fix PR
- * bypass the guard just by naming itself like a release cut. `version`
- * bumping in lockstep across every workspace package is exactly the
- * documented release-cut contract, so it doubles as a hard-to-spoof
- * detector without extra machinery.
+ * A genuine release cut is detected automatically: the root `package.json`
+ * and every `packages/<name>/package.json` must all bump their `version`
+ * field, from the resolved base, to the same new value as root's current
+ * version - the lockstep versioning this repository's release-cut policy
+ * already requires. This is deliberately tied to that whole-workspace diff
+ * shape rather than a PR title or commit message (freely chosen by the PR
+ * author) or a bump of the root version alone (trivially added without
+ * touching any package that actually publishes) - either shortcut would
+ * let an ordinary feature/fix PR bypass the guard without a genuine
+ * release cut.
  *
  * Escape hatch: set `IDD_CHANGELOG_RELEASE=1` for the rarer case of a
  * legitimate CHANGELOG.md edit with no version bump (for example,
@@ -28,7 +28,7 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 
 const CHANGELOG_PATTERN = /^packages\/[^/]+\/CHANGELOG\.md$/;
 const POLICY_DOC = 'docs/idd-policy.md ("CHANGELOG Policy" section)';
@@ -106,13 +106,14 @@ function changedPaths(base) {
 }
 
 /**
- * Read `package.json`'s `version` field as committed at `ref`, or
+ * Read a `package.json`'s `version` field as committed at `ref`, or
  * `undefined` when the ref, file, or JSON can't be resolved.
  * @param {string} ref
+ * @param {string} manifestPath
  * @returns {string | undefined}
  */
-function readVersionAt(ref) {
-  const content = tryGit(['show', `${ref}:package.json`]);
+function readVersionAt(ref, manifestPath) {
+  const content = tryGit(['show', `${ref}:${manifestPath}`]);
   if (content === undefined) return undefined;
   try {
     return JSON.parse(content).version;
@@ -122,31 +123,69 @@ function readVersionAt(ref) {
 }
 
 /**
- * Read the working tree's current root `package.json` `version` field, or
+ * Read the working tree's current `version` field for a `package.json`, or
  * `undefined` when the file can't be read or parsed.
+ * @param {string} manifestPath
  * @returns {string | undefined}
  */
-function readCurrentVersion() {
+function readCurrentVersion(manifestPath) {
   try {
-    return JSON.parse(readFileSync('package.json', 'utf8')).version;
+    return JSON.parse(readFileSync(manifestPath, 'utf8')).version;
   } catch {
     return undefined;
   }
 }
 
 /**
- * @param {string} base
- * @returns {boolean} whether the root `package.json`'s `version` differs
- *   between `base` and the current working tree.
+ * Every workspace package manifest path (`packages/<name>/package.json`),
+ * discovered from the current working tree's `packages/` directory rather
+ * than a hardcoded list, so this stays correct as packages are added or
+ * removed.
+ * @returns {readonly string[]}
  */
-function rootVersionBumped(base) {
-  const baseVersion = readVersionAt(base);
-  const currentVersion = readCurrentVersion();
-  return (
-    baseVersion !== undefined &&
-    currentVersion !== undefined &&
-    baseVersion !== currentVersion
-  );
+function listPackageManifests() {
+  let entries;
+  try {
+    entries = readdirSync('packages', { withFileTypes: true });
+  } catch {
+    return [];
+  }
+  return entries
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => `packages/${entry.name}/package.json`)
+    .sort();
+}
+
+/**
+ * @param {string} base
+ * @returns {boolean} whether root `package.json` and every
+ *   `packages/<name>/package.json` all bump their `version`, from `base`,
+ *   to root's current version in lockstep - this repository's actual
+ *   release-cut contract, not merely "some version somewhere changed".
+ */
+function isLockstepVersionBump(base) {
+  const rootBase = readVersionAt(base, 'package.json');
+  const rootCurrent = readCurrentVersion('package.json');
+  if (
+    rootBase === undefined ||
+    rootCurrent === undefined ||
+    rootBase === rootCurrent
+  ) {
+    return false;
+  }
+
+  const manifests = listPackageManifests();
+  if (manifests.length === 0) return false;
+
+  return manifests.every((manifestPath) => {
+    const baseVersion = readVersionAt(base, manifestPath);
+    const currentVersion = readCurrentVersion(manifestPath);
+    return (
+      baseVersion !== undefined &&
+      baseVersion !== currentVersion &&
+      currentVersion === rootCurrent
+    );
+  });
 }
 
 function main() {
@@ -172,10 +211,11 @@ function main() {
   const offending = paths.filter((path) => CHANGELOG_PATTERN.test(path));
   if (offending.length === 0) return;
 
-  if (rootVersionBumped(base)) {
+  if (isLockstepVersionBump(base)) {
     console.log(
-      "[lint:changelog] root package.json's version differs from the resolved base - " +
-        'treating this as the release-cut change and allowing the package CHANGELOG.md edit(s).',
+      "[lint:changelog] root and every workspace package's version bumped in lockstep against " +
+        'the resolved base - treating this as the release-cut change and allowing the package ' +
+        'CHANGELOG.md edit(s).',
     );
     return;
   }
@@ -192,8 +232,9 @@ function main() {
       `release-time-batch-only policy (${POLICY_DOC}) reserves for the release-cut change ` +
       'that bumps package.json versions - never a feature/fix PR. Drop this hunk:\n' +
       offending.map((path) => `  - ${path}`).join('\n') +
-      "\nIf this genuinely is the release-cut change, bump root package.json's version too, " +
-      'or set IDD_CHANGELOG_RELEASE=1 and re-run.',
+      '\nIf this genuinely is the release-cut change, bump the root package.json and every ' +
+      "workspace package's package.json to the same new version, or set " +
+      'IDD_CHANGELOG_RELEASE=1 and re-run.',
   );
   process.exitCode = 1;
 }
