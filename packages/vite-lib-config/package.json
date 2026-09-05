@@ -35,23 +35,23 @@
     "test": "vitest run --coverage"
   },
   "dependencies": {
-    "lodash-es": "^4.17.21",
+    "lodash-es": "^4.18.1",
     "shebang-regex": "^4.0.0",
-    "type-fest": "^5.0.1",
-    "vite": "^8.0.0",
-    "vite-plugin-dts": "^5.0.1"
+    "type-fest": "^5.9.0",
+    "vite": "^8.2.2",
+    "vite-plugin-dts": "^5.1.0"
   },
   "devDependencies": {
     "@kurone-kito/typescript-config": "workspace:^",
     "@types/lodash-es": "^4.17.12",
-    "@types/node": "^24.6.2",
-    "@vitest/coverage-v8": "^4.1.0",
+    "@types/node": "^24.13.3",
+    "@vitest/coverage-v8": "^4.1.11",
     "cpy-cli": "^7.0.0",
-    "rimraf": "^6.0.1",
-    "typedoc": "^0.28.13",
+    "rimraf": "^6.1.3",
+    "typedoc": "^0.28.20",
     "typedoc-plugin-markdown": "^4.13.0",
     "typescript": "~6.0.3",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.11"
   },
   "engines": {
     "node": "^22.23.2 || ^24.2.0 || >=26.0.0"
