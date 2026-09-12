@@ -249,34 +249,23 @@ report-and-stop path unchanged):
    `branch: suitability-close/<number>-<slug>` — outside the
    `issue/*`/`roadmap-audit/*` scope the core cwd-vs-claim gate checks
    (`idd-overview-core.instructions.md`), so no worktree is needed.
-2. Re-validate that claim, then run the profile-selected helper (add
-   `--apply` to mutate; omit it to dry-run first):
+2. Re-validate that claim, then run the helper (add `--apply` to
+   mutate; omit it to dry-run first):
 
    ```sh
-   # source repo / vendored-node
    node scripts/suitability-close-execute.mjs --issue <number> \
      --claim-id <claim-id> --agent-id <agent-id> --apply
-
-   # package-manager (this repository's profile)
-   pnpm run idd:suitability-close-execute -- --issue <number> \
-     --claim-id <claim-id> --agent-id <agent-id> --apply
-
-   # ephemeral-npx
-   npx --yes --package <helper-package-spec> idd-suitability-close-execute \
-     --issue <number> --claim-id <claim-id> --agent-id <agent-id> --apply
    ```
 
-   `idd-suitability-close-execute` is the underlying bin; a plain shell
-   does not add `node_modules/.bin` to `PATH`, so the `package-manager`
-   profile must invoke it through the configured package manager
-   (`package.json`'s `idd:suitability-close-execute` script) rather than
-   as a bare command. Resolve `<helper-package-spec>` for the
-   `ephemeral-npx` form from the helper-runtime configuration. No
-   profile-wiring entry for this helper exists yet in
-   `docs/idd-helper-scripts.md` (upstream `idd-skill` has none either as
-   of `v0.11.0`) — use the concrete command above rather than an
-   unresolvable `<profile-selected-...-command>` placeholder until one
-   is documented.
+   `docs/idd-helper-scripts.md` does not yet carry a profile-wiring
+   entry for this helper under `package-manager`, `ephemeral-npx`, or
+   `instructions-only` (neither does upstream `idd-skill` as of
+   `v0.11.0`). Under this repository's `package-manager` profile, run
+   it via `pnpm exec idd-suitability-close-execute -- --issue <number>
+   --claim-id <claim-id> --agent-id <agent-id> --apply` instead; for
+   any other profile, or if that also fails, treat the step as
+   currently helper-only and stop for a manual/maintainer decision
+   rather than guessing an untested invocation.
 
    It re-collects the same mechanical evidence, posts the
    evidence-bound closing comment (the accepted human-notification
