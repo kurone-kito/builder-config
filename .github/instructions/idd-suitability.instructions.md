@@ -257,13 +257,12 @@ report-and-stop path unchanged):
      --claim-id <claim-id> --agent-id <agent-id> --apply
    ```
 
-   `docs/idd-helper-scripts.md` does not yet carry a profile-wiring
-   entry for this helper under `package-manager`, `ephemeral-npx`, or
-   `instructions-only` (neither does upstream `idd-skill` as of
-   `v0.11.0`). Under this repository's `package-manager` profile, run
-   it via `pnpm exec idd-suitability-close-execute -- --issue <number>
-   --claim-id <claim-id> --agent-id <agent-id> --apply` instead; for
-   any other profile, or if that also fails, treat the step as
+   Check `docs/idd-helper-scripts.md` for this helper's own
+   profile-wiring entry; if none is documented there yet, run it via
+   `pnpm exec idd-suitability-close-execute -- --issue <number>
+   --claim-id <claim-id> --agent-id <agent-id> --apply` under this
+   repository's `package-manager` profile instead. For any other
+   profile, or if neither form works, treat the step as
    currently helper-only and stop for a manual/maintainer decision
    rather than guessing an untested invocation.
 
