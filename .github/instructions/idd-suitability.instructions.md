@@ -249,13 +249,22 @@ report-and-stop path unchanged):
    `branch: suitability-close/<number>-<slug>` — outside the
    `issue/*`/`roadmap-audit/*` scope the core cwd-vs-claim gate checks
    (`idd-overview-core.instructions.md`), so no worktree is needed.
-2. Re-validate that claim, then run (add `--apply` to mutate; omit it
-   to dry-run first):
+2. Re-validate that claim, then run the profile-selected helper (add
+   `--apply` to mutate; omit it to dry-run first):
 
    ```sh
+   # source repo / vendored-node
    node scripts/suitability-close-execute.mjs --issue <number> \
      --claim-id <claim-id> --agent-id <agent-id> --apply
+
+   # package-manager / ephemeral-npx
+   <profile-selected-suitability-close-execute-command> --issue <number> \
+     --claim-id <claim-id> --agent-id <agent-id> --apply
    ```
+
+   Resolve `<profile-selected-suitability-close-execute-command>` from
+   `docs/idd-helper-scripts.md`; do not hardcode `node scripts/...` for
+   non-vendored profiles.
 
    It re-collects the same mechanical evidence, posts the
    evidence-bound closing comment (the accepted human-notification
