@@ -257,14 +257,17 @@ report-and-stop path unchanged):
    node scripts/suitability-close-execute.mjs --issue <number> \
      --claim-id <claim-id> --agent-id <agent-id> --apply
 
-   # package-manager / ephemeral-npx
-   <profile-selected-suitability-close-execute-command> --issue <number> \
+   # package-manager (this repository's profile): `idd-suitability-close-execute`
+   # (package.json's `idd:suitability-close-execute` script)
+   idd-suitability-close-execute --issue <number> \
      --claim-id <claim-id> --agent-id <agent-id> --apply
    ```
 
-   Resolve `<profile-selected-suitability-close-execute-command>` from
-   `docs/idd-helper-scripts.md`; do not hardcode `node scripts/...` for
-   non-vendored profiles.
+   No profile-wiring entry for this helper exists yet in
+   `docs/idd-helper-scripts.md` (upstream `idd-skill` has none either as
+   of `v0.11.0`) — use the concrete command above rather than an
+   unresolvable `<profile-selected-...-command>` placeholder until one
+   is documented.
 
    It re-collects the same mechanical evidence, posts the
    evidence-bound closing comment (the accepted human-notification
