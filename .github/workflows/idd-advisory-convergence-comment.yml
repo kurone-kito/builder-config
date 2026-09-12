@@ -75,18 +75,11 @@ jobs:
           COMMENT_BODY: ${{ github.event.comment.body }}
         name: Classify review comment
         id: origin
-        # review-comment-origin.mjs ships in @kurone-kito/idd-skill@0.7.0
-        # as a plain vendored script only -- confirmed no
-        # `idd-review-comment-origin` bin/CLI facade exists at this pin
-        # (absent from both the package's own `bin` field and this
-        # repository's package.json `idd:*` script map), unlike
-        # idd-rerun-advisory-convergence below, which does have one. It
-        # is a workflow-embedded classifier (reads $COMMENT_BODY, writes
-        # $GITHUB_OUTPUT), never an agent-facing CLI helper, so there is
-        # no `pnpm exec idd-*` form to fall back to here -- this is the
-        # package-manager-profile equivalent of upstream's own
-        # `node scripts/review-comment-origin.mjs` invocation.
-        run: node node_modules/@kurone-kito/idd-skill/scripts/review-comment-origin.mjs
+        # @kurone-kito/idd-skill@v0.11.0 ships an `idd-review-comment-origin`
+        # bin/CLI facade (added since the v0.7.0 pin this comment used to
+        # describe); use the package-manager-profile `idd:*` script alias
+        # instead of the raw vendored script path.
+        run: pnpm exec idd-review-comment-origin
       - if: github.event.action == 'edited' && steps.origin.outputs.idd_originated != 'true'
         env:
           COMMENT_BODY: ${{ github.event.changes.body.from }}
@@ -101,7 +94,7 @@ jobs:
         # for a GitHub comment-edit webhook; only checked when the new
         # body alone didn't already classify as IDD-originated, to avoid
         # a redundant second classify call.
-        run: node node_modules/@kurone-kito/idd-skill/scripts/review-comment-origin.mjs
+        run: pnpm exec idd-review-comment-origin
       - if: steps.origin.outputs.idd_originated == 'true' || steps.origin_prev.outputs.idd_originated == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
