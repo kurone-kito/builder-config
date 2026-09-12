@@ -75,17 +75,23 @@ jobs:
           COMMENT_BODY: ${{ github.event.comment.body }}
         name: Classify review comment
         id: origin
-        # review-comment-origin.mjs ships in @kurone-kito/idd-skill@0.7.0
-        # as a plain vendored script only -- confirmed no
-        # `idd-review-comment-origin` bin/CLI facade exists at this pin
-        # (absent from both the package's own `bin` field and this
-        # repository's package.json `idd:*` script map), unlike
-        # idd-rerun-advisory-convergence below, which does have one. It
-        # is a workflow-embedded classifier (reads $COMMENT_BODY, writes
-        # $GITHUB_OUTPUT), never an agent-facing CLI helper, so there is
-        # no `pnpm exec idd-*` form to fall back to here -- this is the
-        # package-manager-profile equivalent of upstream's own
-        # `node scripts/review-comment-origin.mjs` invocation.
+        # This job checks out `main` (not the PR head) before installing
+        # dependencies, so it always runs against whatever
+        # @kurone-kito/idd-skill pin is currently merged to `main` --
+        # never the pin a still-open PR (such as the one that bumped this
+        # repository to v0.11.0) is proposing. `idd-review-comment-origin`
+        # is a v0.11.0+ bin/CLI facade; using it here would fail with
+        # `command not found` on any comment-triggered run that lands
+        # while a pin-bump PR is still open, since `main` hasn't reached
+        # that pin yet (confirmed by Copilot review #231, which caught
+        # this after an earlier, too-eager attempt to adopt the facade
+        # here). The raw vendored script keeps working across every pin
+        # bump (the facade is an additive wrapper around the same script,
+        # never a replacement), so invoke it directly rather than the
+        # `idd:*` alias, unlike `idd-rerun-advisory-convergence` below,
+        # which runs after this job has confirmed the PR's own review
+        # activity is IDD-originated and is not affected by this
+        # checked-out-`main` constraint.
         run: node node_modules/@kurone-kito/idd-skill/scripts/review-comment-origin.mjs
       - if: github.event.action == 'edited' && steps.origin.outputs.idd_originated != 'true'
         env:
