@@ -43,6 +43,14 @@ When the `issue-authoring` companion bundle is installed under
 `.claude/skills/` in a target repository, OpenCode also discovers it
 there through its `.claude/skills/` compatibility.
 
+This repository also installs the `idd-spec-audit` companion skill at
+the same 3 mirrored destinations (`.claude/skills/`, `.github/skills/`,
+`skills/`) — a read-only, agent-driven semantic auditor over the
+instruction corpus (leaked session context, cross-file contradictions,
+fresh-memory completability, automation blockers, and
+restatement-discipline drift). Invoke it on request; it never edits a
+file or mutates a GitHub issue on its own.
+
 During onboarding, create or update `CLAUDE.md`, `AGENTS.md`, and
 `GEMINI.md` so each non-Copilot agent listed above has a stable first
 file to read. GitHub Copilot remains an update-if-present surface via
