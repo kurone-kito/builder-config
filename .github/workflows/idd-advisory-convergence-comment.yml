@@ -75,11 +75,24 @@ jobs:
           COMMENT_BODY: ${{ github.event.comment.body }}
         name: Classify review comment
         id: origin
-        # @kurone-kito/idd-skill@v0.11.0 ships an `idd-review-comment-origin`
-        # bin/CLI facade (added since the v0.7.0 pin this comment used to
-        # describe); use the package-manager-profile `idd:*` script alias
-        # instead of the raw vendored script path.
-        run: pnpm exec idd-review-comment-origin
+        # This job checks out `main` (not the PR head) before installing
+        # dependencies, so it always runs against whatever
+        # @kurone-kito/idd-skill pin is currently merged to `main` --
+        # never the pin a still-open PR (such as the one that bumped this
+        # repository to v0.11.0) is proposing. `idd-review-comment-origin`
+        # is a v0.11.0+ bin/CLI facade; using it here would fail with
+        # `command not found` on any comment-triggered run that lands
+        # while a pin-bump PR is still open, since `main` hasn't reached
+        # that pin yet (confirmed by Copilot review #231, which caught
+        # this after an earlier, too-eager attempt to adopt the facade
+        # here). The raw vendored script keeps working across every pin
+        # bump (the facade is an additive wrapper around the same script,
+        # never a replacement), so invoke it directly rather than the
+        # `idd:*` alias, unlike `idd-rerun-advisory-convergence` below,
+        # which runs after this job has confirmed the PR's own review
+        # activity is IDD-originated and is not affected by this
+        # checked-out-`main` constraint.
+        run: node node_modules/@kurone-kito/idd-skill/scripts/review-comment-origin.mjs
       - if: github.event.action == 'edited' && steps.origin.outputs.idd_originated != 'true'
         env:
           COMMENT_BODY: ${{ github.event.changes.body.from }}
@@ -94,7 +107,7 @@ jobs:
         # for a GitHub comment-edit webhook; only checked when the new
         # body alone didn't already classify as IDD-originated, to avoid
         # a redundant second classify call.
-        run: pnpm exec idd-review-comment-origin
+        run: node node_modules/@kurone-kito/idd-skill/scripts/review-comment-origin.mjs
       - if: steps.origin.outputs.idd_originated == 'true' || steps.origin_prev.outputs.idd_originated == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
