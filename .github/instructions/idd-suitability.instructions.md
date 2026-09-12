@@ -257,18 +257,22 @@ report-and-stop path unchanged):
    node scripts/suitability-close-execute.mjs --issue <number> \
      --claim-id <claim-id> --agent-id <agent-id> --apply
 
-   # package-manager / ephemeral-npx
-   idd-suitability-close-execute --issue <number> \
+   # package-manager (this repository's profile)
+   pnpm run idd:suitability-close-execute -- --issue <number> \
      --claim-id <claim-id> --agent-id <agent-id> --apply
+
+   # ephemeral-npx
+   npx --yes --package <helper-package-spec> idd-suitability-close-execute \
+     --issue <number> --claim-id <claim-id> --agent-id <agent-id> --apply
    ```
 
-   `idd-suitability-close-execute` is the bin both the `package-manager`
-   profile (this repository's, via `package.json`'s
-   `idd:suitability-close-execute` script) and an `ephemeral-npx`
-   profile (`npx --yes --package <helper-package-spec>
-   idd-suitability-close-execute ...`, resolving `<helper-package-spec>`
-   from the helper-runtime configuration) invoke identically once
-   resolved. No profile-wiring entry for this helper exists yet in
+   `idd-suitability-close-execute` is the underlying bin; a plain shell
+   does not add `node_modules/.bin` to `PATH`, so the `package-manager`
+   profile must invoke it through the configured package manager
+   (`package.json`'s `idd:suitability-close-execute` script) rather than
+   as a bare command. Resolve `<helper-package-spec>` for the
+   `ephemeral-npx` form from the helper-runtime configuration. No
+   profile-wiring entry for this helper exists yet in
    `docs/idd-helper-scripts.md` (upstream `idd-skill` has none either as
    of `v0.11.0`) — use the concrete command above rather than an
    unresolvable `<profile-selected-...-command>` placeholder until one
