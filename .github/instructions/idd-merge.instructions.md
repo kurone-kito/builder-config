@@ -165,19 +165,16 @@ Before any mutating action in F3, apply the
      been re-run against `${PR_HEAD_SHA_F3}` (#2749) — covers commits
      that landed between F2 and this final gate, for example a
      required `{development-branch}` sync. Before running them,
-     confirm the local worktree is at `${PR_HEAD_SHA_F3}` exactly: if a
-     resumed or external-push session left it stale, `git fetch origin
-     {claimed-branch}` then `git merge --ff-only origin/{claimed-branch}`
-     — this keeps the claimed branch checked out (satisfying the shared
-     [claim revalidation gate](idd-overview-core.instructions.md#claim-revalidation-gate)'s
-     branch check) while advancing it to the pushed head, unlike a bare
-     `git checkout ${PR_HEAD_SHA_F3}`, which would detach HEAD instead;
-     never `git reset --hard`, which this repository's own
-     `.claude/settings.json` denies. If the fast-forward is refused
-     (local history has diverged), stop and hold rather than
-     force-discarding it — D3.5 step 7's `git log` and D3.7's inherited
-     `git diff` both read local git state, not the remote PR directly.
-     Skip D3.5 steps 6-7 under the
+     confirm the local worktree is checked out at `${PR_HEAD_SHA_F3}`
+     exactly (`git fetch` plus `git checkout ${PR_HEAD_SHA_F3}` if a
+     resumed or external-push session left it stale — a transient
+     detached HEAD is fine here, since D3.5 step 7's `git log` and
+     D3.7's inherited `git diff` are read-only, and neither the
+     `{claim-id}` bullet above nor step 4's `gh pr merge` care about
+     local checkout state; never `git reset --hard`, which this
+     repository's own `.claude/settings.json` denies — if uncommitted
+     changes block the checkout, stop and hold instead of
+     force-discarding them). Skip D3.5 steps 6-7 under the
      same non-default-`{development-branch}` exemption D3.5 itself
      carries, and skip D3.6/D3.7 entirely under D3.6's own no-template
      -or-no-`IDD impact`-heading exemption (this repository's own
@@ -429,17 +426,15 @@ Before any mutating action in F3, apply the
    primary worktree has no local `{development-branch}` yet (expected
    whenever it differs from the repository's default branch, since B1
    branches new worktrees straight from `origin/{development-branch}`
-   without ever checking it out in the primary worktree). If
-   `{development-branch}` differs from the repository's default branch,
-   switch the primary worktree back to the default branch
-   (`git switch <default-branch>`) immediately after this fast-forward,
-   before moving on to step 5 — `idd-work.instructions.md` B1 Step 1
-   requires the primary worktree to stay on the default branch
-   throughout B1, and none of steps 5-7 below need it on
-   `{development-branch}`, so restoring it here (rather than only after
-   every remaining step completes) also covers a stop or claim loss
-   partway through steps 5-7: the primary worktree is already back on
-   the branch B1 expects regardless of where cleanup halts.
+   without ever checking it out in the primary worktree). This local
+   checkout is a plain git operation over the merged feature branch's
+   own target and is unrelated to `idd-work.instructions.md` B1 Step
+   1's own requirement that the primary worktree stay on the default
+   branch throughout B1 — if `{development-branch}` differs from the
+   repository's default branch, switch the primary worktree back to
+   the default branch (`git switch <default-branch>`) once the
+   remaining F4 cleanup steps below complete, so the next B1 pass finds
+   the primary worktree already on the branch it expects.
 
    Doing this first ensures WorkTrunk's own merge-status check (which
    reads the local branch rather than its `origin/` remote-tracking
