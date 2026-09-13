@@ -96,6 +96,12 @@ function createRepo(options: RepoOptions): Repo {
   git(workDir, ['config', 'user.name', 'Test']);
   git(workDir, ['config', 'commit.gpgsign', 'false']);
   git(workDir, ['config', 'tag.gpgsign', 'false']);
+  // Shadow any globally-configured core.hooksPath (a developer's own
+  // ~/.gitconfig, or this very repository's project-local hooks) with a
+  // guaranteed-nonexistent directory: git silently skips a hook it can't
+  // find there, so a managed hook that rejects synthetic test content
+  // can never make these scratch commits fail.
+  git(workDir, ['config', 'core.hooksPath', join(base, 'no-hooks')]);
   git(workDir, ['remote', 'add', 'origin', originDir]);
 
   writeJson(join(workDir, 'package.json'), {
@@ -448,6 +454,7 @@ describe('check-changelog-policy', () => {
     git(workDir, ['config', 'user.name', 'Test']);
     git(workDir, ['config', 'commit.gpgsign', 'false']);
     git(workDir, ['config', 'tag.gpgsign', 'false']);
+    git(workDir, ['config', 'core.hooksPath', join(base, 'no-hooks')]);
     git(workDir, ['remote', 'add', 'origin', originDir]);
     writeJson(join(workDir, 'package.json'), {
       name: 'root',
