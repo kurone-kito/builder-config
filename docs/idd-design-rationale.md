@@ -194,10 +194,23 @@ keeps sorting ahead of its band after its release has already shipped.
 resolved `milestone` title in their own outputs so the ranking input is
 visible evidence, not a value an agent has to re-fetch to audit a pick.
 
+**Not yet wired in this repository.** This section describes upstream's
+current (`v0.11.0`) A4 Step 2 design; this repository's own
+`.github/instructions/idd-discover.instructions.md` does not yet read
+`discover.milestoneScope` or apply this tie-breaker (it still orders by
+score, desync, effort, and issue number only), so setting the field
+today has no effect here. Importing that operative behavior is out of
+this reconciliation's scope (`idd-discover.instructions.md` is not
+among the files it touches) — tracked for a future roadmap #213 track.
+
 ### A4 — Scored-vs-unscored floor tie-breaker: what still ties afterward
 
-Moved from the Discover phase file to keep the capped instruction
-surface lean. After the scored-vs-unscored floor tie-breaker resolves
+Upstream moved this rationale out of its own Discover phase file to
+keep that file's capped instruction surface lean; this repository's own
+`.github/instructions/idd-discover.instructions.md` still states the
+rule directly (and links back here for the rationale below), so read
+this section as the _why_, not as evidence the rule itself lives only
+here. After the scored-vs-unscored floor tie-breaker resolves
 the mixed case, the remaining tie-breakers (concurrent-selection
 desync, effort hint, lowest issue number) still apply in unchanged
 relative order — for example, between two genuinely-scored candidates,

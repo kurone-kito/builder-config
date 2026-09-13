@@ -424,12 +424,13 @@ regardless of branch name), or a push filter that matches the slash namespace
 
 ## Optional — host idd-advisory-convergence as a required-check CI workflow
 
-For repositories that vendor the IDD helper scripts, hosting the
-`advisory-convergence` helper (`docs/idd-helper-scripts.md`) as a CI
-workflow turns "Copilot's review converged on the current PR HEAD" from
-an instruction the execution model must choose to honor into a
-status check GitHub itself can enforce. It is opt-in — the template
-already mirrors the workflow at
+Hosting the `advisory-convergence` helper (`docs/idd-helper-scripts.md`)
+as a CI workflow — whether the repository vendors the helper scripts or
+runs them via the `package-manager`/`ephemeral-npx` profile — turns
+"Copilot's review converged on the current PR HEAD" from an instruction
+the execution model must choose to honor into a status check GitHub
+itself can enforce. It is opt-in — the template already mirrors the
+workflow at
 [`idd-template/.github/workflows/idd-advisory-convergence.yml`](../../.github/workflows/idd-advisory-convergence.yml)
 and its comment-refresh companion
 [`idd-template/.github/workflows/idd-advisory-convergence-comment.yml`](../../.github/workflows/idd-advisory-convergence-comment.yml);
@@ -611,6 +612,17 @@ its rerun-once budget is already spent, which the plain `--apply`
 path does not provide. Neither call reports `ready` itself. Ordinary
 human prose (`LGTM`) does not create or
 cancel the required check.
+
+**This repository's own wiring differs from the topology above**: its
+checked-in `.github/workflows/idd-advisory-convergence.yml` triggers
+directly on `pull_request` and `pull_request_review` (no
+`pull_request_target`), and its companion
+`idd-advisory-convergence-comment.yml` only listens for
+`pull_request_review_comment`, not a review submission. Reconciling
+this repository's own workflow files to the topology this section
+describes is out of this reconciliation's scope (`.github/workflows/*`
+is not among the files it touches) — tracked for a future roadmap #213
+track (review, Copilot).
 
 A thread being resolved or unresolved via the "Resolve conversation"
 button (`pull_request_review_thread`) is a real GitHub webhook event,
