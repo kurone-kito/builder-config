@@ -1,14 +1,17 @@
+import:
+  - '@kurone-kito/cspell-config'
 cache:
   cacheFormat: universal
   cacheLocation: node_modules/.cache/cspell/.cspell.cache
   cacheStrategy: metadata
   useCache: true
-import:
-  - '@kurone-kito/cspell-config'
+language: en,ja
 version: '0.2'
 words:
   - armv7l
+  - dedented
   - dedup
+  - demotability
   - deprioritize
   - desync
   - desynced
@@ -16,26 +19,47 @@ words:
   - Esync
   - GHEC
   - GHES
+  - ghinstance
   - GHSA
+  - idd
+  - ification
+  - includ
   - isort
+  - Kiro
+  - kurone
+  - minimizable
+  - ministral
   - nektos
-  - onnx
+  - nvmrc
+  - octocat
+  - ONNX
   - pylint
   - pyproject
   - pytest
   - qwen
   - rcompare
   - remediations
-  - toctou
+  - requir
+  - resumability
+  - rethrew
+  - rollup
+  - TOCTOU
+  - tsfile
   - undispositioned
   - unioned
+  - unmigrated
+  - unmirrored
   - unpushed
   - unreplied
+  - unrouted
   - unscored
   - unshallow
   - unshallowing
   - unstub
+  - untriggerable
   - unwaived
+  - vrchat
   - waivable
+  - WHATWG
   - xcpc
   - xsea
