@@ -260,10 +260,20 @@ now (#174):
 > repository does not have; revisit as a fresh issue if/when one is
 > adopted.
 
-As a direct result, `.github/idd/config.json` intentionally carries no
-`critiqueLoop.delegate` entry — a decline means no config entry to add,
-not an explicit disabled value, so this file's own "keep both in sync"
-rule at the top has nothing to mirror here.
+**Refined stance (#219)**: repo-local `critiqueLoop.delegate` stays
+entirely absent from `.github/idd/config.json` — a decline means no
+config entry to add, not an explicit disabled value, so this file's
+own "keep both in sync" rule at the top has nothing to mirror here.
+The operator relies on a user-global delegate default instead,
+configured outside this repository at
+`$XDG_CONFIG_HOME/idd-skill/config.json` (or
+`$HOME/.config/idd-skill/config.json`); see
+[User-global critique delegate default](idd-workflow.md#user-global-critique-delegate-default).
+That user-global fragment only takes effect because the repo-local key
+is entirely absent — a configured, disabled (`null`), or malformed
+repo-local `critiqueLoop.delegate` would win outright and never
+inherit it (see
+[Effective C1 critique delegate](idd-helper-scripts.md#effective-c1-critique-delegate)).
 `.github/instructions/idd-work.instructions.md` C1 already documents
 the fallback behavior for this field: absent, invalid, or a failing
 delegate leaves C1 running the per-agent critique mechanism unchanged.
