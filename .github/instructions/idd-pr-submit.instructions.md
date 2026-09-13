@@ -1,35 +1,37 @@
 # IDD — PR Submit Phase (D)
 
 Read this file after the self-review loop passes. It covers
-pre-publication main sync, claim verification, tests, pushing, PR
-creation, and waiting for CI.
+pre-publication `{development-branch}` sync, claim verification, tests,
+pushing, PR creation, and waiting for CI.
 
 Before the D1 sync and D2 push, apply the
 [shared claim revalidation gate](idd-overview-core.instructions.md#claim-revalidation-gate).
 
-## D1 — Sync main before first push
+## D1 — Sync {development-branch} before first push
 
-If the branch has not been pushed yet, sync it onto `main` before the
-first push — the routine pre-publication history cleanup step. First run
-`git fetch origin main`, then check whether the branch is **already
-current** with `origin/main`: if `git merge-base HEAD origin/main` equals
-`origin/main` (behind-count 0), the branch already contains every commit
-on `main`, so the rebase would be a pure no-op. **Skip the rebase entirely
-and proceed to D2** — D1's pre-publication synchronization goal is already
-met. In a sibling-worktree setup a no-op `git rebase origin/main` can still
-detach HEAD at the upstream tip without replaying the local commit, and
-re-running that no-op rebase re-detaches every time, so the bounded
-recovery below cannot converge for the no-op case; skipping it is the clean
-exit.
+If the branch has not been pushed yet, sync it onto `{development-branch}`
+before the first push — the routine pre-publication history cleanup step.
+First run `git fetch origin {development-branch}`, then check whether the
+branch is **already current** with `origin/{development-branch}`: if
+`git merge-base HEAD origin/{development-branch}` equals
+`origin/{development-branch}` (behind-count 0), the branch already
+contains every commit on `{development-branch}`, so the rebase would be a
+pure no-op. **Skip the rebase entirely and proceed to D2** — D1's
+pre-publication synchronization goal is already met. In a
+sibling-worktree setup a no-op `git rebase origin/{development-branch}`
+can still detach HEAD at the upstream tip without replaying the local
+commit, and re-running that no-op rebase re-detaches every time, so the
+bounded recovery below cannot converge for the no-op case; skipping it is
+the clean exit.
 
-Otherwise the branch **is** behind `origin/main`: rebase it onto `main`
-(`git rebase origin/main`), then apply the post-rebase verification and
-bounded recovery below.
+Otherwise the branch **is** behind `origin/{development-branch}`: rebase
+it onto `{development-branch}` (`git rebase origin/{development-branch}`),
+then apply the post-rebase verification and bounded recovery below.
 
 After the first D-phase push, do not reuse D1 as the normal
 synchronization path. Later branch updates should return through the
-E-phase review loop and, by default, merge `main` into the published PR
-branch so the synchronization diff is reviewable.
+E-phase review loop and, by default, merge `{development-branch}` into
+the published PR branch so the synchronization diff is reviewable.
 
 This D-phase file records the publication boundary only: post-push
 synchronization itself runs through `idd-review-triage.instructions.md`'s
@@ -50,9 +52,10 @@ signing wrapper for arbitrary git subcommands (pass
 to `git` before the subcommand — `git -c … rebase`, not `git rebase -c …`
 — or use a repo alias that wraps any subcommand; a commit-only alias like
 `git commit-ssh` will not run `rebase`),
-**run the initial `git rebase origin/main` above through that wrapper —
-not the plain command — and continue it with the wrapper's own
-`--continue` form**; the wrapper must own the whole operation. Plain
+**run the initial `git rebase origin/{development-branch}` above
+through that wrapper — not the plain command — and continue it with
+the wrapper's own `--continue` form**; the wrapper must own the whole
+operation. Plain
 `git rebase --continue` re-signs the replayed commit through the
 configured primary signing, which stalls non-interactively right after
 the conflict is already resolved. This is the normal-path complement to
@@ -67,8 +70,10 @@ D2, verify both:
 
 1. `git branch --show-current` is **non-empty** — HEAD is on the claimed
    branch, not detached.
-2. The expected local commit is present in `main..HEAD` (for example,
-   `git log --oneline main..HEAD` lists it).
+2. The expected local commit is present in
+   `origin/{development-branch}..HEAD` (for example, `git log --oneline
+   origin/{development-branch}..HEAD` lists it) — `origin/`-prefixed
+   since a local `{development-branch}` branch may not exist.
 
 If HEAD is detached (current branch empty), **auto-recover once**: re-attach
 to the claimed branch with `git checkout {branch-name}` (the local commit is
@@ -478,7 +483,8 @@ completion.
    **On a stray match**: amend the offending commit (`git commit
    --amend` for the tip commit, or an interactive rebase for an
    earlier one). If the branch already carries a merge commit (for
-   example, from an E-phase `main` sync), rebase with `--rebase-merges`
+   example, from an E-phase `{development-branch}` sync), rebase with
+   `--rebase-merges`
    instead of a plain interactive rebase, so the merge and its recorded
    conflict resolution aren't silently linearized or dropped. On a
    signed-commit repo whose primary signing is non-interactive-hostile,

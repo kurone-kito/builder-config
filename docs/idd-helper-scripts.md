@@ -2377,8 +2377,8 @@ Pass the `-c` flags to `git` itself, before the subcommand (`git -c …
 merge`, not `git merge -c …`); a commit-only alias such as `git
 commit-ssh` will not run `merge`. Pass a conventional-commits-shaped
 `-m` subject on the first `merge` call too — GitHub's own auto-generated
-`Merge branch 'main' into …` subject fails a commitlint `commit-msg`
-hook on a repository that enforces Conventional Commits, and `--continue`
+`Merge branch '{development-branch}' into …` subject fails a commitlint
+`commit-msg` hook on a repository that enforces Conventional Commits, and `--continue`
 cannot change a subject the initial `merge` call already committed to.
 Even a clean, conflict-free merge commits immediately, so the wrapper
 must own the operation from the first `merge` call, not just a later
