@@ -444,18 +444,25 @@ completion.
 
    For each commit's full message, search using step 3's same keyword
    alternation, generalized to any issue number instead of the fixed
-   `<N>`, and to an optional repository-qualified form (GitHub's
-   `Fixes other-owner/other-repo#100` syntax also auto-closes, so a
-   qualified reference is exactly as unsafe as an unqualified one):
+   `<N>`, and to both a repository-qualified form and GitHub's full-URL
+   form (both also auto-close, so either is exactly as unsafe as an
+   unqualified reference):
 
    ```text
-   (?im)\b(close[sd]?|fix(e[sd])?|resolve[sd]?)\s+(?:[\w.-]+\/[\w.-]+)?#(\d+)\b
+   (?im)\b(close[sd]?|fix(e[sd])?|resolve[sd]?)\s+((?:[\w.-]+\/[\w.-]+)?#\d+|https://github\.com/[\w.-]+/[\w.-]+/issues/\d+)\b
    ```
 
-   A match against any issue number in the deliberate closing set from
-   D3 is expected (deliberate — this covers both the single-issue `<N>`
-   case and "Multiple closing issues" above); only a captured number
-   **outside** that set is a stray commit-message close.
+   For each match, extract the referenced repository (present for a
+   qualified `owner/repo#N` or a full-URL match; absent for a bare
+   `#N`, which always means this repository) and the issue number. A
+   match is expected only when the referenced repository is **either**
+   absent **or** equal to this repository, **and** the issue number is
+   in the deliberate closing set from D3 (this covers both the
+   single-issue `<N>` case and "Multiple closing issues" above); a
+   match naming a different repository is always a stray close
+   regardless of whether its number coincides with one in the
+   deliberate set, and a same-repository number outside that set is
+   also a stray commit-message close.
 
    **On a stray match**: amend the offending commit (`git commit
    --amend` for the tip commit, or an interactive rebase for an

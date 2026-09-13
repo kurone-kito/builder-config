@@ -2358,16 +2358,17 @@ evaluates them):
 ## Signed-Commit Merge Wrapper (Shared Git Procedure)
 
 `idd-review-triage.instructions.md`'s E-phase sync path and
-`idd-review-fix.instructions.md`'s E11 both merge `main` into the feature
-branch with `git fetch origin main && git merge origin/main`. On a repo
-whose primary commit signing is non-interactive-hostile (GPG pinentry /
-hardware-touch) and that configures a fallback signing wrapper for
-arbitrary git subcommands, run the **merge** step — including a
-`--continue` after conflict resolution — through that wrapper, never the
-plain command (`git fetch` creates no commit and needs no signing):
+`idd-review-fix.instructions.md`'s E11 both merge `{development-branch}`
+into the feature branch with `git fetch origin {development-branch} &&
+git merge origin/{development-branch}`. On a repo whose primary commit
+signing is non-interactive-hostile (GPG pinentry / hardware-touch) and
+that configures a fallback signing wrapper for arbitrary git
+subcommands, run the **merge** step — including a `--continue` after
+conflict resolution — through that wrapper, never the plain command
+(`git fetch` creates no commit and needs no signing):
 
 ```sh
-git -c gpg.format=ssh -c user.signingkey=<abs-path> -c commit.gpgsign=true merge origin/main -m "chore: merge origin/main into the claimed branch"
+git -c gpg.format=ssh -c user.signingkey=<abs-path> -c commit.gpgsign=true merge origin/{development-branch} -m "chore: merge origin/{development-branch} into the claimed branch"
 # resolve conflicts if any, then:
 git -c gpg.format=ssh -c user.signingkey=<abs-path> -c commit.gpgsign=true merge --continue
 ```
