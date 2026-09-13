@@ -10,10 +10,12 @@ planning (B2), implementation (B3), and the self-review loop (C).
 Before creating, check for local conflicts in this order. Concurrent
 workers sharing one clone: serialize every `git fetch`/`merge --ff-only`/
 worktree add/remove call against the shared clone — here, and at F4
-cleanup's own worktree removal — behind the clone-scoped lock
-(`node scripts/clone-lock.mjs --exec`/`idd-clone-lock --exec`; under
-`instructions-only`, no helper runtime exists for this, so give each
-concurrent session its own clone instead of sharing one) (see the
+cleanup's own worktree removal — behind the clone-scoped lock. Under
+`package-manager` (this repository's profile), run
+`pnpm exec idd-clone-lock --exec --agent-id <agent-id> -- <command>
+[args...]`; under `instructions-only`, no helper runtime exists for
+this, so give each concurrent session its own clone instead of sharing
+one (see the
 [fan-out variant](../../docs/idd-workflow.md#orchestrator-fan-out-variant)
 for when this applies).
 
@@ -119,7 +121,8 @@ cleanup before continuing.
   same `wt switch --create -b <base-branch> <branch-name>` if `git-wt` is
   unavailable
 
-`<base-branch>` is normally `main`. In a **non-interactive / automation**
+`<base-branch>` below is `{development-branch}`. In a **non-interactive
+/ automation**
 context, append `-x <noop>` (e.g. `-x true`) — otherwise WorkTrunk tries
 to change the caller's directory and can hang; `-x` makes it create, run
 the pre-start hook, and exit cleanly.
@@ -129,7 +132,7 @@ If WorkTrunk is not available, choose the correct case:
 <!-- dprint-ignore-start -->
 | Case | Command |
 | --- | --- |
-| Fresh claim | `git worktree add <path> -b <branch-name> origin/main` |
+| Fresh claim | `git worktree add <path> -b <branch-name> origin/{development-branch}` |
 | Takeover — local branch exists | `git worktree add <path> <branch-name>` |
 | Takeover — remote branch only | `git fetch origin && git worktree add <path> -b <branch-name> origin/<branch-name>` |
 | Takeover — neither local nor remote (rare) | treat as fresh claim; preserve the inherited branch name |
@@ -207,7 +210,7 @@ mechanical file/close-based signal stronger than A4.5's title/
 declaration heuristic (a weak **title-only** match is **not** a hit
 here). Keep it cheap: one fetch plus a bounded merged-PR scan.
 
-1. `git fetch origin main`.
+1. `git fetch origin {development-branch}`.
 2. **Closed-by-a-merged-PR signal**: re-fetch the issue; if it is now closed
    with a linked closing PR, the deliverable already shipped:
 
@@ -227,10 +230,11 @@ here). Keep it cheap: one fetch plus a bounded merged-PR scan.
    gh pr view <n> --json files --jq '.files[].path'
    ```
 
-**On a hit → verify-then-close** (never silent re-implementation, and never an
-auto-close on a weak signal): confirm the issue's acceptance criteria already
-hold on current `main`, then close the issue with a comment referencing the
-superseding PR. If the criteria only **partly** hold, keep the issue open,
+**On a hit → verify-then-close** (never silent re-implementation, and
+never an auto-close on a weak signal): confirm the issue's acceptance
+criteria already hold on current `{development-branch}`, then close
+the issue with a comment referencing the superseding PR. If the
+criteria only **partly** hold, keep the issue open,
 record the overlap, and plan only the genuinely-remaining work. On no hit,
 continue with the plan below.
 
