@@ -7,6 +7,7 @@
   "reviewPolicy": "copilot-advisory",
   "threadResolutionPolicy": "fast-agent-resolve",
   "authoringLanguage": "match-source",
+  "developmentBranch": "main",
   "claimTiming": {
     "staleAge": "PT24H",
     "heartbeatInterval": "PT12H"
@@ -37,6 +38,9 @@
     "coderabbitai[bot]",
     "chatgpt-codex-connector[bot]"
   ],
+  "providerOutage": {
+    "declarationTarget": 221
+  },
   "ciGate": {
     "trustSourcePinnedRequiredChecks": true,
     "trustEmptyProtectionReads": true
@@ -48,6 +52,16 @@
     "maxClarificationRounds": 3
   },
   "worktreeGuard": {
+    "enabled": true,
+    "refuseBaseBranchCommits": true
+  },
+  "upstreamEscalation": {
     "enabled": true
+  },
+  "labels": {
+    "untrustedLabelerLogins": [
+      "coderabbitai[bot]",
+      "chatgpt-codex-connector[bot]"
+    ]
   }
 }
