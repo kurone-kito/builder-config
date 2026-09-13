@@ -171,8 +171,13 @@ Before any mutating action in F3, apply the
      `git log` and D3.7's inherited `git diff` both read local git
      state, not the remote PR directly. Skip D3.5 steps 6-7 under the
      same non-default-`{development-branch}` exemption D3.5 itself
-     carries. On a mismatch, fix it per D3.5/D3.7's own documented
-     handling. Any fix here — whether or not it changes HEAD, since a
+     carries, and skip D3.6/D3.7 entirely under D3.6's own no-template
+     -or-no-`IDD impact`-heading exemption (this repository's own
+     `.github/pull_request_template.md` has neither, so D3.6/D3.7
+     always skip here) — this field is satisfied by confirming the
+     applicable skip condition holds, not only by a re-run. On a
+     mismatch, fix it per D3.5/D3.7's own documented handling. Any fix
+     here — whether or not it changes HEAD, since a
      PR-body edit alone (D3.7's remediation, or D3.5 step 6's) still
      counts — invalidates step 3's own **Re-validate claim** and
      **Advisory state revalidation** checks above; re-run both of
@@ -429,7 +434,11 @@ Before any mutating action in F3, apply the
    clone, serialize this fetch and the worktree removal below against
    each other behind the clone-scoped lock (`node scripts/clone-lock.mjs
    --exec`/`idd-clone-lock --exec`, spanning both steps) so they don't
-   race. This local checkout is unrelated to `idd-work.instructions.md`
+   race. Under the `instructions-only` profile (no helper runtime, so
+   neither form above exists), give each concurrent session its own
+   clone instead of sharing one — this serialization has no
+   command-free fallback. This local checkout is unrelated to
+   `idd-work.instructions.md`
    B1 Step 1's own requirement that the primary worktree stay on the
    default branch throughout B1 — if `{development-branch}` differs
    from the repository's default branch, switch the primary worktree
