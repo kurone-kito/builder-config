@@ -666,24 +666,39 @@ rather than accepting the permanent false-positive warning:
   `pnpm install`.
 
   ```sh
-  git rev-parse --git-dir > /dev/null 2>&1 || exit 0; git config core.hooksPath .githooks
+  node scripts/prepare-git-hooks.mjs
   ```
 
-  The `git rev-parse --git-dir` guard keeps this a no-op (exit 0) when
-  `pnpm install` runs outside a Git worktree — a "Download ZIP"
-  checkout or a registry-tarball install has no `.git` to configure,
-  and hooks are meaningless there anyway. Inside a Git worktree, a
-  genuine `git config` failure still propagates (fails the install)
-  rather than being silently swallowed — an earlier `... || true`
-  shape suppressed that class of failure too, which would have left
-  hooks silently unwired (worktree guard, lint-staged, commitlint all
-  inert) with no signal to the developer. This uses `exit 0` plus
-  `;`/`||` chaining rather than `if`/`then`/`fi`: this repository's
-  `pnpm-workspace.yaml` sets `shellEmulator: true` for cross-platform
-  lifecycle scripts (Windows CI included), and that emulator supports
-  simple command chaining but not full POSIX control-flow keywords —
-  confirmed empirically (`if` fails with `command not found: if` under
-  the emulator, even though it works under a real POSIX shell).
+  `scripts/prepare-git-hooks.mjs` no-ops (exit 0) when `pnpm install`
+  runs outside a Git worktree — a "Download ZIP" checkout or a
+  registry-tarball install has no `.git` to configure, and hooks are
+  meaningless there anyway. Inside a Git worktree, it sets
+  `core.hooksPath` to `.githooks`, and a genuine `git config` failure
+  still propagates (fails the install) rather than being silently
+  swallowed — an earlier `... || true` shape suppressed that class of
+  failure too, which would have left hooks silently unwired (worktree
+  guard, lint-staged, commitlint all inert) with no signal to the
+  developer.
+
+  This was originally a shell one-liner
+  (`git rev-parse --git-dir > /dev/null 2>&1 || exit 0; git config
+  core.hooksPath .githooks`), relying on this repository's
+  `pnpm-workspace.yaml` `shellEmulator: true` cross-platform lifecycle
+  shell (Windows CI included) supporting simple `;`/`||` chaining while
+  not supporting full POSIX control-flow keywords — confirmed
+  empirically (`if` failed with `command not found: if` under the
+  emulator, even though it works under a real POSIX shell). Bumping
+  the repository's `packageManager` pin to pnpm 12.4.1 (#232, for
+  `@kurone-kito/idd-skill@0.11.0`'s `engines.pnpm: "^12.4.0"`) broke
+  even that one-liner: pnpm 12's emulator
+  additionally rejects any command with more than one redirect
+  (`ERR_PNPM_EXECUTOR_SHELL_EMULATOR_PARSE: Multiple redirects are
+  currently not supported`), which this one-liner has (`>` and `2>&1`
+  on the same command). Rather than chase the emulator's shrinking
+  supported-syntax surface again on some future pnpm release, the
+  logic was moved into a small Node script, which every pnpm version
+  can always invoke as a single argument with no shell parsing of its
+  internals at all.
 
   The script intentionally does **not** `chmod +x` the hook files:
   `git ls-files -s .githooks/` already reports mode `100755` for
