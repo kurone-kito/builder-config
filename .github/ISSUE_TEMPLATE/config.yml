@@ -1,1 +1,9 @@
+# Intentionally diverged from pnpm-project-template's generic version (#222) -- do not silently overwrite.
 blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Report a security vulnerability
+    url: https://github.com/kurone-kito/builder-config/security/advisories/new
+    about: Please report vulnerabilities privately via GitHub Security Advisories instead of a public issue. See SECURITY.md for details.
+  - name: 💬 Ask a question / start a discussion
+    url: https://github.com/kurone-kito/builder-config/discussions
+    about: For questions or discussions that are not a specific bug, feature, chore, or documentation issue, please use GitHub Discussions instead.

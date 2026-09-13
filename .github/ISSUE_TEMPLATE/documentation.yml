@@ -1,14 +1,14 @@
 # Intentionally diverged from pnpm-project-template's generic version (#222) -- do not silently overwrite.
-name: ✨ Feature request
-description: Suggest an idea for this project
-labels: enhancement
+name: 📚 Documentation
+description: Report missing, unclear, or incorrect documentation
+labels: documentation
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to fill out this feature request!
+        Thanks for taking the time to report a documentation issue!
 
-        Before you continue filling out this report, please take a moment to check that your feature request has not been [already reported on GitHub](https://github.com/kurone-kito/builder-config/search?q=is%3Aissue&type=issues) 🙌
+        Before you continue filling out this report, please take a moment to check that it has not been [already reported on GitHub](https://github.com/kurone-kito/builder-config/search?q=is%3Aissue&type=issues) 🙌
 
         🇺🇸🇬🇧 At first, read the following documents:
         https://github.com/kurone-kito/builder-config/blob/main/.github/CONTRIBUTING.md
@@ -24,9 +24,9 @@ body:
   - type: textarea
     id: overview
     attributes:
-      label: Feature Overview
-      description: A clear and concise description of what the feature request is.
-      placeholder: I would like this project to be able to do "X".
+      label: Documentation Issue
+      description: What is missing, unclear, or incorrect?
+      placeholder: The README says "X", but the actual behavior is "Y".
     validations:
       required: true
 
@@ -34,7 +34,7 @@ body:
     id: package
     attributes:
       label: Affected package(s)
-      description: Which package(s) does this feature request concern?
+      description: Which package(s) does this documentation issue concern?
       multiple: true
       options:
         - "@kurone-kito/sea-builder"
@@ -48,22 +48,24 @@ body:
       required: true
 
   - type: textarea
-    id: alternatives
+    id: document
     attributes:
-      label: Alternatives Considered
-      description: Detail any potential alternative solutions/workarounds you've used or considered.
-      placeholder: I have done/might be able to do "X" in this project by doing "Y".
+      label: Affected Document(s)
+      description: Which file(s) or section(s) are affected?
+      placeholder: "README.md, packages/sea-builder/README.md, docs/idd-workflow.md, etc."
+    validations:
+      required: true
 
   - type: textarea
-    id: acceptance
+    id: fix
     attributes:
-      label: Suggested acceptance criteria (optional)
-      description: If you already know how this feature could be verified as done, share it here. This helps a later acceptance-criteria pass.
-      placeholder: "`pnpm run build` succeeds and the new option is documented in the package's README."
+      label: Suggested Fix (optional)
+      description: If you already have a suggested rewording or correction, share it here.
+      placeholder: Change "X" to "Y" in the "Installation" section.
 
   - type: textarea
     id: context
     attributes:
       label: Additional Context
-      description: Add any other context about the problem here.
-      placeholder: Feel free to add any other context/information/screenshots/etc... that you think might be relevant to this feature request here.
+      description: Add any other context about this documentation issue here.
+      placeholder: Feel free to add any other context/information/screenshots/etc... that you think might be relevant to this issue here.
