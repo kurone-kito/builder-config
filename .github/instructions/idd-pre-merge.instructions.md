@@ -419,15 +419,20 @@ turns an operator-visible failure into a silent stall.
   cause makes it `false`, and the gate still routes to E1/E4. Fails
   closed: an unusable check makes this condition unmet.
 - **Closing-set and impact-checklist re-verification** (D3.5/D3.7
-  re-run against current HEAD, #2749): confirm the local worktree is
-  checked out at the PR's current HEAD exactly (`git fetch` plus
-  `git checkout` if a resumed or external-push session left it stale —
-  never `git reset --hard`, which this repository's own
-  `.claude/settings.json` denies; if `git checkout` itself fails
-  because uncommitted changes are in the way, stop and hold rather
-  than force-discarding them) — D3.5 step 7's `git log` and D3.7's
-  inherited `git diff` both read local git state, not the remote PR
-  directly. Then re-run `idd-pr-submit.instructions.md`'s D3.5 steps
+  re-run against current HEAD, #2749): confirm the local worktree is at
+  the PR's current HEAD exactly: if a resumed or external-push session
+  left it stale, `git fetch origin {claimed-branch}` then
+  `git merge --ff-only origin/{claimed-branch}` — this keeps the
+  claimed branch checked out (satisfying the shared
+  [claim revalidation gate](idd-overview-core.instructions.md#claim-revalidation-gate)'s
+  branch check) while advancing it to the pushed head, unlike a bare
+  `git checkout <sha>`, which would detach HEAD instead; never
+  `git reset --hard`, which this repository's own
+  `.claude/settings.json` denies. If the fast-forward is refused (local
+  history has diverged), stop and hold rather than force-discarding it
+  — D3.5 step 7's `git log` and D3.7's inherited `git diff` both read
+  local git state, not the remote PR directly. Then re-run
+  `idd-pr-submit.instructions.md`'s D3.5 steps
   6-7 (the `closingIssuesReferences` set comparison and the
   commit-message closing-keyword scan) and D3.7 (the
   IDD-impact-checklist re-derivation) against that HEAD. Skip D3.5
