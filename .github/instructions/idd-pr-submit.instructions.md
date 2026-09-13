@@ -1,35 +1,37 @@
 # IDD — PR Submit Phase (D)
 
 Read this file after the self-review loop passes. It covers
-pre-publication main sync, claim verification, tests, pushing, PR
-creation, and waiting for CI.
+pre-publication `{development-branch}` sync, claim verification, tests,
+pushing, PR creation, and waiting for CI.
 
 Before the D1 sync and D2 push, apply the
 [shared claim revalidation gate](idd-overview-core.instructions.md#claim-revalidation-gate).
 
-## D1 — Sync main before first push
+## D1 — Sync {development-branch} before first push
 
-If the branch has not been pushed yet, sync it onto `main` before the
-first push — the routine pre-publication history cleanup step. First run
-`git fetch origin main`, then check whether the branch is **already
-current** with `origin/main`: if `git merge-base HEAD origin/main` equals
-`origin/main` (behind-count 0), the branch already contains every commit
-on `main`, so the rebase would be a pure no-op. **Skip the rebase entirely
-and proceed to D2** — D1's pre-publication synchronization goal is already
-met. In a sibling-worktree setup a no-op `git rebase origin/main` can still
-detach HEAD at the upstream tip without replaying the local commit, and
-re-running that no-op rebase re-detaches every time, so the bounded
-recovery below cannot converge for the no-op case; skipping it is the clean
-exit.
+If the branch has not been pushed yet, sync it onto `{development-branch}`
+before the first push — the routine pre-publication history cleanup step.
+First run `git fetch origin {development-branch}`, then check whether the
+branch is **already current** with `origin/{development-branch}`: if
+`git merge-base HEAD origin/{development-branch}` equals
+`origin/{development-branch}` (behind-count 0), the branch already
+contains every commit on `{development-branch}`, so the rebase would be a
+pure no-op. **Skip the rebase entirely and proceed to D2** — D1's
+pre-publication synchronization goal is already met. In a
+sibling-worktree setup a no-op `git rebase origin/{development-branch}`
+can still detach HEAD at the upstream tip without replaying the local
+commit, and re-running that no-op rebase re-detaches every time, so the
+bounded recovery below cannot converge for the no-op case; skipping it is
+the clean exit.
 
-Otherwise the branch **is** behind `origin/main`: rebase it onto `main`
-(`git rebase origin/main`), then apply the post-rebase verification and
-bounded recovery below.
+Otherwise the branch **is** behind `origin/{development-branch}`: rebase
+it onto `{development-branch}` (`git rebase origin/{development-branch}`),
+then apply the post-rebase verification and bounded recovery below.
 
 After the first D-phase push, do not reuse D1 as the normal
 synchronization path. Later branch updates should return through the
-E-phase review loop and, by default, merge `main` into the published PR
-branch so the synchronization diff is reviewable.
+E-phase review loop and, by default, merge `{development-branch}` into
+the published PR branch so the synchronization diff is reviewable.
 
 This D-phase file records the publication boundary only: post-push
 synchronization itself runs through `idd-review-triage.instructions.md`'s
@@ -50,9 +52,10 @@ signing wrapper for arbitrary git subcommands (pass
 to `git` before the subcommand — `git -c … rebase`, not `git rebase -c …`
 — or use a repo alias that wraps any subcommand; a commit-only alias like
 `git commit-ssh` will not run `rebase`),
-**run the initial `git rebase origin/main` above through that wrapper —
-not the plain command — and continue it with the wrapper's own
-`--continue` form**; the wrapper must own the whole operation. Plain
+**run the initial `git rebase origin/{development-branch}` above
+through that wrapper — not the plain command — and continue it with
+the wrapper's own `--continue` form**; the wrapper must own the whole
+operation. Plain
 `git rebase --continue` re-signs the replayed commit through the
 configured primary signing, which stalls non-interactively right after
 the conflict is already resolved. This is the normal-path complement to
@@ -67,8 +70,10 @@ D2, verify both:
 
 1. `git branch --show-current` is **non-empty** — HEAD is on the claimed
    branch, not detached.
-2. The expected local commit is present in `main..HEAD` (for example,
-   `git log --oneline main..HEAD` lists it).
+2. The expected local commit is present in
+   `origin/{development-branch}..HEAD` (for example, `git log --oneline
+   origin/{development-branch}..HEAD` lists it) — `origin/`-prefixed
+   since a local `{development-branch}` branch may not exist.
 
 If HEAD is detached (current branch empty), **auto-recover once**: re-attach
 to the claimed branch with `git checkout {branch-name}` (the local commit is
@@ -102,6 +107,55 @@ here turns a confusing later failure into an immediate, recoverable signal.
    repository policy permits it and the exceptional route already
    required a rebase; otherwise stop and return to the merge-based sync
    path.
+
+### Adding a new CI job
+
+When this branch's diff introduces a **new** CI job, land it configured
+for `workflow_dispatch` only, not yet wired to `push`/`pull_request`,
+and validate it with manually dispatched runs against the pushed
+branch (for example `gh workflow run <file> --ref <branch>`) before
+making the one remaining edit that flips the trigger to its final
+form. **Commit, re-run pre-push-validate, and push that edit before
+creating the PR (D3)** — merging with the branch still dispatch-only
+would never enable the job.
+
+GitHub only allows a `workflow_dispatch` run once registered on the
+default branch: `gh workflow run` cannot target a file or trigger that
+exists only on the pushed branch. A first-time job needs a minimal
+bootstrap merge first — trigger wiring only, job inert — via its own
+preliminary PR (this repository merges only through PRs); this flow
+then applies to the follow-up PR adding the real job, once that
+scaffolding exists.
+
+`on:` is workflow-file-scoped, not job-scoped: a new job in its own
+file needs no cross-job isolation, but adding `workflow_dispatch` to
+an existing multi-job file makes every job in it dispatchable.
+Isolating the unproven job then is ordinary GitHub Actions authoring
+(for example a job-level `if:`), scoped to that file's own jobs and
+dependencies — keep it minimal, removing it with the trigger-flip edit
+once validated. This step does **not** by itself reduce advisory-bot
+review invocation count — that is driven by push count, not trigger
+wiring. Its real benefit is avoiding wasted CI Actions-minutes and
+false-failure noise from an unproven job auto-running on every
+unrelated push.
+
+For a Linux-runner job, also validate it locally with `nektos/act`
+before pushing when `act` (and Docker) is available — per the
+tool-availability convention in `idd-overview-core.instructions.md`'s
+Project commands table, skip this otherwise and rely on the dispatch
+validation above plus CI. `act`'s Docker-based execution cannot
+validate `windows-latest`/`macos-latest` runner-specific behavior from
+a WSL/Linux environment — never treat "validated via `act`" as
+covering a Windows or macOS job.
+
+Optionally, for a job `act` cannot validate where shakeout is long or
+costly, a contributor may iterate it on a branch with no open PR yet,
+landing only the validated final version on the actual PR branch.
+Review automation that only fires on PR-associated pushes never runs
+during that shakeout, avoiding review cost entirely — the one path
+here that actually reduces it. This deviates from the normal
+early-PR-then-iterate practice, so scope it to CI-infrastructure work,
+as the implementer's choice, not a mandate.
 
 Once the branch is pushed, treat it as published review history. A PR
 that is merely `BEHIND` does not force a branch update by itself unless
@@ -213,6 +267,84 @@ follow-up is important enough to file in-repo now, invoke the
 `issue-authoring` skill (its Stage 1 hold) instead of improvising a
 body. Do not add a parallel "worker-lite authoring" contract.
 
+### Live-operator-directed immediate-fix carve-out
+
+The "never call `gh issue create`" rule immediately above assumes
+unattended execution with no live operator present. When a live
+operator is present during a claimed issue's own execution and directs
+an immediate fix for a blocking bug unrelated to the claimed work, the
+session may proceed with that fix under the operator's live authority
+instead of routing it through the `issue-authoring` skill first.
+Minimum provenance: the side-fix PR body must cross-reference the
+originating claimed issue using a **non-closing cross-reference** (for
+example, `Refs #<claimed-issue-number>` — never a closing keyword such
+as `Closes`/`Fixes`/`Resolves`, which would auto-close the originating
+issue on the side-fix's own merge). Formal `issue-authoring` tracking
+is still preferred when time allows, but it is not a start blocker for
+this carve-out.
+
+How the executing session obtains a branch, worktree, and claim for
+the side-fix while the originating claim stays active — and how the
+side-fix's own merge and cleanup avoid releasing that originating
+claim — is not yet defined. The shared claim revalidation gate
+(`idd-overview-core.instructions.md`) scopes its cwd-vs-claim check off
+the active claim's recorded `branch:` field, not the mutation's target
+branch, so no branch-naming convention alone exempts a same-session
+side-fix from it. Treat this as an open gap: this carve-out authorizes
+the _decision_ to proceed under live authority; the operator directing
+it owns the mechanics until a follow-up defines them.
+
+D3's closing-keyword requirement and D3.5's presence-detection and
+auto-injection (steps 1-5, including step 4) apply only to the
+side-fix PR's own deliberate closing set — its own linked issue, if
+any, or none otherwise — never to the originating claimed issue named
+above; do not let them treat the non-closing cross-reference above as
+missing, or rewrite it into a closing keyword. The originating claimed
+issue must not appear in the side-fix PR's `closingIssuesReferences`,
+and the side-fix branch's commit messages must not contain a closing
+keyword referencing it — still run D3.5 step 6's exact-set comparison
+and step 7's commit-message scan to confirm both, treating the
+originating issue as outside the side-fix PR's deliberate closing set.
+
+While a side-fix PR that the claimed issue's PR depends on is in
+flight, periodically re-check the claimed issue's own PR review and CI
+state — unresolved review threads and failing checks — rather than
+discovering that backlog only after the side-fix merges.
+
+### D3.6 — Derive the IDD impact checklist
+
+Skip this sub-step and D3.7 below entirely when
+`.github/pull_request_template.md` does not exist or has no `IDD
+impact` heading — mirroring D3's own "If no template file exists, use
+the structure below directly" fallback, there is no checklist to
+derive or reconcile. When it exists, the template's IDD impact
+checklist (`Instruction files changed` / `Template files changed` /
+`Helper scripts changed` / `Config schema changed` / `Security /
+credential / merge behavior changed`) is drafted from the branch's
+actual changed-file list, not from memory. Before drafting the body,
+list the branch's changes
+(`git diff --name-only origin/{development-branch}...HEAD`) and derive
+each checkbox mechanically, using a root-anchored path-prefix match
+(the path starts with the glob's literal prefix, not merely contains
+it):
+
+- **Instruction files changed** — any path starting with
+  `.github/instructions/`.
+- **Template files changed** — not applicable to this repository (it
+  imports the template, it does not vendor one under an `idd-template/`
+  path); leave unchecked.
+- **Helper scripts changed** — any path starting with `scripts/`.
+- **Config schema changed** — `audit/sync-manifest.json`,
+  `.github/idd/config.json`, or another repository-designated
+  config-schema-bearing file.
+- **Security / credential / merge behavior changed** stays a judgment
+  call — leave it to ordinary self-review discretion; it is not
+  mechanically derivable from paths alone.
+
+D3.7 below re-derives this same checklist against the final HEAD
+before merge — later commits (a review-fix round, a critique-pass fix
+landed before the first push) can change the answer.
+
 ### PR body language
 
 The PR body's prose sections above (summary, background/rationale,
@@ -234,6 +366,18 @@ verification regex both match only the English keyword forms
 would silently break auto-close detection.
 
 ### D3.5 — Verify closing keyword detection
+
+**Non-default development branch**: GitHub only auto-closes a linked
+issue when the merging PR targets the repository's **default** branch
+— a closing keyword on a PR based on any other branch, including a
+configured `{development-branch}`, never populates
+`closingIssuesReferences` and never auto-closes on merge, regardless of
+body wording. When `{development-branch}` is not the repository's
+default branch, still include the closing keyword line in the PR body
+for reviewer clarity, but **skip this entire sub-step** (steps 1-7
+below verify a mechanism that cannot fire here) and close the claimed
+issue explicitly after F3 merges (`idd-merge.instructions.md` F4 notes
+this).
 
 After PR creation and before D4, confirm GitHub recognized the
 closing keyword for the claimed issue. Resume routing should re-enter
@@ -301,6 +445,103 @@ completion.
    Repeat this step once after either fix. If it still fails, post a
    hold note on the issue citing the PR URL and stop. Do not proceed to
    D4.
+
+7. **Scan the branch's own commit messages**: GitHub's merge-time
+   closing-keyword scan also reads commit messages (subject and body),
+   not only the PR body, so a stray keyword there can auto-close an
+   issue outside the deliberate set even when the PR body is clean.
+   List the branch's own commits, using a visible delimiter rather
+   than a NUL byte so common terminals and search tools don't treat
+   the output as binary:
+
+   ```sh
+   git log origin/{development-branch}..HEAD --pretty=format:'%H%n%B%n===commit-boundary==='
+   ```
+
+   For each commit's full message, search using step 3's same keyword
+   alternation, generalized to any issue number instead of the fixed
+   `<N>`, and to both a repository-qualified form and GitHub's full-URL
+   form (both also auto-close, so either is exactly as unsafe as an
+   unqualified reference):
+
+   ```text
+   (?im)\b(close[sd]?|fix(e[sd])?|resolve[sd]?)\s+((?:[\w.-]+\/[\w.-]+)?#\d+|https://github\.com/[\w.-]+/[\w.-]+/issues/\d+)\b
+   ```
+
+   For each match, extract the referenced repository (present for a
+   qualified `owner/repo#N` or a full-URL match; absent for a bare
+   `#N`, which always means this repository) and the issue number. A
+   match is expected only when the referenced repository is **either**
+   absent **or** equal to this repository, **and** the issue number is
+   in the deliberate closing set from D3 (this covers both the
+   single-issue `<N>` case and "Multiple closing issues" above); a
+   match naming a different repository is always a stray close
+   regardless of whether its number coincides with one in the
+   deliberate set, and a same-repository number outside that set is
+   also a stray commit-message close.
+
+   **On a stray match**: amend the offending commit (`git commit
+   --amend` for the tip commit, or an interactive rebase for an
+   earlier one). If the branch already carries a merge commit (for
+   example, from an E-phase `{development-branch}` sync), rebase with
+   `--rebase-merges`
+   instead of a plain interactive rebase, so the merge and its recorded
+   conflict resolution aren't silently linearized or dropped. On a
+   signed-commit repo whose primary signing is non-interactive-hostile,
+   run the amend or rebase through the same D1 fallback-signing wrapper
+   noted above, including any rebase continuation — the plain command
+   can stall the same way D1 already documents. Then force-push the
+   correction (`git push --force-with-lease`) only when repository
+   policy permits force-pushing a published branch, mirroring D2's own
+   force-push restriction; if it does not, hold for operator
+   intervention instead of rewriting published history. **Amend before
+   merge** — this scan runs at merge time, so the fix must land before
+   the PR merges; a commit message caught only after merge cannot be
+   amended, and recovery requires reopening the affected issue by hand.
+   Repeat this step once after the amendment. If it still finds a stray
+   match, post a hold note on the issue citing the PR URL and stop. Do
+   not proceed to D4.
+
+   **Re-run before merge**: this scan only covers commits present at
+   D3.5 time. Later branch commits — accepted review fixes
+   (`idd-review-fix.instructions.md` E9-E12) or a `{development-branch}`
+   merge — are not automatically covered by this D3-time pass;
+   `idd-pre-merge.instructions.md`'s F2 condition re-runs this same
+   scan against the final HEAD before F3.
+
+### D3.7 — Re-verify the IDD impact checklist before merge
+
+Immediately before F3 merge (the same "re-run before merge" point as
+D3.5 step 7 above), re-derive D3.6's checklist against the final
+HEAD's full changed-file list and compare it against the PR body's
+current checked boxes. When a ratchet-rule-bearing file (for example,
+`audit/sync-manifest.json`'s own ratchet-rule comment) raises a
+documented budget or limit anywhere in the branch's commits, also
+confirm the file's required PR-description callout is actually
+present in the body now, not only in a commit message — a callout
+only promised at draft time and never landed is the same drift this
+step exists to catch.
+
+On any mismatch: re-run the claim revalidation gate immediately before
+editing (a separate mutation, not covered by an earlier gated push),
+fetch the PR's current full body, edit only the checklist section
+(and the accompanying file-list prose, when present) in the fetched
+copy, and post the complete result back — `gh pr edit <pr-number>
+--body-file <path>` replaces the whole body, so never pass a partial
+file, which would drop the closing-keyword line and every other
+section. After posting, repeat D3.5 step 6's closing-set check when
+D3.5 applies to this branch (skip it on the same
+non-default-`{development-branch}` condition D3.5 itself skips under,
+where `closingIssuesReferences` never populates and the check would
+be meaningless) — edited prose can otherwise introduce a stray
+keyword-adjacent reference.
+
+**Wired to F2/F3**: `idd-pre-merge.instructions.md` F2's "Closing-set
+and impact-checklist re-verification" condition names this step
+explicitly and re-runs it against the then-current HEAD, and
+`idd-merge.instructions.md` F3's Gate checklist re-runs it again
+immediately before merging — F2 can run before further HEAD changes
+land, which is exactly why the F3 re-run also exists.
 
 ## D4 — Wait for CI
 

@@ -7,7 +7,17 @@ planning (B2), implementation (B3), and the self-review loop (C).
 
 ## B1 — Create worktree (with branch)
 
-Before creating, check for local conflicts in this order:
+Before creating, check for local conflicts in this order. Concurrent
+workers sharing one clone: serialize every `git fetch`/`merge --ff-only`/
+worktree add/remove call against the shared clone — here, and at F4
+cleanup's own worktree removal — behind the clone-scoped lock. Under
+`package-manager` (this repository's profile), run
+`pnpm exec idd-clone-lock --exec --agent-id <agent-id> -- <command>
+[args...]`; under `instructions-only`, no helper runtime exists for
+this, so give each concurrent session its own clone instead of sharing
+one (see the
+[fan-out variant](../../docs/idd-workflow.md#orchestrator-fan-out-variant)
+for when this applies).
 
 1. Ensure the local `main` branch is up to date and has no local
    commits. Run this from the primary worktree while on `main`:
@@ -87,11 +97,30 @@ branch name with every `/` replaced by `-`.
 Example: repo `builder-config`, branch `issue/123-add-foo` → worktree path
 `../builder-config.issue-123-add-foo`.
 
+**Harness-native worktree tools**: an agent harness's own worktree
+primitive (e.g. Claude Code's `EnterWorktree`) is a third path outside
+the two enumerated below. Use one only when both its target directory
+can be pinned to the sibling path above and its branch to
+`issue/<number>-<slug>` — never a tool-chosen default. `EnterWorktree`
+always places the worktree under a harness-owned directory
+(`.claude/worktrees/agent-<hash>`), never the sibling path — never use
+it here. Grok Build's `grok --worktree`, subagent `isolation:
+worktree`, and `x.ai/git/worktree/*` likewise can't pin either — never
+use them (same class as `kurone-kito/idd-skill#1930`). When a tool
+can't pin both, use `git worktree add` below (or WorkTrunk) instead.
+
 **Step 1 — Check for orphaned path**: if the target path already exists
 but is not listed in `git worktree list`, stop and report for manual
 cleanup before continuing.
 
-**Step 2 — Create**: use **WorkTrunk** if available. The create verb is
+**Step 2 — Create**: `<base-branch>` below is `{development-branch}` —
+resolve it first: read `developmentBranch` from
+`.github/idd/config.json`, else `gh repo view --json defaultBranchRef
+--jq .defaultBranchRef.name`; validate the result
+([defaults](../../docs/policy-constants.md#branch-synchronization-defaults)),
+fail closed if invalid/absent on `origin`, never fall back. Then
+`git fetch origin {development-branch}` (may be missing/stale
+otherwise). Use **WorkTrunk** if available. The create verb is
 `wt switch --create` (the older `wt new` subcommand was removed):
 
 - macOS/Linux: `wt switch --create -b <base-branch> <branch-name>`
@@ -99,24 +128,25 @@ cleanup before continuing.
   same `wt switch --create -b <base-branch> <branch-name>` if `git-wt` is
   unavailable
 
-`<base-branch>` is normally `main`. In a **non-interactive / automation**
-context, append `-x <noop>` (e.g. `-x true`) — otherwise WorkTrunk tries
-to change the caller's directory and can hang; `-x` makes it create, run
-the pre-start hook, and exit cleanly.
+Non-interactive/automation: append `-x <noop>` (e.g. `-x true`) so
+WorkTrunk creates, runs the pre-start hook, and exits without changing
+the caller's directory.
 
 If WorkTrunk is not available, choose the correct case:
 
 <!-- dprint-ignore-start -->
 | Case | Command |
 | --- | --- |
-| Fresh claim | `git worktree add <path> -b <branch-name> origin/main` |
+| Fresh claim | `git worktree add <path> -b <branch-name> origin/{development-branch}` |
 | Takeover — local branch exists | `git worktree add <path> <branch-name>` |
 | Takeover — remote branch only | `git fetch origin && git worktree add <path> -b <branch-name> origin/<branch-name>` |
 | Takeover — neither local nor remote (rare) | treat as fresh claim; preserve the inherited branch name |
 <!-- dprint-ignore-end -->
 
-For manual `git worktree add`, or WorkTrunk without an install hook,
-acquire the [worktree-local lock file](idd-claim.instructions.md#worktree-local-lock-file-same-machine-collision)
+For manual `git worktree add`, WorkTrunk without an install hook, or a
+compliant pinned harness-native tool (per "Harness-native worktree
+tools" above), acquire the
+[worktree-local lock file](idd-claim.instructions.md#worktree-local-lock-file-same-machine-collision)
 immediately after the worktree exists, **before Step 3** —
 `install-deps` itself writes into the worktree and runs lifecycle
 hooks, so acquiring the lock any later leaves that install unprotected.
@@ -185,7 +215,7 @@ mechanical file/close-based signal stronger than A4.5's title/
 declaration heuristic (a weak **title-only** match is **not** a hit
 here). Keep it cheap: one fetch plus a bounded merged-PR scan.
 
-1. `git fetch origin main`.
+1. `git fetch origin {development-branch}`.
 2. **Closed-by-a-merged-PR signal**: re-fetch the issue; if it is now closed
    with a linked closing PR, the deliverable already shipped:
 
@@ -205,10 +235,11 @@ here). Keep it cheap: one fetch plus a bounded merged-PR scan.
    gh pr view <n> --json files --jq '.files[].path'
    ```
 
-**On a hit → verify-then-close** (never silent re-implementation, and never an
-auto-close on a weak signal): confirm the issue's acceptance criteria already
-hold on current `main`, then close the issue with a comment referencing the
-superseding PR. If the criteria only **partly** hold, keep the issue open,
+**On a hit → verify-then-close** (never silent re-implementation, and
+never an auto-close on a weak signal): confirm the issue's acceptance
+criteria already hold on current `{development-branch}`, then close
+the issue with a comment referencing the superseding PR. If the
+criteria only **partly** hold, keep the issue open,
 record the overlap, and plan only the genuinely-remaining work. On no hit,
 continue with the plan below.
 
@@ -236,6 +267,13 @@ decision — the correction must land as a maintainer addendum, not a
 silent edit. Resume planning only after the addendum is recorded.
 
 On no conflict, continue with the plan below.
+
+### B2.2 — Example field-name verification
+
+When the issue's "Proposed change" or "Acceptance criteria" cites an
+existing schema field, config key, or token as an example (not one it
+adds), verify it exists as cited; fix or drop if not, hold if unclear
+(`kurone-kito/idd-skill#2806`).
 
 Draft an implementation plan and post it as an issue comment, then run
 a critique pass for correctness and concreteness (see

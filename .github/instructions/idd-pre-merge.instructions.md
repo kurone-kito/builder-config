@@ -421,15 +421,24 @@ turns an operator-visible failure into a silent stall.
 - **Closing-set and impact-checklist re-verification** (D3.5/D3.7
   re-run against current HEAD, #2749): confirm the local worktree is
   checked out at the PR's current HEAD exactly (`git fetch` plus
-  `git checkout`/`git reset --hard` if a resumed or external-push
-  session left it stale) — D3.5 step 7's `git log` and D3.7's
-  inherited `git diff` both read local git state, not the remote PR
-  directly. Then re-run `idd-pr-submit.instructions.md`'s D3.5 steps
+  `git checkout <sha>` if a resumed or external-push session left it
+  stale — a transient detached HEAD is fine here, since D3.5 step 7's
+  `git log` and D3.7's inherited `git diff` are read-only and neither
+  the claim check above nor a merge command care about local checkout
+  state; never `git reset --hard`, which this repository's own
+  `.claude/settings.json` denies — if uncommitted changes block the
+  checkout, stop and hold instead of force-discarding them). Then
+  re-run `idd-pr-submit.instructions.md`'s D3.5 steps
   6-7 (the `closingIssuesReferences` set comparison and the
   commit-message closing-keyword scan) and D3.7 (the
   IDD-impact-checklist re-derivation) against that HEAD. Skip D3.5
   steps 6-7 under the same non-default-`{development-branch}`
-  exemption D3.5 itself carries. On a mismatch: for a closing-set
+  exemption D3.5 itself carries, and skip D3.6/D3.7 entirely under
+  D3.6's own no-template-or-no-`IDD impact`-heading exemption (this
+  repository's own `.github/pull_request_template.md` has neither, so
+  D3.6/D3.7 always skip here) — this condition is satisfied by
+  confirming the applicable skip condition holds, not only by a
+  re-run. On a mismatch: for a closing-set
   drift, apply D3.5 step 6's own remediation (reusing step 4's
   edit-and-recheck mechanism for a missing entry); for a stray
   commit-message match, apply D3.5 step 7's own remediation (amend or
