@@ -136,22 +136,29 @@ park/reroute behavior) lives in `idd-ci.instructions.md` and
 `idd-advisory-wait.instructions.md`; this field only wires the
 repository-local declaration surface those instructions read.
 
-**Scope note — park-only, not yet a CI-gate relief path** (Codex
-review on PR #240): this field alone only enables
-`provider-outage-park.mjs`'s claim-release behavior — a session may
-park work blocked by a confirmed-unavailable `advisory-review` or
-`ci-actions` service without waiting out `claimTiming.staleAge`. It
-does **not** yet let `idd-advisory-convergence`'s own CI-check verdict
-or the F2/F3 merge gate treat a declared outage as relief: both of
-those additionally require `ciGate.externalCheckWaivers.mode:
-"maintainer-authorized"` plus an `idd-advisory-convergence` entry in
-`ciGate.externalChecks.waivable` (`docs/idd-helper-scripts.md`'s
-Provider-outage-declaration helper entry), and #218 deliberately did
-not adopt either — enabling a maintainer-authorized bypass for a
-required check is a separate, larger policy decision than wiring a
-declaration-target issue, and was never part of this issue's scoping.
-Revisit as its own issue if a sustained `idd-advisory-convergence`
-outage makes park-only relief insufficient in practice.
+**Scope note — declaration surface only, not yet a CI-gate relief
+path.** `providerOutage.declarationTarget` only wires the declaration
+surface itself: it is the issue number the declaration CLI
+(`--declare`/`--record-advanced`/`--list-advanced`) reads and writes,
+and the issue `idd-advisory-convergence`'s own CI-check verdict and the
+F2/F3 merge gate would resolve a declaration from if consulted. It does
+**not** yet let either of those two consumers actually treat a
+declared outage as relief: both additionally require
+`ciGate.externalCheckWaivers.mode: "maintainer-authorized"` plus an
+`idd-advisory-convergence` entry in `ciGate.externalChecks.waivable`
+(`docs/idd-helper-scripts.md`'s Provider-outage-declaration helper
+entry), and #218 deliberately did not adopt either — enabling a
+maintainer-authorized bypass for a required check is a separate,
+larger policy decision than wiring a declaration-target issue, and was
+never part of this issue's scoping. Separately,
+`provider-outage-park.mjs`'s claim-release path (letting a session park
+work blocked by a confirmed-unavailable service instead of waiting out
+`claimTiming.staleAge`) does **not** read `declarationTarget` at all —
+it is driven independently by live `provider-health` evidence, so it
+already works today regardless of this field. Revisit
+`ciGate.externalCheckWaivers` as its own issue if a sustained
+`idd-advisory-convergence` outage makes the currently-inert CI-gate
+relief path worth enabling.
 
 ## External CI-Check Trust
 
