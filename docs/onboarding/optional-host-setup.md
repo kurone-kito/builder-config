@@ -181,6 +181,20 @@ instead:
 git rev-parse --git-dir > /dev/null 2>&1 || exit 0; git config core.hooksPath .githooks && chmod +x .githooks/pre-commit .githooks/pre-push
 ```
 
+**pnpm ≥12 caveat**: the form above has two redirects (`>` and
+`2>&1`) on its first command. pnpm 12's `shellEmulator` tightened
+further and rejects any command with more than one redirect
+(`ERR_PNPM_EXECUTOR_SHELL_EMULATOR_PARSE: Multiple redirects are
+currently not supported`), so this exact one-liner fails outright on
+a repository pinning pnpm ≥12 — confirmed empirically
+(`kurone-kito/builder-config#232`). Prefer a small script file
+(any language `node`/`sh` can run) over chasing the emulator's
+shrinking supported-syntax surface release to release: put the same
+git-dir-guard-then-`git config` logic in a `.mjs`/`.cjs` file invoked
+as `"prepare": "node <path-to-script>"`, which every pnpm version can
+always invoke as a single argument with no shell parsing of the
+script's own internals at all.
+
 Neither path — chaining or fully replacing — is wired automatically by
 this template: the operator (or an agent following this guide) has to
 author and commit the chaining line or the replacement script
