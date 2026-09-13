@@ -23,13 +23,36 @@
 # commented-on issue is a PR). The concurrency group and every
 # PR-number resolution below fall back to `github.event.issue.number`
 # for this trigger family, since `issue_comment` carries no
-# `pull_request.number`.
+# `pull_request.number`. `issue_comment` also subscribes to `edited`
+# and `deleted`, matching `pull_request_review_comment`'s own family,
+# so a marker-stripping edit or a retraction is covered by the
+# existing `origin_prev` branch the same way it already is for review
+# comments.
 #
 # A burst of IDD-originated comments across both trigger families can
 # exhaust the required check's one-time rerun budget mid-burst; the
 # debounce step below waits a short quiet window, then re-checks
 # whether a newer qualifying event has since landed, skipping this
 # run's own rerun in favor of the later one when so.
+#
+# Known residual (`kurone-kito/idd-skill#2643`'s own design, not
+# specific to this repository): GitHub's concurrency group keeps at
+# most one *queued* run per group, so a 3-event burst (older
+# IDD-originated A running, newer IDD-originated B queued behind it,
+# then non-IDD C arriving) evicts B from the queue before it ever
+# executes. A's own debounce re-query still observes B's comment (a
+# live PR-comment query, not a workflow-run query) and skips, trusting
+# B's run to handle it -- but B's run was already cancelled, and C's
+# own run classifies as not IDD-originated and takes no action either,
+# so this specific ordering can silently miss an automatic refresh.
+# This does not weaken the required check itself (a missed refresh
+# leaves it exactly as not-yet-converged as before this companion existed,
+# recoverable via a manual `idd-rerun-advisory-convergence --apply`,
+# the same escape hatch `idd-pre-merge-readiness` already surfaces),
+# and this workflow still covers strictly more cases than having no
+# comment-triggered refresh at all. A structural fix belongs in the
+# debounce helper itself (shared with every consumer of this template),
+# not as a local divergence here.
 #
 # When the comment is IDD-originated (reply-identity stamp, disposition
 # prefix, or an operational marker the required check already honors),
@@ -50,7 +73,7 @@ on:
   pull_request_review_comment:
     types: [created, edited, deleted]
   issue_comment:
-    types: [created]
+    types: [created, edited, deleted]
 permissions:
   contents: read
   issues: read
