@@ -82,7 +82,7 @@ body:
     id: verification
     attributes:
       label: Suggested verification (optional)
-      description: If you already know how a fix could be verified, share it here (e.g. a `pnpm test` / `pnpm run build:sea` command to run, or the behavior expected afterward). This helps a later acceptance-criteria pass.
+      description: If you already know how a fix could be verified (e.g. a `pnpm test` / `pnpm run build:sea` command, or expected behavior afterward), share it here. Helps a later acceptance-criteria pass.
       placeholder: Run `pnpm run build:sea` and confirm the generated binary starts without the reported error.
 
   - type: textarea
