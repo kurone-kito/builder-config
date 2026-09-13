@@ -249,13 +249,22 @@ report-and-stop path unchanged):
    `branch: suitability-close/<number>-<slug>` — outside the
    `issue/*`/`roadmap-audit/*` scope the core cwd-vs-claim gate checks
    (`idd-overview-core.instructions.md`), so no worktree is needed.
-2. Re-validate that claim, then run (add `--apply` to mutate; omit it
-   to dry-run first):
+2. Re-validate that claim, then run the helper for this repository's
+   configured profile (add `--apply` to mutate; omit it to dry-run
+   first). Under `vendored-node`, the command below is authoritative
+   on its own — no further doc check is needed once it works:
 
    ```sh
    node scripts/suitability-close-execute.mjs --issue <number> \
      --claim-id <claim-id> --agent-id <agent-id> --apply
    ```
+
+   Under `package-manager` (this repository's profile), run it via
+   `pnpm exec idd-suitability-close-execute -- --issue <number>
+   --claim-id <claim-id> --agent-id <agent-id> --apply` instead. For
+   any other profile, or if neither form works, treat the step as
+   currently helper-only and stop for a manual/maintainer decision
+   rather than guessing an untested invocation.
 
    It re-collects the same mechanical evidence, posts the
    evidence-bound closing comment (the accepted human-notification
