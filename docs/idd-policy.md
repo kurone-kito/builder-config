@@ -141,9 +141,9 @@ path.** `providerOutage.declarationTarget` only wires the declaration
 surface itself: it is the issue number the declaration CLI
 (`--declare`/`--record-advanced`/`--list-advanced`) reads and writes,
 and the issue `idd-advisory-convergence`'s own CI-check verdict and the
-F2/F3 merge gate would resolve a declaration from if consulted. It does
-**not** yet let either of those two consumers actually treat a
-declared outage as relief: both additionally require
+F2/F3 merge gate would resolve a declaration from — issue #221 — if
+either consulted it. It does **not** yet let either of those consumers
+actually treat a declared outage as relief: both additionally require
 `ciGate.externalCheckWaivers.mode: "maintainer-authorized"` plus an
 `idd-advisory-convergence` entry in `ciGate.externalChecks.waivable`
 (`docs/idd-helper-scripts.md`'s Provider-outage-declaration helper
