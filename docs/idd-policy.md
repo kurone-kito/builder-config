@@ -127,27 +127,29 @@ blanket non-IDD-PR exemption).
 ## Provider-Outage Declaration
 
 **Policy**: `providerOutage.declarationTarget` = `221` (#218). Points
-the outage-relief declaration path at the dedicated, long-lived
+the outage declaration path at the dedicated, long-lived
 declaration-channel issue #221 (not an execution track). `maxValidity`
 and `maxParkedChanges` are left at their schema defaults (`PT24H` and
 `10` respectively) — no concrete reason to diverge from either has
-surfaced yet. The read-side logic (provider-health classification,
-park/reroute behavior) lives in `idd-ci.instructions.md` and
-`idd-advisory-wait.instructions.md`; this field only wires the
-repository-local declaration surface those instructions read.
+surfaced yet. The read-side consumer is
+[`idd-advisory-wait.instructions.md`'s Sustained outage
+section](../.github/instructions/idd-advisory-wait.instructions.md),
+which points to
+[`docs/idd-helper-scripts.md`'s Provider-outage-declaration helper
+entry](idd-helper-scripts.md#provider-outage-declaration-helper) for
+the full contract; this field only wires the repository-local
+declaration surface those read.
 
 **Scope note — declaration surface only, not yet a CI-gate relief
-path.** `providerOutage.declarationTarget` only wires the declaration
-surface itself: it is the issue number the declaration CLI
-(`--declare`/`--record-advanced`/`--list-advanced`) reads and writes,
-and the issue `idd-advisory-convergence`'s own CI-check verdict and the
-F2/F3 merge gate would resolve a declaration from — issue #221 — if
-either consulted it. It does **not** yet let either of those consumers
-actually treat a declared outage as relief: both additionally require
+path.** `providerOutage.declarationTarget` is the issue number the
+declaration CLI (`--declare`/`--record-advanced`/`--list-advanced`)
+reads and writes. `idd-advisory-convergence`'s own CI-check verdict and
+the F2/F3 merge gate both do independently resolve a declaration from
+that same issue (#221) — the field is genuinely consulted — but neither
+yet treats a resolved declaration as relief: both additionally require
 `ciGate.externalCheckWaivers.mode: "maintainer-authorized"` plus an
-`idd-advisory-convergence` entry in `ciGate.externalChecks.waivable`
-(`docs/idd-helper-scripts.md`'s Provider-outage-declaration helper
-entry), and #218 deliberately did not adopt either — enabling a
+`idd-advisory-convergence` entry in `ciGate.externalChecks.waivable`,
+and #218 deliberately did not adopt either — enabling a
 maintainer-authorized bypass for a required check is a separate,
 larger policy decision than wiring a declaration-target issue, and was
 never part of this issue's scoping. Separately,
