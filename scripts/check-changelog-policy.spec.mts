@@ -239,6 +239,25 @@ describe('check-changelog-policy', () => {
     );
   });
 
+  it('rejects a CHANGELOG.md edit when only root bumped', () => {
+    const { workDir } = createRepo({
+      packages: { alpha: '1.0.0', beta: '1.0.0' },
+      rootVersion: '1.0.0',
+    });
+    touchChangelog(workDir, 'alpha');
+    bumpRootVersion(workDir, '1.1.0');
+    // Every workspace package deliberately left at its base version -
+    // not a genuine lockstep bump, even though root itself moved.
+    commitAll(workDir, 'root-only bump');
+
+    const result = run(workDir);
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain(
+      '[lint:changelog] This change edits a package CHANGELOG.md',
+    );
+  });
+
   it('rejects a numeric downgrade even though every package "moved"', () => {
     const { workDir } = createRepo({
       packages: { alpha: '1.5.0' },
