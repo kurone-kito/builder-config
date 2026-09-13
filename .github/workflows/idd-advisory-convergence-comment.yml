@@ -1,16 +1,58 @@
 # Non-required companion to idd-advisory-convergence.yml (#163, matching
-# kurone-kito/idd-skill#2136).
+# kurone-kito/idd-skill#2136 and #2411).
 #
-# Human review-thread chatter must not create or cancel the required
-# `idd-advisory-convergence` check-run. This workflow has a different
-# name, job id, and concurrency group so it structurally cannot
-# overwrite that SHA's verdict or cancel an in-flight required run:
-# `name:` below is a different string than "IDD advisory-convergence
-# gate", so `${{ github.workflow }}` differs, so the concurrency group
-# differs even for the same PR number; the job id
-# (`refresh-if-idd-originated`) is a different check-run context than
-# `idd-advisory-convergence`, so this job's own runs never appear on
-# the required check's rollup at all.
+# Human review-thread or regular-PR-comment chatter must not create or
+# cancel the required `idd-advisory-convergence` check-run. This
+# workflow has a different name, job id, and concurrency group so it
+# structurally cannot overwrite that SHA's verdict or cancel an
+# in-flight required run: `name:` below is a different string than
+# "IDD advisory-convergence gate", so `${{ github.workflow }}` differs,
+# so the concurrency group differs even for the same PR number; the
+# job id (`refresh-if-idd-originated`) is a different check-run context
+# than `idd-advisory-convergence`, so this job's own runs never appear
+# on the required check's rollup at all.
+#
+# `issue_comment` (regular PR comments -- where post-idd-marker.mjs and
+# disposition-non-review-notices.mjs actually post every marker/
+# disposition type, since both use the issues-comments API, not only
+# inline review-thread replies) widens this workflow's coverage
+# alongside the pre-existing `pull_request_review_comment` family
+# (#2411). `issue_comment` also fires for a comment on a plain issue,
+# not only a PR; the job-level `if:` below skips those
+# (`github.event.issue.pull_request` is only present when the
+# commented-on issue is a PR). The concurrency group and every
+# PR-number resolution below fall back to `github.event.issue.number`
+# for this trigger family, since `issue_comment` carries no
+# `pull_request.number`. `issue_comment` also subscribes to `edited`
+# and `deleted`, matching `pull_request_review_comment`'s own family,
+# so a marker-stripping edit or a retraction is covered by the
+# existing `origin_prev` branch the same way it already is for review
+# comments.
+#
+# A burst of IDD-originated comments across both trigger families can
+# exhaust the required check's one-time rerun budget mid-burst; the
+# debounce step below waits a short quiet window, then re-checks
+# whether a newer qualifying event has since landed, skipping this
+# run's own rerun in favor of the later one when so.
+#
+# Known residual (`kurone-kito/idd-skill#2643`'s own design, not
+# specific to this repository): GitHub's concurrency group keeps at
+# most one *queued* run per group, so a 3-event burst (older
+# IDD-originated A running, newer IDD-originated B queued behind it,
+# then non-IDD C arriving) evicts B from the queue before it ever
+# executes. A's own debounce re-query still observes B's comment (a
+# live PR-comment query, not a workflow-run query) and skips, trusting
+# B's run to handle it -- but B's run was already cancelled, and C's
+# own run classifies as not IDD-originated and takes no action either,
+# so this specific ordering can silently miss an automatic refresh.
+# This does not weaken the required check itself (a missed refresh
+# leaves it exactly as not-yet-converged as before this companion existed,
+# recoverable via a manual `idd-rerun-advisory-convergence --apply`,
+# the same escape hatch `idd-pre-merge-readiness` already surfaces),
+# and this workflow still covers strictly more cases than having no
+# comment-triggered refresh at all. A structural fix belongs in the
+# debounce helper itself (shared with every consumer of this template),
+# not as a local divergence here.
 #
 # When the comment is IDD-originated (reply-identity stamp, disposition
 # prefix, or an operational marker the required check already honors),
@@ -25,10 +67,12 @@ concurrency:
   # Do not cancel: a later human LGTM must not abort an in-flight
   # IDD-originated refresh before it reruns the required check (#163).
   cancel-in-progress: false
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.issue.number }}
 name: IDD advisory-convergence comment refresh
 on:
   pull_request_review_comment:
+    types: [created, edited, deleted]
+  issue_comment:
     types: [created, edited, deleted]
 permissions:
   contents: read
@@ -41,12 +85,16 @@ permissions:
 jobs:
   refresh-if-idd-originated:
     # No `runner` workflow_dispatch input here (this workflow only
-    # triggers on pull_request_review_comment, never manually
-    # dispatched), but still honors the CI_RUNNER_LABEL escape hatch so
-    # a self-hosted-runner requirement (e.g. GHES) covers this job too,
+    # triggers on comment/review events, never manually dispatched),
+    # but still honors the CI_RUNNER_LABEL escape hatch so a
+    # self-hosted-runner requirement (e.g. GHES) covers this job too,
     # not only the required idd-advisory-convergence job (#163 C1
     # follow-up).
     runs-on: ${{ vars.CI_RUNNER_LABEL || 'ubuntu-slim' }}
+    # issue_comment also fires for a comment on a plain issue, not only
+    # a PR; github.event.issue.pull_request is only present when the
+    # commented-on issue is a PR (#2411).
+    if: github.event_name != 'issue_comment' || github.event.issue.pull_request != null
     timeout-minutes: 10
     steps:
       # Trusted default-branch checkout, not the PR head -- same
@@ -111,9 +159,36 @@ jobs:
       - if: steps.origin.outputs.idd_originated == 'true' || steps.origin_prev.outputs.idd_originated == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          # pull_request_review_comment carries
+          # github.event.pull_request.number; issue_comment carries
+          # github.event.issue.number instead (#2411).
+          PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+          # Both trigger families carry the triggering comment's own
+          # timestamps at github.event.comment (matching COMMENT_BODY
+          # above). Prefer updated_at: pull_request_review_comment also
+          # fires on edited, and created_at would then still name the
+          # comment's original post time, not this edit -- making every
+          # comment posted between the original post and the edit look
+          # "newer than the trigger" and wrongly skip this run.
+          # updated_at equals created_at for a never-edited comment, so
+          # this is safe for the created-event case too.
+          TRIGGERED_AT: ${{ github.event.comment.updated_at || github.event.comment.created_at }}
+        name: Check for newer qualifying event
+        id: debounce
+        # A burst of IDD-originated comments can fire this workflow's
+        # own rerun once per comment, exhausting the required check's
+        # one-time rerun budget mid-burst. Wait a short quiet window,
+        # then re-check whether a newer IDD-originated comment has
+        # since landed on the same PR; if so, skip this run's own
+        # rerun and leave it to the later-triggered run (which asks the
+        # same question in turn).
+        run: pnpm exec idd-advisory-comment-debounce --pr "$PR_NUMBER" --triggered-at "$TRIGGERED_AT"
+      - if: (steps.origin.outputs.idd_originated == 'true' || steps.origin_prev.outputs.idd_originated == 'true') && steps.debounce.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
           # Single github.com host only (this repository is not GHES),
           # matching idd-advisory-convergence.yml's own required job,
           # which also sets only GH_TOKEN.
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
         name: Rerun required HEAD check
         run: pnpm exec idd-rerun-advisory-convergence --pr "$PR_NUMBER" --apply
