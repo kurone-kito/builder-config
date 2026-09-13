@@ -2367,18 +2367,23 @@ arbitrary git subcommands, run the **merge** step — including a
 plain command (`git fetch` creates no commit and needs no signing):
 
 ```sh
-git -c gpg.format=ssh -c user.signingkey=<abs-path> -c commit.gpgsign=true merge origin/main
+git -c gpg.format=ssh -c user.signingkey=<abs-path> -c commit.gpgsign=true merge origin/main -m "chore: merge origin/main into the claimed branch"
 # resolve conflicts if any, then:
 git -c gpg.format=ssh -c user.signingkey=<abs-path> -c commit.gpgsign=true merge --continue
 ```
 
 Pass the `-c` flags to `git` itself, before the subcommand (`git -c …
 merge`, not `git merge -c …`); a commit-only alias such as `git
-commit-ssh` will not run `merge`. Even a clean, conflict-free merge
-commits immediately, so the wrapper must own the operation from the
-first `merge` call, not just a later `--continue` — otherwise the merge
-commit reverts to the stalling primary signer. This is the normal-path
-complement to the recovery-path re-signing in
+commit-ssh` will not run `merge`. Pass a conventional-commits-shaped
+`-m` subject on the first `merge` call too — GitHub's own auto-generated
+`Merge branch 'main' into …` subject fails a commitlint `commit-msg`
+hook on a repository that enforces Conventional Commits, and `--continue`
+cannot change a subject the initial `merge` call already committed to.
+Even a clean, conflict-free merge commits immediately, so the wrapper
+must own the operation from the first `merge` call, not just a later
+`--continue` — otherwise the merge commit reverts to the stalling
+primary signer. This is the normal-path complement to the recovery-path
+re-signing in
 `idd-pr-submit.instructions.md` (Post-rebase verification) and
 `idd-overview-core.instructions.md` (cwd-vs-claim cherry-pick recovery).
 

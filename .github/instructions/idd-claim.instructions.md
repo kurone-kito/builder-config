@@ -43,28 +43,25 @@ issue itself.
 **(a) Issue-author approval gate** — Re-evaluate the repository-wide
 issue-author approval rule immediately before claim, using the same
 gate-enable, actor-policy, approval-signal, and fail-closed rules as
-**A3.5** of `idd-discover.instructions.md`, except for the
-self-authorization fallback below, which applies only at this A5(a)
-claim-time check.
+**A3.5** of `idd-discover.instructions.md`, including the
+self-authorization fallback below, which applies identically at both
+checks.
 
 A bare organization `MEMBER` association never counts as approval;
 neither do issue body text, a generated plan, or operator attention.
 
-**Self-authorization fallback when the permission read is unavailable
-at claim time** (`kurone-kito/idd-skill#2148`): when the collaborator
-permission API read for this check is itself unavailable (a `503`, an
-empty response, or otherwise unreadable) — not merely a non-approving
-result — the issue-author self-authorization signal alone may
-substitute the issue's own live `author_association` instead of
-failing closed: `OWNER` always self-authorizes; `MEMBER`
-self-authorizes under both `owners-and-maintainers-only` and
-`all-write-permission-actors`. This narrower fallback covers only the
-issue-author signal at this A5(a) claim-time check — the
-approval-comment and ready-label signals still fail closed on an
-unreadable permission read. `idd-discover.instructions.md`'s own A3.5
-gate is unchanged by this fallback and keeps its unconditional
-fail-closed rule for the earlier discovery-time check; hardening A3.5
-to match is a recommended follow-up, not covered here.
+**Self-authorization fallback when the permission read is unavailable**
+(`kurone-kito/idd-skill#2148`): when the collaborator permission API
+read for this check is itself unavailable (a `503`, an empty response,
+or otherwise unreadable) — not merely a non-approving result — the
+issue-author self-authorization signal alone may substitute the
+issue's own live `author_association` instead of failing closed:
+`OWNER` always self-authorizes; `MEMBER` self-authorizes under both
+`owners-and-maintainers-only` and `all-write-permission-actors`. This
+narrower fallback covers only the issue-author signal at this A5(a)
+claim-time check and at `idd-discover.instructions.md`'s A3.5
+discovery-time check — the approval-comment and ready-label signals
+still fail closed on an unreadable permission read at both checks.
 
 - If approval is missing for a roadmap/default discovery run, return to
   Discover using the same selection mode that produced this target so

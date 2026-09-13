@@ -337,10 +337,12 @@ re-resolves the failing check against the workflow **definition
 file** as it exists on the PR branch, not on `main` — a sibling
 track's already-merged fix to a shared CI check's own `.yml` file is
 invisible to a rerun here until this branch pulls that fix in. If a
-required check keeps failing the same way after a rerun and its
-workflow file changed recently on `main`, diff the PR branch's copy
-against `main`'s; a mismatch means a branch-sync merge (merge `main`
-in, never rebase — see the E-phase branch-sync check in
+required check keeps failing the same way after a rerun, check whether
+its workflow file changed on `main` after this branch's merge-base
+(`git log --oneline <merge-base>..origin/main -- <workflow-file>`); a
+non-empty result means diff the PR branch's copy against `main`'s — a
+mismatch means a branch-sync merge (merge `main` in, never rebase —
+see the E-phase branch-sync check in
 `idd-review-triage.instructions.md`) is the diagnostic recovery step.
 Treat this as reachable at D4/pre-review, not only after E8 — the
 ordering dependency a shared check-definition change creates is

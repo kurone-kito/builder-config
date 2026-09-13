@@ -306,7 +306,7 @@ flight, periodically re-check the claimed issue's own PR review and CI
 state — unresolved review threads and failing checks — rather than
 discovering that backlog only after the side-fix merges.
 
-### D3.6 — Derive the IDD impact checklist
+### D3.7 — Derive the IDD impact checklist
 
 Skip this sub-step entirely when `.github/pull_request_template.md`
 does not exist or has no `IDD impact` heading — mirroring D3's own "If
@@ -336,10 +336,10 @@ with the glob's literal prefix, not merely contains it):
 
 Re-derive this same checklist against the final HEAD immediately
 before merge — later commits (a review-fix round, a critique-pass fix
-landed before the first push) can change the answer. **Known gap**: no
-phase file currently re-triggers this re-derivation, or the D3.5
-commit-message scan below, by name from F1-F3 — treat both as a
-best-effort D3-time check only until a later track closes that gap.
+landed before the first push) can change the answer.
+`idd-pre-merge.instructions.md`'s F2 "Closing-set and
+impact-checklist re-verification" condition re-triggers this
+re-derivation by name (as D3.7) before F3, so no gap remains here.
 
 ### PR body language
 
@@ -444,10 +444,12 @@ completion.
 
    For each commit's full message, search using step 3's same keyword
    alternation, generalized to any issue number instead of the fixed
-   `<N>`:
+   `<N>`, and to an optional repository-qualified form (GitHub's
+   `Fixes other-owner/other-repo#100` syntax also auto-closes, so a
+   qualified reference is exactly as unsafe as an unqualified one):
 
    ```text
-   (?im)\b(close[sd]?|fix(e[sd])?|resolve[sd]?)\s+#(\d+)\b
+   (?im)\b(close[sd]?|fix(e[sd])?|resolve[sd]?)\s+(?:[\w.-]+\/[\w.-]+)?#(\d+)\b
    ```
 
    A match against any issue number in the deliberate closing set from
@@ -479,8 +481,8 @@ completion.
    **Re-run before merge**: this scan only covers commits present at
    D3.5 time. Later branch commits — accepted review fixes
    (`idd-review-fix.instructions.md` E9-E12) or a `main` merge — are not
-   automatically covered; see the D3.6 **Known gap** note above, which
-   applies equally to this scan.
+   automatically covered by this D3-time pass; `idd-pre-merge.instructions.md`'s
+   F2 condition re-runs this same scan against the final HEAD before F3.
 
 ## D4 — Wait for CI
 

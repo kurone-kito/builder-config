@@ -368,11 +368,14 @@ Before any mutating action in F3, apply the
    See `docs/idd-comment-minimization.md` for the evidence comment
    format, cleanup-failure comment format, permission-blocked comment
    format, and fallback GraphQL commands.
-3. Fast-forward the local `main` branch to the just-merged commit
-   before removing the worktree/branch below. Run from the **primary
-   worktree** — the worktree being cleaned up is still checked out to
-   its issue branch at this point, so running this elsewhere would
-   fast-forward the wrong branch:
+3. Re-validate this session's active claim (the shared claim
+   revalidation gate,
+   `idd-overview-core.instructions.md`); stop instead of mutating if it
+   is no longer ours. Then fast-forward the local `main` branch to the
+   just-merged commit before removing the worktree/branch below. Run
+   from the **primary worktree** — the worktree being cleaned up is
+   still checked out to its issue branch at this point, so running this
+   elsewhere would fast-forward the wrong branch:
 
    ```sh
    git fetch origin main
