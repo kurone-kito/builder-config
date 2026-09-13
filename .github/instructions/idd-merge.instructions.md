@@ -363,7 +363,7 @@ Before any mutating action in F3, apply the
    shows `needs-apply`):
 
    - **`clean`**: no candidates and no permission-blocked items.
-     Proceed to step 3.
+     Proceed to step 4.
 
    - **`needs-apply`**: eligible candidates exist and the viewer can
      minimize them. Apply is mandatory. Re-validate the active claim,
@@ -382,17 +382,17 @@ Before any mutating action in F3, apply the
      duplicate-success-record skip rule above; otherwise post the
      evidence comment (`status`, `applied`, `failed`, `skipped`,
      `viewer-cannot-minimize` counts for `applied`, or a converged
-     `clean` record) so this run's work is recorded. Proceed to step 3.
+     `clean` record) so this run's work is recorded. Proceed to step 4.
 
      If the apply `status` is `failed` or `incomplete`: post the
      cleanup-failure comment format instead, including the
      `viewer-cannot-minimize` count when non-zero. Explicit evidence,
-     not a merge gate — the merge already succeeded. Proceed to step 3.
+     not a merge gate — the merge already succeeded. Proceed to step 4.
 
    - **`permission-blocked`**: skipped items exist with
      `viewerCanMinimize: false` and no apply-eligible candidates found.
      Post a cleanup-permission-blocked comment listing the blocked
-     candidates and the count, then proceed to step 3.
+     candidates and the count, then proceed to step 4.
 
    For the GraphQL fallback (helper unavailable): check
    `viewerCanMinimize` and `isMinimized` before minimizing; skip
