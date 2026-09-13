@@ -7,7 +7,15 @@ planning (B2), implementation (B3), and the self-review loop (C).
 
 ## B1 — Create worktree (with branch)
 
-Before creating, check for local conflicts in this order:
+Before creating, check for local conflicts in this order. Concurrent
+workers sharing one clone: serialize every `git fetch`/`merge --ff-only`/
+worktree add/remove call against the shared clone — here, and at F4
+cleanup's own worktree removal — behind the clone-scoped lock
+(`node scripts/clone-lock.mjs --exec`/`idd-clone-lock --exec`; under
+`instructions-only`, no helper runtime exists for this, so give each
+concurrent session its own clone instead of sharing one) (see the
+[fan-out variant](../../docs/idd-workflow.md#orchestrator-fan-out-variant)
+for when this applies).
 
 1. Ensure the local `main` branch is up to date and has no local
    commits. Run this from the primary worktree while on `main`:
