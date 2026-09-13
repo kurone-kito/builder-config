@@ -188,7 +188,7 @@ When a lightweight-tier model runs any part of this loop:
   lite-profile exclusion.
 - Do not run the autonomous merge phases (F3 onward) on this tier. See
   the merge-policy recommendation for weak-model sessions at
-  <https://github.com/kurone-kito/idd-skill/blob/main/idd-template/docs/onboarding/policy-decisions.md#merge-policy>.
+  [Merge policy](onboarding/policy-decisions.md#merge-policy).
 - This is additional to, not a replacement for, the uniform C-phase
   objective diff validation floor in
   [Critique pass invocation](#critique-pass-invocation): that floor
