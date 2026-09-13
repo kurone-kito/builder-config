@@ -483,17 +483,14 @@ coordinate with or wait on, and that it must perform the implementation
 work itself rather than re-delegate or wait for a reply
 (`kurone-kito/idd-skill#2179`).
 
-**Restate the CI/advisory-wait topology-safety condition.** The
-delegation brief must also carry — verbatim or by direct reference —
-the CI/advisory-wait topology-safety condition from [idd-ci.instructions.md's
-Wake-up discipline](idd-ci.instructions.md#wake-up-discipline), the same
-requirement already stated for this delegation pattern in
+**Restate the CI/advisory-wait topology-safety condition.** Carry —
+verbatim or by reference — the topology-safety condition from
+[idd-ci.instructions.md's Wake-up
+discipline](idd-ci.instructions.md#wake-up-discipline) (also in
 [docs/idd-workflow.md's Orchestrator fan-out
-variant](../../docs/idd-workflow.md#orchestrator-fan-out-variant). Without
-it, a worker can end its turn on a Monitor-style or backgrounded wait
-assuming an unconfirmed notification resumes it — under a
-supervisor/worker topology, only the supervisor is notified, so the
-worker's own turn stalls indefinitely (`kurone-kito/idd-skill#2210`).
+variant](../../docs/idd-workflow.md#orchestrator-fan-out-variant));
+without it, a worker can stall indefinitely on an unconfirmed
+backgrounded wait (`kurone-kito/idd-skill#2210`).
 
 ### Hide displaced claim chain on takeover
 

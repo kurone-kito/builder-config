@@ -368,10 +368,50 @@ Before any mutating action in F3, apply the
    See `docs/idd-comment-minimization.md` for the evidence comment
    format, cleanup-failure comment format, permission-blocked comment
    format, and fallback GraphQL commands.
-3. Delete the local worktree and local branch.
-4. Update the local `main` branch.
+3. Fast-forward the local `main` branch to the just-merged commit
+   before removing the worktree/branch below. Run from the **primary
+   worktree** — the worktree being cleaned up is still checked out to
+   its issue branch at this point, so running this elsewhere would
+   fast-forward the wrong branch:
+
+   ```sh
+   git fetch origin main
+   git switch main
+   git merge --ff-only origin/main
+   ```
+
+   Doing this first ensures WorkTrunk's own merge-status check (which
+   reads the local `main` rather than `origin/main`) sees the
+   just-merged branch as already merged on its first attempt, instead
+   of reporting `branch_outcome: retained_unmerged` and declining to
+   delete it (`kurone-kito/idd-skill#2331`). When two or more sessions
+   share one clone, serialize this fetch and the worktree removal below
+   against each other (e.g. a simple lockfile spanning both steps) so
+   they don't race.
+4. Delete the local worktree and local branch. Run from the **primary
+   worktree**, never from inside the worktree being removed.
+   Immediately before `worktree remove`, re-validate this session's
+   claim and worktree lock (`idd-claim.instructions.md`); stop if
+   either is no longer ours.
+
+   - `git worktree remove <path>`
+   - `git branch -d <branch-name>` (the baseline permission profile
+     denies `-D`; see `docs/permissions.md`). Local `main` was already
+     fast-forwarded to the merge commit by the previous step, so this
+     should not fail with `error: the branch '<branch-name>' is not
+     fully merged`; if it still does, investigate before retrying
+     rather than assuming a stale local `main` is the cause.
 5. If GitHub auto-delete is disabled: delete the remote branch too.
-   (Worktrunk may be used for steps 3–5.)
+   (Worktrunk may be used for steps 4–5, the deletion steps — step 3's
+   local `main` update is a plain git operation, not a WorkTrunk one.)
+6. Re-validate the active claim one final time. If it still uses your
+   `{claim-id}`, post `unclaimed-by` for your own `{agent-id}` /
+   `{claim-id}` (see
+   [Unclaim format](idd-overview-core.instructions.md#unclaim-format))
+   to release the claim now that cleanup is complete
+   (`kurone-kito/idd-skill#2220`). If it no longer uses your
+   `{claim-id}`, do not post a release comment — another session
+   already took over.
 
 ## F5 — Loop
 

@@ -16,6 +16,7 @@ words:
   - GHES
   - GHSA
   - isort
+  - nektos
   - onnx
   - pylint
   - pyproject
