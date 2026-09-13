@@ -434,7 +434,11 @@ Before any mutating action in F3, apply the
    clone, serialize this fetch and the worktree removal below against
    each other behind the clone-scoped lock (`node scripts/clone-lock.mjs
    --exec`/`idd-clone-lock --exec`, spanning both steps) so they don't
-   race. Under the `instructions-only` profile (no helper runtime, so
+   race — acquiring the lock can wait, so re-check the active claim
+   once more immediately after acquiring it and before running `git
+   fetch` above; the claim check at this step's start does not cover a
+   handoff that happened during that wait. Under the `instructions-only`
+   profile (no helper runtime, so
    neither form above exists), give each concurrent session its own
    clone instead of sharing one — this serialization has no
    command-free fallback. This local checkout is unrelated to
