@@ -28,11 +28,22 @@ afterEach(() => {
   scratchDirs = [];
 });
 
-/** Runs a git subcommand in `cwd`, returning trimmed stdout. */
+/**
+ * Runs a git subcommand in `cwd`, returning trimmed stdout. Strips
+ * `GIT_DIR`/`GIT_WORK_TREE`/`GIT_INDEX_FILE` from the inherited
+ * environment - an ambient value for any of them would otherwise let
+ * this call target the real checkout instead of the scratch repo `cwd`
+ * names, defeating this whole file's isolation claim.
+ */
 function git(cwd: string, args: readonly string[]): string {
+  const env = { ...process.env };
+  for (const name of ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE']) {
+    delete env[name];
+  }
   return execFileSync('git', args, {
     cwd,
     encoding: 'utf8',
+    env,
     stdio: ['ignore', 'pipe', 'pipe'],
   }).trim();
 }
@@ -96,7 +107,10 @@ function createRepo(options: RepoOptions): Repo {
   return { initialSha, originDir, workDir };
 }
 
-/** Overwrites `packages/<name>/package.json`'s `version` and re-commits. */
+/**
+ * Overwrites `packages/<name>/package.json`'s `version` in the working
+ * tree only - the caller must still `commitAll()` separately.
+ */
 function bumpPackageVersion(
   workDir: string,
   name: string,
@@ -246,10 +260,16 @@ describe('check-changelog-policy', () => {
       rootVersion: '1.5.0',
     });
     touchChangelog(workDir, 'alpha');
-    // Re-write the same version - not a genuine bump.
-    bumpRootVersion(workDir, '1.5.0');
-    bumpPackageVersion(workDir, 'alpha', '1.5.0');
-    commitAll(workDir, 'no-op rewrite');
+    // Genuinely re-write root package.json (an extra field makes this a
+    // real diff entry, not a no-op `writeJson` producing byte-identical
+    // content that git would record no change for at all) while keeping
+    // `version` at the same value - not a genuine bump.
+    writeJson(join(workDir, 'package.json'), {
+      description: 'unrelated edit',
+      name: 'root',
+      version: '1.5.0',
+    });
+    commitAll(workDir, 'unrelated root edit, same version');
 
     const result = run(workDir);
 
@@ -355,6 +375,11 @@ describe('check-changelog-policy', () => {
     touchChangelog(workDir, 'alpha');
     commitAll(workDir, 'manual backfill');
     git(workDir, ['remote', 'set-url', 'origin', '/nonexistent/path']);
+    // Also drop the cached tracking ref: otherwise an implementation
+    // that ignored IDD_CHANGELOG_RELEASE and fell back to this stale ref
+    // could still exit 0 for the wrong reason, and this test would not
+    // prove the override was honored.
+    git(workDir, ['update-ref', '-d', 'refs/remotes/origin/main']);
 
     const result = run(workDir, { IDD_CHANGELOG_RELEASE: '1' });
 
@@ -370,6 +395,12 @@ describe('check-changelog-policy', () => {
     touchChangelog(workDir, 'alpha');
     commitAll(workDir, 'changelog edit only');
     git(workDir, ['remote', 'set-url', 'origin', '/nonexistent/path']);
+    // Also drop the cached tracking ref: with origin unreachable AND no
+    // cached ref, an implementation that ignored MERGE_BASE would fail
+    // with "Could not resolve main's current commit" instead - a
+    // different message than the one asserted below - so only a genuine
+    // MERGE_BASE read can produce this specific diagnostic.
+    git(workDir, ['update-ref', '-d', 'refs/remotes/origin/main']);
 
     const result = run(workDir, { MERGE_BASE: initialSha });
 
