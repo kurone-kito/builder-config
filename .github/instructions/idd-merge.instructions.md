@@ -385,9 +385,15 @@ Before any mutating action in F3, apply the
 
    ```sh
    git fetch origin {development-branch}
-   git switch {development-branch}
+   git switch {development-branch} || git switch -c {development-branch} --track origin/{development-branch}
    git merge --ff-only origin/{development-branch}
    ```
+
+   The switch falls back to creating a local tracking branch when the
+   primary worktree has no local `{development-branch}` yet (expected
+   whenever it differs from the repository's default branch, since B1
+   branches new worktrees straight from `origin/{development-branch}`
+   without ever checking it out in the primary worktree).
 
    Doing this first ensures WorkTrunk's own merge-status check (which
    reads the local branch rather than its `origin/` remote-tracking
@@ -400,7 +406,12 @@ Before any mutating action in F3, apply the
    clone, serialize this fetch and the worktree removal below against
    each other behind the clone-scoped lock (`node scripts/clone-lock.mjs
    --exec`/`idd-clone-lock --exec`, spanning both steps) so they don't
-   race.
+   race. This local checkout is unrelated to the trusted-checkout-source
+   concern in B1 Step 1 — if `{development-branch}` differs from the
+   repository's default branch, switch the primary worktree back to the
+   default branch (`git switch <default-branch>`) once the remaining F4
+   cleanup steps below complete, so the next B1 pass finds the primary
+   worktree on its expected trusted checkout.
 5. Delete the local worktree and local branch. Run from the **primary
    worktree**, never from inside the worktree being removed.
    Immediately before `worktree remove`, re-validate this session's
