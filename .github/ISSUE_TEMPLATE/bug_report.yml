@@ -74,7 +74,7 @@ body:
         - Node.js version: [e.g. 22.23.2/24.2.0/26.0.0/etc...]
         - pnpm version: [e.g. 11.25.0/etc...]
         - OS/architecture: [e.g. Ubuntu 24.04 x64/macOS 15 arm64/Windows 11 x64/etc...]
-        - Version of this project or specific commit: [e.g. 1.4.3/commit hash]
+        - Affected package version or commit hash: [e.g. @kurone-kito/sea-builder@0.22.0/commit hash]
     validations:
       required: true
 
