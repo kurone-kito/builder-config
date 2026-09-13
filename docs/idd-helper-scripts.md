@@ -2360,7 +2360,12 @@ evaluates them):
 `idd-review-triage.instructions.md`'s E-phase sync path and
 `idd-review-fix.instructions.md`'s E11 both merge `{development-branch}`
 into the feature branch with `git fetch origin {development-branch} &&
-git merge origin/{development-branch}`. On a repo whose primary commit
+git merge origin/{development-branch} -m "chore: merge
+origin/{development-branch} into the claimed branch"` — the `-m` is
+required on that plain command too, not only on the wrapper below: a
+non-conflicting merge still auto-commits, and Git's generated `Merge
+branch ...` subject fails a commitlint `commit-msg` hook the same way
+it would through the wrapper. On a repo whose primary commit
 signing is non-interactive-hostile (GPG pinentry / hardware-touch) and
 that configures a fallback signing wrapper for arbitrary git
 subcommands, run the **merge** step — including a `--continue` after

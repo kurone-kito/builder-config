@@ -182,10 +182,14 @@ unpushed E9 fixes.
 - **`content-conflict`** (`mergeable` `CONFLICTING`): pass the active
   review gate, merge `{development-branch}` into the feature branch
   (`git fetch origin {development-branch} && git merge
-  origin/{development-branch}`), resolve, complete the merge.
-  Non-interactive-hostile signing: use the
+  origin/{development-branch}`), resolve the conflicts, then finish
+  with `git commit -m "chore: merge origin/{development-branch} into
+  the claimed branch"` — a bare `git commit` here opens Git's
+  auto-generated `Merge branch ...` subject, which a commitlint
+  `commit-msg` hook rejects. Non-interactive-hostile signing: use the
   [signed-commit merge wrapper](../../docs/idd-helper-scripts.md#signed-commit-merge-wrapper-shared-git-procedure)
-  instead.
+  instead, which carries the same conventional subject through
+  `--continue`.
 - Otherwise (clean, behind-no-conflict, computing, dirty,
   force-push-exception, unknown): skip the merge, proceed to E12 —
   the E-phase branch-sync check and F1 handle those downstream.

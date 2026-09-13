@@ -485,7 +485,14 @@ require a fresh approval comment or a re-applied ready label.
 
 **Fail-closed**: when approval state or permission resolution is
 unavailable or ambiguous, fail closed unless the repository explicitly
-opted out via `skipIssueAuthorApprovalGate`.
+opted out via `skipIssueAuthorApprovalGate`. The sole exception is the
+issue-author self-authorization fallback above: an unavailable
+collaborator-permission-API read for that signal specifically
+substitutes the issue's live `author_association` rather than failing
+closed. The approval-comment actor and `idd:ready`-label actor
+signals carry no such exception — an unavailable or ambiguous
+permission read for either of those still fails closed under this
+rule.
 
 **Candidate routing**: candidates that fail the gate are not
 ready-to-start — keep them visible in an **approval-needed fallback
@@ -521,9 +528,11 @@ criteria. Fail any one → discard the issue.
   **complete** the work. Fail: requires operator to provide
   credentials; requires a product decision before the work can finish.
 
-**Structural-evidence demotion (#2767)**: Limited scope / Autonomous
-completion (never Clear verification) may demote to `warn` per
-`idd-suitability.instructions.md`'s matching edge case.
+**Structural-evidence demotion (#2767)**: Clear verification /
+Autonomous completion (never Limited scope) may demote to `warn` per
+`idd-suitability.instructions.md`'s matching Check 7/Check 6 edge
+case (Check 5, which Limited scope corresponds to, has no such
+branch there).
 
 If **no issue** survives the gate:
 

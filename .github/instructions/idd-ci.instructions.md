@@ -332,21 +332,26 @@ same bot-gated `action_required` risk noted above (a
 re-enter `action_required` instead of completing) applies to this
 residual too.
 
-**Stale workflow definition on the PR branch.** `gh run rerun`
-re-resolves the failing check against the workflow **definition
-file** as it exists on the PR branch, not on `main` — a sibling
-track's already-merged fix to a shared CI check's own `.yml` file is
-invisible to a rerun here until this branch pulls that fix in. If a
-required check keeps failing the same way after a rerun, `git fetch
-origin main` first — rerunning a GitHub Actions run does not update
-this clone's `origin/main` ref, so a stale fetch can hide a fix that
-already landed — then check whether the workflow file changed on
-`main` after this branch's merge-base
+**Stale workflow definition on an existing run.** `gh run rerun`
+replays the run against the workflow definition file **and commit
+SHA already frozen on that run** — it does not re-resolve the
+workflow file from the PR branch's current HEAD. A sibling track's
+already-merged fix to a shared CI check's own `.yml` file, even after
+this branch has merged it in, is invisible to a rerun of a run that
+was triggered before that merge; only a genuinely new run (a fresh
+push — even an empty commit — or, where the workflow supports it, a
+manual `workflow_dispatch` against the new HEAD) resolves the
+workflow file as it exists now. If a required check keeps failing the
+same way after a rerun, `git fetch origin main` first — rerunning a
+GitHub Actions run does not update this clone's `origin/main` ref, so
+a stale fetch can hide a fix that already landed — then check whether
+the workflow file changed on `main` after this branch's merge-base
 (`git log --oneline <merge-base>..origin/main -- <workflow-file>`); a
 non-empty result means diff the PR branch's copy against `main`'s — a
 mismatch means a branch-sync merge (merge `main` in, never rebase —
 see the E-phase branch-sync check in
-`idd-review-triage.instructions.md`) is the diagnostic recovery step.
+`idd-review-triage.instructions.md`) followed by a fresh push (not a
+rerun of the old run) is the diagnostic recovery step.
 Treat this as reachable at D4/pre-review, not only after E8 — the
 ordering dependency a shared check-definition change creates is
 invisible to disjoint-file-set track planning.

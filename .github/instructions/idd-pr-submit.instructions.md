@@ -105,14 +105,26 @@ here turns a confusing later failure into an immediate, recoverable signal.
 
 ### Adding a new CI job
 
-When this branch's diff introduces a **new** CI job, land it configured
-for `workflow_dispatch` only, not yet wired to `push`/`pull_request`,
-and validate it with manually dispatched runs against the pushed
-branch (for example `gh workflow run <file> --ref <branch>`) before
-making the one remaining edit that flips the trigger to its final
-form. **Commit, re-run pre-push-validate, and push that edit before
-creating the PR (D3)** — merging with the branch still dispatch-only
-would never enable the job.
+When this branch's diff introduces a **new** CI job **in a new
+workflow file**, land that file configured for `workflow_dispatch`
+only, not yet wired to `push`/`pull_request`, and validate it with
+manually dispatched runs against the pushed branch (for example
+`gh workflow run <file> --ref <branch>`) before making the one
+remaining edit that flips the trigger to its final form. **Commit,
+re-run pre-push-validate, and push that edit before creating the PR
+(D3)** — merging with the branch still dispatch-only would never
+enable the job.
+
+When the new job instead lands in an **existing** multi-job workflow
+file, do not touch that file's `on:` block at all: `on:` is
+file-scoped, so switching it to `workflow_dispatch`-only would also
+strip every other job in the file of its existing `push`/
+`pull_request` triggers and stop unrelated CI. Keep the existing
+triggers untouched and isolate only the new, not-yet-proven job with
+a job-level `if:` (for example `if: github.event_name ==
+'workflow_dispatch'`), removing that `if:` in the same follow-up edit
+that would otherwise flip a dispatch-only file's trigger. Dispatch-only
+staging is available only to a workflow file that is itself new.
 
 GitHub only allows a `workflow_dispatch` run once registered on the
 default branch: `gh workflow run` cannot target a file or trigger that
@@ -122,15 +134,10 @@ preliminary PR (this repository merges only through PRs); this flow
 then applies to the follow-up PR adding the real job, once that
 scaffolding exists.
 
-`on:` is workflow-file-scoped, not job-scoped: a new job in its own
-file needs no cross-job isolation, but adding `workflow_dispatch` to
-an existing multi-job file makes every job in it dispatchable.
-Isolating the unproven job then is ordinary GitHub Actions authoring
-(for example a job-level `if:`), scoped to that file's own jobs and
-dependencies — keep it minimal, removing it with the trigger-flip edit
-once validated. This step does **not** by itself reduce advisory-bot
-review invocation count — that is driven by push count, not trigger
-wiring. Its real benefit is avoiding wasted CI Actions-minutes and
+Either staging form (a dispatch-only new file, or a job-level `if:` in
+an existing file) does **not** by itself reduce advisory-bot review
+invocation count — that is driven by push count, not trigger wiring.
+Its real benefit is avoiding wasted CI Actions-minutes and
 false-failure noise from an unproven job auto-running on every
 unrelated push.
 
@@ -317,7 +324,7 @@ template's IDD impact checklist (`Instruction files changed` /
 changed` / `Security / credential / merge behavior changed`) is
 drafted from the branch's actual changed-file list, not from memory.
 Before drafting the body, list the branch's changes
-(`git diff --name-only origin/main...HEAD`) and derive each checkbox
+(`git diff --name-only origin/{development-branch}...HEAD`) and derive each checkbox
 mechanically, using a root-anchored path-prefix match (the path starts
 with the glob's literal prefix, not merely contains it):
 
@@ -405,7 +412,14 @@ completion.
    block-quote prefix) and apply the same edit-and-recheck path
    as step 4.
 
-6. **Confirm the closing set matches exactly**: GitHub's
+6. **Confirm the closing set matches exactly** (skip this step and
+   step 7 below under the **non-default-`{development-branch}`
+   exemption**: GitHub only auto-closes an issue via a closing
+   keyword when the PR merges into the repository's **default**
+   branch, and both steps exist solely to catch an unwanted auto-close
+   side effect from that mechanism — `idd-pre-merge.instructions.md`'s
+   F2 re-verification skips the same two steps for the same reason).
+   GitHub's
    `closingIssuesReferences` field on the PR
    (`gh pr view <pr-number> --json closingIssuesReferences --jq
    '.closingIssuesReferences[].number'`) lists every issue GitHub plans
@@ -439,7 +453,7 @@ completion.
    the output as binary:
 
    ```sh
-   git log origin/main..HEAD --pretty=format:'%H%n%B%n===commit-boundary==='
+   git log origin/{development-branch}..HEAD --pretty=format:'%H%n%B%n===commit-boundary==='
    ```
 
    For each commit's full message, search using step 3's same keyword

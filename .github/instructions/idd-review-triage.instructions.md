@@ -510,7 +510,7 @@ Route based on `branchState` from the helper (or `mergeable` /
   a PR comment documenting the state and stop. Do not proceed to F-phase
   without confirmed branch-state evidence.
 
-**Sync path** (merge-from-`main`):
+**Sync path** (merge-from-`{development-branch}`):
 
 1. **Active review gate**: unresolved review threads, unreplied
    comments, or a reviewer's `CHANGES_REQUESTED` state require explicit
@@ -518,13 +518,15 @@ Route based on `branchState` from the helper (or `mergeable` /
    appear in PR history.
 2. Merge `{development-branch}` into the feature branch:
    `git fetch origin {development-branch} && git merge
-   origin/{development-branch}`. Use the
+   origin/{development-branch} -m "chore: merge origin/{development-branch}
+   into the claimed branch"`. A plain `git merge` here still creates a
+   commit on the normal (non-conflicting) path, so a commitlint
+   `commit-msg` hook rejects Git's auto-generated `Merge branch ...`
+   subject unless the conventional `-m` is passed on this first call —
+   not only when using the wrapper below. Use the
    [signed-commit merge wrapper](../../docs/idd-helper-scripts.md#signed-commit-merge-wrapper-shared-git-procedure)
-   when primary signing is non-interactive-hostile. That wrapper's
-   merge invocation includes a conventional `-m` subject (for example
-   `chore: merge origin/main into the claimed branch`, substituting
-   this repository's configured `{development-branch}`) so a
-   commitlint `commit-msg` hook does not reject the merge commit.
+   instead when primary signing is non-interactive-hostile; that
+   wrapper's own merge invocation carries the same `-m` subject.
 3. If conflicts arise, resolve them and complete the merge with that
    same procedure — mirrors the D1 rebase note.
 4. Run **post-fix-validate**.
