@@ -23,6 +23,17 @@ compact-cloud model, switch to `human_merge` or
 `separate_merge_agent` for that session instead of relying on this
 default.
 
+## Development Branch
+
+**Policy**: `developmentBranch` = `"main"` (#218). This repository's
+default and development branch are the same (`main`), so this field is
+set explicitly rather than left absent — several already-reconciled
+instruction files (`idd-merge.instructions.md`,
+`idd-review-triage.instructions.md`) reference `{development-branch}`
+generically, and setting this field is what resolves that placeholder
+to a concrete branch name at runtime instead of falling back to a live
+GitHub default-branch lookup on every read.
+
 ## PR Review Policy
 
 **Profile**: `copilot-advisory` (distributed default) — this
@@ -112,6 +123,42 @@ blanket non-IDD-PR exemption).
   Enabled so those PRs are classified `not_applicable` under
   `convergenceScope: all-prs` instead of being forced through the
   advisory-convergence gate meant for claimed IDD work.
+
+## Provider-Outage Declaration
+
+**Policy**: `providerOutage.declarationTarget` = `221` (#218). Names
+the issue the declaration CLI
+(`--declare`/`--record-advanced`/`--list-advanced`) reads and writes,
+and the issue from which `idd-advisory-convergence`'s CI-check verdict
+and the F2/F3 merge gate would resolve an active declaration.
+`maxValidity` and `maxParkedChanges` are left at their schema defaults
+(`PT24H` and `10` respectively) — no concrete reason to diverge from
+either has surfaced yet. The read-side consumer is
+[`idd-advisory-wait.instructions.md`'s Sustained outage
+section](../.github/instructions/idd-advisory-wait.instructions.md),
+which points to
+[`docs/idd-helper-scripts.md`'s Provider-outage-declaration helper
+entry](idd-helper-scripts.md#provider-outage-declaration-helper) for
+the full contract.
+
+**Scope note — declaration surface only, not yet a CI-gate relief
+path.** Neither `idd-advisory-convergence`'s own CI-check verdict nor
+the F2/F3 merge gate currently grants any relief from a declaration on
+issue #221: both require `ciGate.externalCheckWaivers.mode:
+"maintainer-authorized"` plus a matching `idd-advisory-convergence`
+entry in `ciGate.externalChecks.waivable` before a declaration has any
+gating effect, and #218 deliberately left that mode at its disabled
+default — enabling a maintainer-authorized bypass for a required check
+is a separate, larger policy decision than wiring a declaration-target
+issue, and was never part of this issue's scoping. Separately,
+`provider-outage-park.mjs`'s claim-release path (letting a session park
+work blocked by a confirmed-unavailable service instead of waiting out
+`claimTiming.staleAge`) does **not** read `declarationTarget` at all —
+it is driven independently by live `provider-health` evidence, so it
+already works today regardless of this field. Revisit
+`ciGate.externalCheckWaivers` as its own issue if a sustained
+`idd-advisory-convergence` outage makes the currently-inert CI-gate
+relief path worth enabling.
 
 ## External CI-Check Trust
 
@@ -220,6 +267,26 @@ this companion actually reaches the agent runtime (Copilot) that
 reviews every PR in this repository.
 
 - **`issueAuthoring.maxClarificationRounds`**: `3`
+- **`issueAuthoring.journalIssue`** (#218): stays unset. Unlike
+  `providerOutage.declarationTarget` above, no standalone-authoring-set-
+  with-no-anchor case has actually occurred yet; when the issue-authoring
+  skill needs one it stops with `blocked-by-human` per its own documented
+  fail-safe, which this repository accepts as sufficient for now rather
+  than pre-provisioning a holding issue speculatively.
+
+## Upstream Escalation
+
+**Policy**: `upstreamEscalation.enabled` = `true` (#218). This
+repository is maintained by the same owner (`kurone-kito`) as the
+`idd-skill` source repository, so a session flagging a high-confidence
+`idd-skill` upstream defect discovered here as a local
+`status:upstream-candidate` issue (via the normal issue-authoring
+skill) closes a natural feedback loop rather than crossing an
+organizational boundary. See
+[`idd-overview-appendix.instructions.md`](../.github/instructions/idd-overview-appendix.instructions.md)
+and the issue-authoring skill's
+[contract.md](../skills/issue-authoring/references/contract.md)
+for the read-side marker format and routing.
 
 ## Authoring Language
 
@@ -278,11 +345,29 @@ inherit it (see
 the fallback behavior for this field: absent, invalid, or a failing
 delegate leaves C1 running the per-agent critique mechanism unchanged.
 
+**`critiqueLoop.telemetryHook`** (#218): also stays absent, for the
+same reason as `delegate` above — no concrete external telemetry
+command exists to point it at.
+
 ## IDD Labels
 
 Distributed defaults: `roadmap`, `status:blocked-by-human`,
 `status:needs-decision`, `status:authoring` — already created in this
 repository before this import.
+
+**`labels.untrustedLabelerLogins`** (#218): `["coderabbitai[bot]",
+"chatgpt-codex-connector[bot]"]`. CodeRabbit has a confirmed prior
+incident (#65: it auto-labeled issues with IDD's reserved control
+labels, corrupting Discover routing); the Codex connector is included
+proactively since it is already a recognized review bot in this
+repository's `advisoryBotLogins` list with the same class of
+auto-labeling capability, even though no concrete mislabel incident has
+been observed for it yet. Schema-supported metadata only — no
+distributed CI enforcement reads this list yet. This repository's own
+hand-authored `.github/workflows/strip-untrusted-labels.yml` already
+guards against untrusted label application independently of this
+field; recording it documents the trust assumption, and is not itself
+a change to that workflow.
 
 ## Trusted Marker Actors
 
@@ -538,6 +623,15 @@ an intentional exception). CI cannot detect this class of violation —
 it checks out a detached HEAD, which the guard treats as a no-op — so
 this local hook, together with `idd-doctor --strict`, is the practical
 enforcement surface.
+
+**`worktreeGuard.refuseBaseBranchCommits: true`** (#218): extends the
+guard to also refuse a commit/push made from the primary worktree while
+`HEAD` is on `developmentBranch` (`main`) itself — closing a gap the
+`branchPatterns` check above does not cover, since the base branch
+never matches an implementation-branch glob. This makes the guard
+stricter than before this change: a human maintainer who commits
+directly to `main` from the primary worktree outside an IDD session is
+now also refused, not only an agent session that skipped B1.
 
 **Deliberate divergence from the generic activation instructions**:
 ONBOARDING.md's default guidance points `core.hooksPath` at
