@@ -12,7 +12,9 @@ words:
   - deprioritize
   - desync
   - desynced
+  - dofork
   - Esync
+  - GHEC
   - GHES
   - GHSA
   - isort
@@ -23,6 +25,7 @@ words:
   - pytest
   - qwen
   - rcompare
+  - remediations
   - toctou
   - undispositioned
   - unioned
