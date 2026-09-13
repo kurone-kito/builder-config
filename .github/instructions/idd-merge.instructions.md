@@ -393,7 +393,8 @@ Before any mutating action in F3, apply the
    (`kurone-kito/idd-skill#2331`). When two or more sessions share one
    clone, serialize this fetch and the worktree removal below against
    each other behind the clone-scoped lock (`node scripts/clone-lock.mjs
-   --exec`, spanning both steps) so they don't race.
+   --exec`/`idd-clone-lock --exec`, spanning both steps) so they don't
+   race.
 4. Delete the local worktree and local branch. Run from the **primary
    worktree**, never from inside the worktree being removed.
    Immediately before `worktree remove`, re-validate this session's
@@ -401,19 +402,13 @@ Before any mutating action in F3, apply the
    either is no longer ours.
 
    - `git worktree remove <path>`
-   - Re-validate the claim and worktree lock again, immediately before
-     this second mutation — the claim can be taken over by a
-     replacement session during the `worktree remove` step above, and
-     deleting the local branch out from under that replacement session
-     would destroy its work; stop instead of deleting if either check
-     no longer names this session. Then `git branch -d <branch-name>`
-     (the baseline permission profile denies `-D`; see
-     `docs/permissions.md`). Local `{development-branch}` was already
-     fast-forwarded to the merge commit by the previous step, so this
-     should not fail with `error: the branch '<branch-name>' is not
-     fully merged`; if it still does, investigate before retrying
-     rather than assuming a stale local `{development-branch}` is the
-     cause.
+   - `git branch -d <branch-name>` (the baseline permission profile
+     denies `-D`; see `docs/permissions.md`). Local `{development-branch}`
+     was already fast-forwarded to the merge commit by the previous
+     step, so this should not fail with `error: the branch
+     '<branch-name>' is not fully merged`; if it still does,
+     investigate before retrying rather than assuming a stale local
+     `{development-branch}` is the cause.
 5. If GitHub auto-delete is disabled: re-validate the active claim
    immediately before this step too, then delete the remote branch.
    (Worktrunk may be used for steps 4–5, the deletion steps — step 3's

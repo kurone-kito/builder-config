@@ -105,26 +105,14 @@ here turns a confusing later failure into an immediate, recoverable signal.
 
 ### Adding a new CI job
 
-When this branch's diff introduces a **new** CI job **in a new
-workflow file**, land that file configured for `workflow_dispatch`
-only, not yet wired to `push`/`pull_request`, and validate it with
-manually dispatched runs against the pushed branch (for example
-`gh workflow run <file> --ref <branch>`) before making the one
-remaining edit that flips the trigger to its final form. **Commit,
-re-run pre-push-validate, and push that edit before creating the PR
-(D3)** — merging with the branch still dispatch-only would never
-enable the job.
-
-When the new job instead lands in an **existing** multi-job workflow
-file, do not touch that file's `on:` block at all: `on:` is
-file-scoped, so switching it to `workflow_dispatch`-only would also
-strip every other job in the file of its existing `push`/
-`pull_request` triggers and stop unrelated CI. Keep the existing
-triggers untouched and isolate only the new, not-yet-proven job with
-a job-level `if:` (for example `if: github.event_name ==
-'workflow_dispatch'`), removing that `if:` in the same follow-up edit
-that would otherwise flip a dispatch-only file's trigger. Dispatch-only
-staging is available only to a workflow file that is itself new.
+When this branch's diff introduces a **new** CI job, land it configured
+for `workflow_dispatch` only, not yet wired to `push`/`pull_request`,
+and validate it with manually dispatched runs against the pushed
+branch (for example `gh workflow run <file> --ref <branch>`) before
+making the one remaining edit that flips the trigger to its final
+form. **Commit, re-run pre-push-validate, and push that edit before
+creating the PR (D3)** — merging with the branch still dispatch-only
+would never enable the job.
 
 GitHub only allows a `workflow_dispatch` run once registered on the
 default branch: `gh workflow run` cannot target a file or trigger that
@@ -134,10 +122,15 @@ preliminary PR (this repository merges only through PRs); this flow
 then applies to the follow-up PR adding the real job, once that
 scaffolding exists.
 
-Either staging form (a dispatch-only new file, or a job-level `if:` in
-an existing file) does **not** by itself reduce advisory-bot review
-invocation count — that is driven by push count, not trigger wiring.
-Its real benefit is avoiding wasted CI Actions-minutes and
+`on:` is workflow-file-scoped, not job-scoped: a new job in its own
+file needs no cross-job isolation, but adding `workflow_dispatch` to
+an existing multi-job file makes every job in it dispatchable.
+Isolating the unproven job then is ordinary GitHub Actions authoring
+(for example a job-level `if:`), scoped to that file's own jobs and
+dependencies — keep it minimal, removing it with the trigger-flip edit
+once validated. This step does **not** by itself reduce advisory-bot
+review invocation count — that is driven by push count, not trigger
+wiring. Its real benefit is avoiding wasted CI Actions-minutes and
 false-failure noise from an unproven job auto-running on every
 unrelated push.
 
@@ -313,20 +306,22 @@ flight, periodically re-check the claimed issue's own PR review and CI
 state — unresolved review threads and failing checks — rather than
 discovering that backlog only after the side-fix merges.
 
-### D3.7 — Derive the IDD impact checklist
+### D3.6 — Derive the IDD impact checklist
 
-Skip this sub-step entirely when `.github/pull_request_template.md`
-does not exist or has no `IDD impact` heading — mirroring D3's own "If
-no template file exists, use the structure below directly" fallback,
-there is no checklist to derive or reconcile. When it exists, the
-template's IDD impact checklist (`Instruction files changed` /
-`Template files changed` / `Helper scripts changed` / `Config schema
-changed` / `Security / credential / merge behavior changed`) is
-drafted from the branch's actual changed-file list, not from memory.
-Before drafting the body, list the branch's changes
-(`git diff --name-only origin/{development-branch}...HEAD`) and derive each checkbox
-mechanically, using a root-anchored path-prefix match (the path starts
-with the glob's literal prefix, not merely contains it):
+Skip this sub-step and D3.7 below entirely when
+`.github/pull_request_template.md` does not exist or has no `IDD
+impact` heading — mirroring D3's own "If no template file exists, use
+the structure below directly" fallback, there is no checklist to
+derive or reconcile. When it exists, the template's IDD impact
+checklist (`Instruction files changed` / `Template files changed` /
+`Helper scripts changed` / `Config schema changed` / `Security /
+credential / merge behavior changed`) is drafted from the branch's
+actual changed-file list, not from memory. Before drafting the body,
+list the branch's changes
+(`git diff --name-only origin/{development-branch}...HEAD`) and derive
+each checkbox mechanically, using a root-anchored path-prefix match
+(the path starts with the glob's literal prefix, not merely contains
+it):
 
 - **Instruction files changed** — any path starting with
   `.github/instructions/`.
@@ -341,12 +336,9 @@ with the glob's literal prefix, not merely contains it):
   call — leave it to ordinary self-review discretion; it is not
   mechanically derivable from paths alone.
 
-Re-derive this same checklist against the final HEAD immediately
+D3.7 below re-derives this same checklist against the final HEAD
 before merge — later commits (a review-fix round, a critique-pass fix
 landed before the first push) can change the answer.
-`idd-pre-merge.instructions.md`'s F2 "Closing-set and
-impact-checklist re-verification" condition re-triggers this
-re-derivation by name (as D3.7) before F3, so no gap remains here.
 
 ### PR body language
 
@@ -369,6 +361,18 @@ verification regex both match only the English keyword forms
 would silently break auto-close detection.
 
 ### D3.5 — Verify closing keyword detection
+
+**Non-default development branch**: GitHub only auto-closes a linked
+issue when the merging PR targets the repository's **default** branch
+— a closing keyword on a PR based on any other branch, including a
+configured `{development-branch}`, never populates
+`closingIssuesReferences` and never auto-closes on merge, regardless of
+body wording. When `{development-branch}` is not the repository's
+default branch, still include the closing keyword line in the PR body
+for reviewer clarity, but **skip this entire sub-step** (steps 1-7
+below verify a mechanism that cannot fire here) and close the claimed
+issue explicitly after F3 merges (`idd-merge.instructions.md` F4 notes
+this).
 
 After PR creation and before D4, confirm GitHub recognized the
 closing keyword for the claimed issue. Resume routing should re-enter
@@ -412,14 +416,7 @@ completion.
    block-quote prefix) and apply the same edit-and-recheck path
    as step 4.
 
-6. **Confirm the closing set matches exactly** (skip this step and
-   step 7 below under the **non-default-`{development-branch}`
-   exemption**: GitHub only auto-closes an issue via a closing
-   keyword when the PR merges into the repository's **default**
-   branch, and both steps exist solely to catch an unwanted auto-close
-   side effect from that mechanism — `idd-pre-merge.instructions.md`'s
-   F2 re-verification skips the same two steps for the same reason).
-   GitHub's
+6. **Confirm the closing set matches exactly**: GitHub's
    `closingIssuesReferences` field on the PR
    (`gh pr view <pr-number> --json closingIssuesReferences --jq
    '.closingIssuesReferences[].number'`) lists every issue GitHub plans
@@ -501,9 +498,44 @@ completion.
 
    **Re-run before merge**: this scan only covers commits present at
    D3.5 time. Later branch commits — accepted review fixes
-   (`idd-review-fix.instructions.md` E9-E12) or a `main` merge — are not
-   automatically covered by this D3-time pass; `idd-pre-merge.instructions.md`'s
-   F2 condition re-runs this same scan against the final HEAD before F3.
+   (`idd-review-fix.instructions.md` E9-E12) or a `{development-branch}`
+   merge — are not automatically covered by this D3-time pass;
+   `idd-pre-merge.instructions.md`'s F2 condition re-runs this same
+   scan against the final HEAD before F3.
+
+### D3.7 — Re-verify the IDD impact checklist before merge
+
+Immediately before F3 merge (the same "re-run before merge" point as
+D3.5 step 7 above), re-derive D3.6's checklist against the final
+HEAD's full changed-file list and compare it against the PR body's
+current checked boxes. When a ratchet-rule-bearing file (for example,
+`audit/sync-manifest.json`'s own ratchet-rule comment) raises a
+documented budget or limit anywhere in the branch's commits, also
+confirm the file's required PR-description callout is actually
+present in the body now, not only in a commit message — a callout
+only promised at draft time and never landed is the same drift this
+step exists to catch.
+
+On any mismatch: re-run the claim revalidation gate immediately before
+editing (a separate mutation, not covered by an earlier gated push),
+fetch the PR's current full body, edit only the checklist section
+(and the accompanying file-list prose, when present) in the fetched
+copy, and post the complete result back — `gh pr edit <pr-number>
+--body-file <path>` replaces the whole body, so never pass a partial
+file, which would drop the closing-keyword line and every other
+section. After posting, repeat D3.5 step 6's closing-set check when
+D3.5 applies to this branch (skip it on the same
+non-default-`{development-branch}` condition D3.5 itself skips under,
+where `closingIssuesReferences` never populates and the check would
+be meaningless) — edited prose can otherwise introduce a stray
+keyword-adjacent reference.
+
+**Wired to F2/F3**: `idd-pre-merge.instructions.md` F2's "Closing-set
+and impact-checklist re-verification" condition names this step
+explicitly and re-runs it against the then-current HEAD, and
+`idd-merge.instructions.md` F3's Gate checklist re-runs it again
+immediately before merging — F2 can run before further HEAD changes
+land, which is exactly why the F3 re-run also exists.
 
 ## D4 — Wait for CI
 
