@@ -259,11 +259,17 @@ Before any mutating action in F3, apply the
 
 ## F4 — Cleanup
 
-1. Confirm the post-merge digest update above exists or repair it after
+1. **Non-default development branch**: if `{development-branch}` is not
+   the repository's default branch, GitHub did not auto-close any issue
+   on merge (see `idd-pr-submit.instructions.md` D3.5) — close each
+   issue in D3's deliberate closing set explicitly, not only the
+   claimed issue: `gh issue close {issue-number} --comment "Merged via
+   #{pr-number}."`.
+2. Confirm the post-merge digest update above exists or repair it after
    re-validating the claim. Do not minimize the digest as an
    operational marker unless a future cleanup policy explicitly
    supports digest retirement.
-2. Run merged-PR comment cleanup (must not run before F3 succeeds).
+3. Run merged-PR comment cleanup (must not run before F3 succeeds).
    Re-validate the active claim before each GitHub minimization
    mutation.
 
@@ -368,7 +374,7 @@ Before any mutating action in F3, apply the
    See `docs/idd-comment-minimization.md` for the evidence comment
    format, cleanup-failure comment format, permission-blocked comment
    format, and fallback GraphQL commands.
-3. Re-validate this session's active claim (the shared claim
+4. Re-validate this session's active claim (the shared claim
    revalidation gate,
    `idd-overview-core.instructions.md`); stop instead of mutating if it
    is no longer ours. Then fast-forward the local `{development-branch}`
@@ -395,7 +401,7 @@ Before any mutating action in F3, apply the
    each other behind the clone-scoped lock (`node scripts/clone-lock.mjs
    --exec`/`idd-clone-lock --exec`, spanning both steps) so they don't
    race.
-4. Delete the local worktree and local branch. Run from the **primary
+5. Delete the local worktree and local branch. Run from the **primary
    worktree**, never from inside the worktree being removed.
    Immediately before `worktree remove`, re-validate this session's
    claim and worktree lock (`idd-claim.instructions.md`); stop if
@@ -409,12 +415,12 @@ Before any mutating action in F3, apply the
      '<branch-name>' is not fully merged`; if it still does,
      investigate before retrying rather than assuming a stale local
      `{development-branch}` is the cause.
-5. If GitHub auto-delete is disabled: re-validate the active claim
+6. If GitHub auto-delete is disabled: re-validate the active claim
    immediately before this step too, then delete the remote branch.
-   (Worktrunk may be used for steps 4–5, the deletion steps — step 3's
+   (Worktrunk may be used for steps 5–6, the deletion steps — step 4's
    local `{development-branch}` update is a plain git operation, not a
    WorkTrunk one.)
-6. Re-validate the active claim one final time. If it still uses your
+7. Re-validate the active claim one final time. If it still uses your
    `{claim-id}`, post `unclaimed-by` for your own `{agent-id}` /
    `{claim-id}` (see
    [Unclaim format](idd-overview-core.instructions.md#unclaim-format))
