@@ -146,6 +146,9 @@ Before any mutating action in F3, apply the
 
    - current HEAD SHA **equals** the carried F2-snapshot head
      (`{f2-head-SHA}`);
+   - PR `baseRefName` (fresh `gh pr view {pr-number} --json baseRefName`)
+     **equals** `{development-branch}` — catches a retarget after D3's
+     one-time check; a mismatch is a wrong-base hold, not a merge;
    - review-currency route is `proceed`;
    - `F3_UNRESOLVED_ACTIONABLE_COUNT` is `0`;
    - advisory `f3Outcome` is `SATISFIED` (the authoritative advisory
@@ -157,7 +160,27 @@ Before any mutating action in F3, apply the
      sub-condition on it
      ([Terminal routing](idd-advisory-wait.instructions.md#terminal-routing-1570));
    - all required CI checks pass for the current head;
-   - claim ownership still uses your `{claim-id}`.
+   - claim ownership still uses your `{claim-id}`;
+   - D3.5 steps 6-7 and D3.7 (`idd-pr-submit.instructions.md`) have
+     been re-run against `${PR_HEAD_SHA_F3}` (#2749) — covers commits
+     that landed between F2 and this final gate, for example a
+     required `{development-branch}` sync. Before running them,
+     confirm the local worktree is checked out at `${PR_HEAD_SHA_F3}`
+     exactly (`git fetch` plus `git checkout`/`git reset --hard` if a
+     resumed or external-push session left it stale) — D3.5 step 7's
+     `git log` and D3.7's inherited `git diff` both read local git
+     state, not the remote PR directly. Skip D3.5 steps 6-7 under the
+     same non-default-`{development-branch}` exemption D3.5 itself
+     carries. On a mismatch, fix it per D3.5/D3.7's own documented
+     handling. Any fix here — whether or not it changes HEAD, since a
+     PR-body edit alone (D3.7's remediation, or D3.5 step 6's) still
+     counts — invalidates step 3's own **Re-validate claim** and
+     **Advisory state revalidation** checks above; re-run both of
+     those before merging. If the fix additionally amended or rebased
+     a commit (changing HEAD), return to E1 instead of just
+     re-validating in place — F2's own snapshot is invalidated by a
+     new HEAD. Otherwise repeat this field once; if it still fails,
+     stop and do not merge.
 
    For the head-SHA field, use this **copy-paste-safe, fail-closed**
    check — both operands fully quoted, no glob, abort on mismatch —
@@ -406,12 +429,13 @@ Before any mutating action in F3, apply the
    clone, serialize this fetch and the worktree removal below against
    each other behind the clone-scoped lock (`node scripts/clone-lock.mjs
    --exec`/`idd-clone-lock --exec`, spanning both steps) so they don't
-   race. This local checkout is unrelated to the trusted-checkout-source
-   concern in B1 Step 1 — if `{development-branch}` differs from the
-   repository's default branch, switch the primary worktree back to the
-   default branch (`git switch <default-branch>`) once the remaining F4
-   cleanup steps below complete, so the next B1 pass finds the primary
-   worktree on its expected trusted checkout.
+   race. This local checkout is unrelated to `idd-work.instructions.md`
+   B1 Step 1's own requirement that the primary worktree stay on the
+   default branch throughout B1 — if `{development-branch}` differs
+   from the repository's default branch, switch the primary worktree
+   back to the default branch (`git switch <default-branch>`) once the
+   remaining F4 cleanup steps below complete, so the next B1 pass finds
+   the primary worktree already on the branch it expects.
 5. Delete the local worktree and local branch. Run from the **primary
    worktree**, never from inside the worktree being removed.
    Immediately before `worktree remove`, re-validate this session's
