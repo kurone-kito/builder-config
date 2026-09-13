@@ -7,6 +7,15 @@ export default defineConfig({
       include: ['packages/*/src/**'],
       provider: 'v8',
     },
-    projects: ['packages/*'],
+    projects: [
+      'packages/*',
+      {
+        test: {
+          environment: 'node',
+          include: ['scripts/**/*.spec.mts'],
+          name: 'scripts',
+        },
+      },
+    ],
   },
 });
