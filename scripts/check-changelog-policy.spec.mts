@@ -29,21 +29,30 @@ afterEach(() => {
 });
 
 /**
- * Runs a git subcommand in `cwd`, returning trimmed stdout. Strips
- * `GIT_DIR`/`GIT_WORK_TREE`/`GIT_INDEX_FILE` from the inherited
- * environment - an ambient value for any of them would otherwise let
- * this call target the real checkout instead of the scratch repo `cwd`
- * names, defeating this whole file's isolation claim.
+ * Builds a minimal child-process environment (`PATH` and `HOME` only,
+ * plus any `extra` entries) rather than blocklisting individual
+ * variables: an ambient `GIT_DIR`, `GIT_WORK_TREE`, `GIT_INDEX_FILE`,
+ * `GIT_OBJECT_DIRECTORY`, `GIT_COMMON_DIR`, or any other of the
+ * repository-local variables `git rev-parse --local-env-vars` reports
+ * could otherwise retarget a git call at the real checkout instead of a
+ * scratch repo `cwd`, and an allowlist can't be silently invalidated by
+ * a future git version adding another such variable the way a blocklist
+ * could be.
  */
+function minimalEnv(
+  extra: Readonly<Record<string, string>> = {},
+): Record<string, string> {
+  const env: Record<string, string> = { PATH: process.env.PATH ?? '' };
+  if (process.env.HOME) env.HOME = process.env.HOME;
+  return Object.assign(env, extra);
+}
+
+/** Runs a git subcommand in `cwd`, returning trimmed stdout. */
 function git(cwd: string, args: readonly string[]): string {
-  const env = { ...process.env };
-  for (const name of ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE']) {
-    delete env[name];
-  }
   return execFileSync('git', args, {
     cwd,
     encoding: 'utf8',
-    env,
+    env: minimalEnv(),
     stdio: ['ignore', 'pipe', 'pipe'],
   }).trim();
 }
@@ -143,23 +152,19 @@ interface RunResult {
 }
 
 /**
- * Runs the real `check-changelog-policy.mjs` against `cwd`, with an
- * explicitly-built environment (never inherits `GIT_DIR`/`GIT_WORK_TREE`,
- * which would otherwise let an ambient value retarget git calls away from
- * the scratch repo).
+ * Runs the real `check-changelog-policy.mjs` against `cwd`, via
+ * {@link minimalEnv} - see its doc comment for why this never simply
+ * inherits `process.env`.
  */
 function run(
   cwd: string,
   env: Readonly<Record<string, string>> = {},
 ): RunResult {
-  const childEnv: Record<string, string> = { PATH: process.env.PATH ?? '' };
-  if (process.env.HOME) childEnv.HOME = process.env.HOME;
-  Object.assign(childEnv, env);
   try {
     const stdout = execFileSync('node', [scriptPath], {
       cwd,
       encoding: 'utf8',
-      env: childEnv,
+      env: minimalEnv(env),
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     return { status: 0, stderr: '', stdout };
