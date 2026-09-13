@@ -165,14 +165,21 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
           # Both trigger families carry the triggering comment's own
           # timestamps at github.event.comment (matching COMMENT_BODY
-          # above). Prefer updated_at: pull_request_review_comment also
-          # fires on edited, and created_at would then still name the
-          # comment's original post time, not this edit -- making every
-          # comment posted between the original post and the edit look
-          # "newer than the trigger" and wrongly skip this run.
-          # updated_at equals created_at for a never-edited comment, so
-          # this is safe for the created-event case too.
+          # above). Prefer updated_at: an edited event fires with
+          # created_at still naming the comment's original post time,
+          # not this edit -- making every comment posted between the
+          # original post and the edit look "newer than the trigger"
+          # and wrongly skip this run. updated_at equals created_at for
+          # a never-edited comment, so this is safe for the
+          # created-event case too. A `deleted` event is the one
+          # exception: github.event.comment there still names the
+          # deleted comment's pre-deletion updated_at, not the deletion
+          # time itself, which would make every comment posted between
+          # that stale timestamp and the actual deletion look newer and
+          # wrongly skip -- the shell step below overrides this value
+          # with the current time for that action instead.
           TRIGGERED_AT: ${{ github.event.comment.updated_at || github.event.comment.created_at }}
+          EVENT_ACTION: ${{ github.event.action }}
         name: Check for newer qualifying event
         id: debounce
         # A burst of IDD-originated comments can fire this workflow's
@@ -182,7 +189,11 @@ jobs:
         # since landed on the same PR; if so, skip this run's own
         # rerun and leave it to the later-triggered run (which asks the
         # same question in turn).
-        run: pnpm exec idd-advisory-comment-debounce --pr "$PR_NUMBER" --triggered-at "$TRIGGERED_AT"
+        run: |
+          if [ "$EVENT_ACTION" = "deleted" ]; then
+            TRIGGERED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          fi
+          pnpm exec idd-advisory-comment-debounce --pr "$PR_NUMBER" --triggered-at "$TRIGGERED_AT"
       - if: (steps.origin.outputs.idd_originated == 'true' || steps.origin_prev.outputs.idd_originated == 'true') && steps.debounce.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
