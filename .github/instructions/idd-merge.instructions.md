@@ -368,10 +368,59 @@ Before any mutating action in F3, apply the
    See `docs/idd-comment-minimization.md` for the evidence comment
    format, cleanup-failure comment format, permission-blocked comment
    format, and fallback GraphQL commands.
-3. Delete the local worktree and local branch.
-4. Update the local `main` branch.
-5. If GitHub auto-delete is disabled: delete the remote branch too.
-   (Worktrunk may be used for steps 3–5.)
+3. Re-validate this session's active claim (the shared claim
+   revalidation gate,
+   `idd-overview-core.instructions.md`); stop instead of mutating if it
+   is no longer ours. Then fast-forward the local `{development-branch}`
+   branch to the just-merged commit before removing the worktree/branch
+   below. Run from the **primary worktree** — the worktree being cleaned
+   up is still checked out to its issue branch at this point, so
+   running this elsewhere would fast-forward the wrong branch:
+
+   ```sh
+   git fetch origin {development-branch}
+   git switch {development-branch}
+   git merge --ff-only origin/{development-branch}
+   ```
+
+   Doing this first ensures WorkTrunk's own merge-status check (which
+   reads the local branch rather than its `origin/` remote-tracking
+   ref — confirm WorkTrunk itself resolves `{development-branch}`
+   rather than a hardcoded `main` before relying on this for a
+   non-default development branch) sees the just-merged branch as
+   already merged on its first attempt, instead of reporting
+   `branch_outcome: retained_unmerged` and declining to delete it
+   (`kurone-kito/idd-skill#2331`). When two or more sessions share one
+   clone, serialize this fetch and the worktree removal below against
+   each other behind the clone-scoped lock (`clone-lock.mjs --exec`/
+   `idd-clone-lock --exec`, spanning both steps) so they don't race.
+4. Delete the local worktree and local branch. Run from the **primary
+   worktree**, never from inside the worktree being removed.
+   Immediately before `worktree remove`, re-validate this session's
+   claim and worktree lock (`idd-claim.instructions.md`); stop if
+   either is no longer ours.
+
+   - `git worktree remove <path>`
+   - `git branch -d <branch-name>` (the baseline permission profile
+     denies `-D`; see `docs/permissions.md`). Local `{development-branch}`
+     was already fast-forwarded to the merge commit by the previous
+     step, so this should not fail with `error: the branch
+     '<branch-name>' is not fully merged`; if it still does,
+     investigate before retrying rather than assuming a stale local
+     `{development-branch}` is the cause.
+5. If GitHub auto-delete is disabled: re-validate the active claim
+   immediately before this step too, then delete the remote branch.
+   (Worktrunk may be used for steps 4–5, the deletion steps — step 3's
+   local `{development-branch}` update is a plain git operation, not a
+   WorkTrunk one.)
+6. Re-validate the active claim one final time. If it still uses your
+   `{claim-id}`, post `unclaimed-by` for your own `{agent-id}` /
+   `{claim-id}` (see
+   [Unclaim format](idd-overview-core.instructions.md#unclaim-format))
+   to release the claim now that cleanup is complete
+   (`kurone-kito/idd-skill#2220`). If it no longer uses your
+   `{claim-id}`, do not post a release comment — another session
+   already took over.
 
 ## F5 — Loop
 

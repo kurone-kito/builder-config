@@ -516,10 +516,15 @@ Route based on `branchState` from the helper (or `mergeable` /
    comments, or a reviewer's `CHANGES_REQUESTED` state require explicit
    operator confirmation before this merge, since the merge commit will
    appear in PR history.
-2. Merge `main` into the feature branch:
-   `git fetch origin main && git merge origin/main`. Use the
+2. Merge `{development-branch}` into the feature branch:
+   `git fetch origin {development-branch} && git merge
+   origin/{development-branch}`. Use the
    [signed-commit merge wrapper](../../docs/idd-helper-scripts.md#signed-commit-merge-wrapper-shared-git-procedure)
-   when primary signing is non-interactive-hostile.
+   when primary signing is non-interactive-hostile. That wrapper's
+   merge invocation includes a conventional `-m` subject (for example
+   `chore: merge origin/main into the claimed branch`, substituting
+   this repository's configured `{development-branch}`) so a
+   commitlint `commit-msg` hook does not reject the merge commit.
 3. If conflicts arise, resolve them and complete the merge with that
    same procedure — mirrors the D1 rebase note.
 4. Run **post-fix-validate**.

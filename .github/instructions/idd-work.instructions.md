@@ -87,6 +87,18 @@ branch name with every `/` replaced by `-`.
 Example: repo `builder-config`, branch `issue/123-add-foo` → worktree path
 `../builder-config.issue-123-add-foo`.
 
+**Harness-native worktree tools**: an agent harness's own worktree
+primitive (e.g. Claude Code's `EnterWorktree`) is a third path outside
+the two enumerated below. Use one only when both its target directory
+can be pinned to the sibling path above and its branch to
+`issue/<number>-<slug>` — never a tool-chosen default. `EnterWorktree`
+always places the worktree under a harness-owned directory
+(`.claude/worktrees/agent-<hash>`), never the sibling path — never use
+it here. Grok Build's `grok --worktree`, subagent `isolation:
+worktree`, and `x.ai/git/worktree/*` likewise can't pin either — never
+use them (same class as `kurone-kito/idd-skill#1930`). When a tool
+can't pin both, use `git worktree add` below (or WorkTrunk) instead.
+
 **Step 1 — Check for orphaned path**: if the target path already exists
 but is not listed in `git worktree list`, stop and report for manual
 cleanup before continuing.
@@ -115,8 +127,10 @@ If WorkTrunk is not available, choose the correct case:
 | Takeover — neither local nor remote (rare) | treat as fresh claim; preserve the inherited branch name |
 <!-- dprint-ignore-end -->
 
-For manual `git worktree add`, or WorkTrunk without an install hook,
-acquire the [worktree-local lock file](idd-claim.instructions.md#worktree-local-lock-file-same-machine-collision)
+For manual `git worktree add`, WorkTrunk without an install hook, or a
+compliant pinned harness-native tool (per "Harness-native worktree
+tools" above), acquire the
+[worktree-local lock file](idd-claim.instructions.md#worktree-local-lock-file-same-machine-collision)
 immediately after the worktree exists, **before Step 3** —
 `install-deps` itself writes into the worktree and runs lifecycle
 hooks, so acquiring the lock any later leaves that install unprotected.
@@ -236,6 +250,13 @@ decision — the correction must land as a maintainer addendum, not a
 silent edit. Resume planning only after the addendum is recorded.
 
 On no conflict, continue with the plan below.
+
+### B2.2 — Example field-name verification
+
+When the issue's "Proposed change" or "Acceptance criteria" cites an
+existing schema field, config key, or token as an example (not one it
+adds), verify it exists as cited; fix or drop if not, hold if unclear
+(`kurone-kito/idd-skill#2806`).
 
 Draft an implementation plan and post it as an issue comment, then run
 a critique pass for correctness and concreteness (see

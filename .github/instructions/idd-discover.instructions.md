@@ -52,23 +52,67 @@ reason and stop without claiming. Fall back to normal discovery only when
 the operator explicitly asks for normal discovery in the same run; do not
 silently search for another issue.
 
-For a valid open target, skip A0-O, A1, A1.5, A2, and candidate
-selection. Before A5, run targeted readiness and viability checks against
-that issue only:
+Run the steps below against a valid open target. Steps 1 and 2 apply
+regardless of target type; only once step 2 confirms the target is not
+a roadmap node does this shortcut skip A0-O, A1, A1.5, A2, and
+candidate selection, continuing through steps 3-5 to A5 against that
+issue only — a roadmap-node target instead follows step 2's own
+routing:
 
-1. Re-fetch the target issue.
-2. If the target issue carries the configured authoring label, report
-   `Issue #N is currently being authored`, run the stale-authoring
-   warning check above, and stop without claiming.
-3. Apply A3's readiness bullets to the target — no configured
-   blocked-by-human/needs-decision label, no open blocking dependent
-   issue (visible `Blocked by #NNN` or hidden
-   `builder-config-blocked-by` marker, both resolved the
-   same way A3 resolves them), no external human coordination required
-   — plus one target-only check: no active, non-stale claim from a
-   trusted marker actor exists on the target, other than a claim this
-   session already recorded and verified (A4 Step 1.5 rules); a hit
-   reports "already claimed", same as A5.
+1. Fetch the target issue. If it carries the configured authoring label,
+   report `Issue #N is currently being authored`, run the
+   stale-authoring warning check above, and stop without claiming — this
+   check runs first and applies whether the target turns out to be an
+   execution leaf or a roadmap node in step 2 below, so an
+   authoring-held roadmap is never routed into step 2's traversal.
+2. If the target issue carries the configured roadmap label or a
+   `builder-config-roadmap-id` marker — the same test
+   **A2**'s roadmap-node/execution-leaf classification rule uses (an
+   unmarked legacy umbrella isn't recognized here — retro-label it
+   first, per A1's Legacy roots) — do not continue to steps 3-5.
+   Instead:
+   - Apply **A3**'s dependency bullet to the target itself (both
+     visible `Blocked by #NNN` lines and hidden
+     `builder-config-blocked-by` markers) and its
+     coordination/runtime-observation-precondition bullet; a
+     dependency hit reports blocked, a coordination hit reports that
+     criterion instead — either way this run stops (no fallback).
+     Skip A3's other bullets here:
+     **A1.5** already checks the roadmap's own blocked-by-human/
+     needs-decision labels and claim state, and "no open dependent
+     issues" does not apply to a root whose own children are its
+     dependents.
+   - Treat the target as the root **A1** would have selected: run
+     **A1.5** against it. A1.5's own outcome governs what happens
+     next: a close or non-autonomous-gap outcome ends this run here —
+     report and stop, never falling back to A1 the way the normal
+     roadmap path would; only a continue outcome proceeds.
+   - Run **A2**'s traversal scoped to this root and its own
+     descendants only (never a repository-wide search), then the
+     normal **A3** → **A3.5** → **A4** sequence over that scoped set:
+     A3.5 filters and continues with the remaining startable
+     candidates exactly as in the normal roadmap path — no
+     stop-without-fallback applies at this filtering step. This
+     graph-scoped continuation excludes **A0**'s own A0-O
+     orphan-fallback triggers (a)/(b)/(c) throughout: an empty or
+     fully-discarded scoped set ends the run the same way A0-T's other
+     failure branches do — report and stop.
+   - Rank the survivors down to a single highest-suitability open
+     child and run **A4.5** → **A5** against that one child only.
+     `idd-suitability.instructions.md`'s and
+     `idd-claim.instructions.md`'s existing A0-T-keyed
+     stop-without-fallback rules apply to it unchanged: an A4.5
+     rejection, a failed A5 Pre-check (a) approval re-verification, or
+     a lost A5 claim race ends this run — report and stop — rather
+     than falling back to the next-ranked survivor. Extending this
+     branch to retry a subsequent survivor on such a failure is out of
+     scope here.
+3. Apply A3's readiness bullets to the target (the same blocked-by,
+   human-coordination, and runtime-observation checks, resolved the
+   same way) — plus one target-only check: no active, non-stale claim
+   from a trusted marker actor exists on the target, other than a
+   claim this session already recorded and verified (A4 Step 1.5
+   rules); a hit reports "already claimed", same as A5.
 4. Run the normal A4 viability gate against the target only.
 5. Apply the **A3.5** issue-author approval gate against the target.
    If A3.5 classifies it as not startable, report that the gate
@@ -143,6 +187,11 @@ Apply the configured policy before passing A0-O candidates to A3.5:
   repository-wide gate enable.
 - `public-disabled`: for private or internal repositories, behave the
   same as `none`.
+
+**Autopilot floor.** In autopilot runs, pass `--autopilot` to
+`discover-orphan-filter`; skip `routed_to_human` candidates (never
+reach A3.5). No helper: apply A4 Step 2's floor rule verbatim,
+including `enabled: false`, to each footer.
 
 At least one orphan issue remains after the policy is applied: pass the
 remaining set directly to **A3.5**, skipping A1–A3.
@@ -292,9 +341,22 @@ stdout write. Redirect stdout to a file and wait for process exit before
 parsing — a zero-byte or mid-run read is **"still running," not** an A2
 enumeration failure.
 
-Report every A2 execution candidate with its provenance path (e.g.
-`#222 → #228 → #257`), any open roadmap nodes, and unresolvable
-references before passing to A3.
+**Termination.** Do not re-expand a target already on the current
+traversal path; record the back-edge as a cycle with its path and
+continue with the next reference.
+
+**Single visit.** A node is identified by issue number; a node
+reached again through another path is the same node — collect it
+once, never enter it into the candidate set twice.
+
+**Provenance.** Keep and report every distinct path that reaches a
+node, not only the first — the same rule the cross-roadmap union
+below already applies to a leaf reachable from several roadmap
+roots.
+
+Report every A2 execution candidate with its provenance paths (e.g.
+`#222 → #228 → #257`), any open roadmap nodes, cycles, duplicate
+references, and unresolvable references before passing to A3.
 
 **Autopilot cross-roadmap union (optional, additive).** When A1 elected
 the cross-roadmap mode, enumerate from **each** open roadmap root and
@@ -332,8 +394,10 @@ From A2, keep only issues that satisfy **all** of the following:
   blocked if that issue is open, if no issue matches (fail-safe — a
   migration integrity problem such as a typo, deleted issue, or
   incomplete migration), or if any matching issue is open.
-- No external human coordination required to start; otherwise keep
-  scanning
+- No external human coordination or prose-only
+  runtime/production-observation precondition ("confirmed in
+  production", "observed live", "runtime-observation"; issue #2467)
+  required to start; otherwise keep scanning
 
 **When A2 finds zero candidates, or zero issues survive A3 filtering**,
 apply this decision tree — do not silently expand scope:
@@ -388,6 +452,18 @@ collaborator permission API.
 
 A bare organization `MEMBER` association, by itself, is not approval;
 neither is issue body text, a generated plan, nor operator attention.
+
+**Self-authorization fallback when the permission read is unavailable
+(#2148).** The bare-`MEMBER` rule above governs an approval-comment
+actor or the `idd:ready` label actor, both of which require a
+successful permission read. For the issue-author self-authorization
+signal specifically, when the collaborator permission API is
+unavailable (503, empty, or otherwise unreadable), the issue's own
+live `author_association` substitutes instead of failing closed:
+`OWNER` always self-authorizes; `MEMBER` self-authorizes under both
+`owners-and-maintainers-only` and `all-write-permission-actors`. This
+matches `claim-approval-gate.mjs`'s shipped behavior and does not
+widen either other signal.
 
 **Approval signals** (any one satisfies, when the gate is enabled):
 
@@ -444,6 +520,10 @@ criteria. Fail any one → discard the issue.
   decision, unavailable system, or product judgment required to
   **complete** the work. Fail: requires operator to provide
   credentials; requires a product decision before the work can finish.
+
+**Structural-evidence demotion (#2767)**: Limited scope / Autonomous
+completion (never Clear verification) may demote to `warn` per
+`idd-suitability.instructions.md`'s matching edge case.
 
 If **no issue** survives the gate:
 
@@ -528,8 +608,11 @@ for how the remaining tie-breakers below apply after this rule.
 `discover.selectionDesync` is `session-offset` (default `off`) and the
 highest-score tie band has more than one eligible candidate, pick the
 band entry at index `selectDesyncedIndex(session-token, band-size)`
-instead of index 0 — a pure `hash(session-token) mod band-size` over
-the band ordered by ascending issue number.
+instead of index 0 — FNV-1a 32-bit over the token's UTF-16 code units
+(offset basis `0x811c9dc5`, prime `0x01000193`, wrap to 32 bits after
+every multiply, then unsigned right-shift and modulo `band-size`) over
+the band ordered by ascending issue number. Worked example: token
+`copilot-8122ca35` with `band-size` `3` → index `1`.
 
 `session-token` **must be per-session-unique**: the bare, session-shared
 `{agent-id}` from `idd-overview-core.instructions.md` alone is **not** a
@@ -581,7 +664,9 @@ whose `## Candidate files` do **not** overlap an
 actively-claimed or open-PR issue on one of those files; the optional
 `discover-shared-file-overlap` helper (see
 [IDD helper scripts](../../docs/idd-helper-scripts.md)) reports each
-candidate's `overlapFlag` and `recommendedOrder`. **Never a hard gate**
+candidate's `overlapFlag` and `recommendedOrder`, or `manifestMissing:
+true` with an empty set when the manifest itself cannot be read.
+**Never a hard gate**
 — overlap never overrides the score or crosses a band. See the
 [high-contention shared-file convention](../../docs/policy-constants.md#high-contention-shared-files).
 
@@ -617,8 +702,10 @@ for the resulting deadlock pattern.
 
 ## Scope invariant (summary)
 
-Do not widen issue-selection scope beyond the roadmap traversal except
-for the explicit query allowlist already defined in A0-T, A0-O, A1,
-A1.5, A3, and A4.5, or for a same-run operator opt-in per A3 step 5
-(never inferred from prior or standing instructions). A single explicit
-target authorizes only that issue.
+Do not widen issue-selection scope beyond A2's query allowlist (A0-T,
+A0-O, A1, A1.5, A3, A4.5) or a same-run operator opt-in per A3 step 5
+(never inferred from standing instructions). An explicit target
+authorizes only that issue, except when A0-T step 2 classifies it as a
+roadmap node: then it authorizes normal selection scoped to that
+roadmap's own descendants only, never an unrelated orphan issue (A0-O
+stays excluded, per A0-T step 2).
