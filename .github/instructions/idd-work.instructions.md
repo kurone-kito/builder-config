@@ -113,7 +113,14 @@ can't pin both, use `git worktree add` below (or WorkTrunk) instead.
 but is not listed in `git worktree list`, stop and report for manual
 cleanup before continuing.
 
-**Step 2 — Create**: use **WorkTrunk** if available. The create verb is
+**Step 2 — Create**: `<base-branch>` below is `{development-branch}` —
+resolve it first: read `developmentBranch` from
+`.github/idd/config.json`, else `gh repo view --json defaultBranchRef
+--jq .defaultBranchRef.name`; validate the result
+([defaults](../../docs/policy-constants.md#branch-synchronization-defaults)),
+fail closed if invalid/absent on `origin`, never fall back. Then
+`git fetch origin {development-branch}` (may be missing/stale
+otherwise). Use **WorkTrunk** if available. The create verb is
 `wt switch --create` (the older `wt new` subcommand was removed):
 
 - macOS/Linux: `wt switch --create -b <base-branch> <branch-name>`
@@ -121,11 +128,9 @@ cleanup before continuing.
   same `wt switch --create -b <base-branch> <branch-name>` if `git-wt` is
   unavailable
 
-`<base-branch>` below is `{development-branch}`. In a **non-interactive
-/ automation**
-context, append `-x <noop>` (e.g. `-x true`) — otherwise WorkTrunk tries
-to change the caller's directory and can hang; `-x` makes it create, run
-the pre-start hook, and exit cleanly.
+Non-interactive/automation: append `-x <noop>` (e.g. `-x true`) so
+WorkTrunk creates, runs the pre-start hook, and exits without changing
+the caller's directory.
 
 If WorkTrunk is not available, choose the correct case:
 
