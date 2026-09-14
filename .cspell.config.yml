@@ -33,6 +33,7 @@ words:
   - nvmrc
   - octocat
   - ONNX
+  - pnpmfile
   - pylint
   - pyproject
   - pytest
