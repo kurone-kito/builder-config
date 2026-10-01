@@ -104,10 +104,10 @@
     "test:vitest": "vitest run --coverage"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.12",
-    "@commitlint/cli": "^21.2.2",
-    "@commitlint/config-conventional": "^21.2.2",
-    "@cspell/cspell-types": "^10.2.2",
+    "@biomejs/biome": "^2.5.14",
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "@cspell/cspell-types": "^10.3.5",
     "@kurone-kito/biome-config": "^0.23.0",
     "@kurone-kito/commitlint-config": "^0.23.0",
     "@kurone-kito/cspell-config": "^0.23.0",
@@ -117,9 +117,9 @@
     "@kurone-kito/lint-staged-config": "^0.23.0",
     "@kurone-kito/markdownlint-config": "^0.23.0",
     "@vitest/coverage-v8": "^4.1.11",
-    "cspell": "^10.2.2",
-    "lint-staged": "^17.4.1",
-    "markdownlint-cli2": "^0.23.2",
+    "cspell": "^10.3.5",
+    "lint-staged": "^17.6.0",
+    "markdownlint-cli2": "^0.23.3",
     "rimraf": "^6.1.3",
     "typescript": "~7.0.2",
     "vitest": "^4.1.11"
